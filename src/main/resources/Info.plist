@@ -45,12 +45,14 @@
     <dict>
       <key>MainClass</key>
       <string>${mainClass}</string>
+      <key>SplashFile</key>
+      <string>$JAVAROOT/splash_128x128.png</string>
       <key>JVMVersion</key>
       <string>1.4+</string>
       <key>ClassPath</key>
       ${classpath}
       <key>VMOptions</key>
-      <string>-Xmx512m -Xms128m</string>
+      <string>-Xmx512m -Xms128m -splash:$JAVAROOT/splash_128x128.png</string>
       <key>Properties</key>
             <dict>
                 <key>apple.laf.useScreenMenuBar</key>
