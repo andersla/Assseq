@@ -1,4 +1,4 @@
-package aliview.sequencelist;
+package aliview.importer;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import aliview.importer.NexusFileIndexer;
 
 import sun.nio.cs.ext.ISCII91;
 
@@ -49,6 +48,7 @@ public class MappedBuffReaderHelper {
 
 	private byte read() throws EOFException {
 		lastRead = (byte)mappedBuff.read();
+		//logger.info("" + (char) lastRead);
 		if(lastRead == -1){
 			throw new EOFException();
 		}
@@ -250,12 +250,69 @@ public class MappedBuffReaderHelper {
 		}
 		return foundPos;
 	}
-
-	public void skipUntilLineContains(String string) throws EOFException {
+	
+	public long skipUntilNextNonWhiteChar() throws EOFException {
+		return posOfNextNonWhiteChar();
+	}
+	
+	public int skipUntilNextNonWhiteCharOnNextLine() throws EOFException {
+		long foundPos = -1;
+		int linebreaks = 0;
 		while(true){
-			String next = readLine();
-			if(next.toUpperCase().contains("MATRIX")){
-				break;
+			byte next = read();
+			
+			//logger.info("next" + (char) next);
+			
+			if(isLF(next)){
+				linebreaks ++;
+			}
+			
+			if(linebreaks > 0){
+				if(! isWhiteOrLF(next)){
+					mappedBuff.position(mappedBuff.position() - 1);
+					return linebreaks;
+				}
+			}
+		}
+	}
+	
+	
+	public int skipUntilNextNonWhiteCharInFirstPosAfterNewLine() throws EOFException {
+		long foundPos = -1;
+		int linebreaks = 0;
+		int charCountSinceLF = 0;
+		while(true){
+			byte next = read();
+			
+			charCountSinceLF ++;
+			
+			if(isLF(next)){
+				linebreaks ++;
+				charCountSinceLF = 0;
+			}
+			
+			if(charCountSinceLF == 1){
+				if(linebreaks > 0){
+					if(! isWhiteOrLF(next)){
+						mappedBuff.position(mappedBuff.position() - 1);
+						return linebreaks;
+					}
+				}
+			}
+		}
+	}
+	
+	
+	
+
+	public String skipUntilLineContains(String string) throws EOFException {
+		long startPointer = mappedBuff.position();
+		while(true){
+			startPointer = mappedBuff.position();
+			String nextLine = readLine();
+			if(nextLine.toUpperCase().contains(string.toUpperCase())){
+				mappedBuff.position(startPointer);
+				return nextLine;
 			}
 		}
 	}
@@ -357,8 +414,7 @@ public class MappedBuffReaderHelper {
 	
 	
 
-	public long posOfNextNonWhiteNexusChar() throws EOFException {
-		StringBuilder buff = new StringBuilder();	
+	public long posOfNextNonWhiteNexusChar() throws EOFException {	
 		while(true){
 			int nextByte = read();
 			
@@ -375,6 +431,16 @@ public class MappedBuffReaderHelper {
 		}
 	}
 	
+	public long posOfNextWhitespaceOrLF() throws EOFException {
+		while(true){
+			int nextByte = read();
+			
+			if(isWhiteOrLF(nextByte)){
+				return mappedBuff.position() - 1;
+			}
+		}
+	}
+	
 	public long getPosOfNonWhiteNexusCharacter(int skipCount) throws EOFException {
 		int counter = 0;
 		while(true){
@@ -387,7 +453,7 @@ public class MappedBuffReaderHelper {
 				// skip
 			}else{
 				counter++;
-				logger.info((char)nextByte);
+//				logger.info((char)nextByte);
 				if(counter == skipCount){
 				//	logger.info("lastseqchar=" + (char)nextByte);
 					return mappedBuff.position() - 1;
@@ -395,5 +461,25 @@ public class MappedBuffReaderHelper {
 			}
 		}
 	}
+
+	public byte[] getBytesBetween(long seqStartPointer, long seqEndPointer) {
+		long len = seqEndPointer - seqStartPointer + 1; // +1 because inclusive
+		byte[] bytes = new byte[(int)len];
+		mappedBuff.read(bytes, 0, bytes.length);
+		return bytes;
+	}
+
+	public void readUntilNextNonBlankLine() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public long position() {
+		return mappedBuff.position();
+	}
+
+	
+
+	
 	
 }
