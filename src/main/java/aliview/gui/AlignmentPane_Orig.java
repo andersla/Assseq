@@ -4,18 +4,15 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.font.TextAttribute;
-import java.awt.image.MemoryImageSource;
 import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,13 +33,6 @@ import aliview.alignment.AliHistogram;
 import aliview.alignment.Alignment;
 import aliview.alignment.NucleotideHistogram;
 import aliview.color.ColorScheme;
-import aliview.color.ColorUtils;
-import aliview.pane.AACharPixelsContainer;
-import aliview.pane.CharPixelsContainer;
-import aliview.pane.CompoundCharPixelsContainer;
-import aliview.pane.ImageUtils;
-import aliview.pane.RGBArray;
-import aliview.pane.TranslationCharPixelsContainer;
 import aliview.sequences.Sequence;
 import aliview.settings.Settings;
 import aliview.utils.ArrayUtilities;
@@ -50,13 +40,13 @@ import aliview.utils.ArrayUtilities;
 
 // HAS to be JPanel - JComponent is not enough for only partial cliprect when in jscrollpane when painting
 // When JComponent only then I had to paint it all (maybe because of layoutmanager?)
-public class AlignmentPane extends JPanel{
+public class AlignmentPane_Orig extends JPanel{
 	private static final long serialVersionUID = 601195400946835871L;
-	private static final Logger logger = Logger.getLogger(AlignmentPane.class);
+	private static final Logger logger = Logger.getLogger(AlignmentPane_Orig.class);
 	private static final double MIN_CHAR_SIZE = 0;
 	private static final int MAX_CHAR_SIZE = 100;
 	private static final double CHAR_HEIGHT_RATIO = 1.4;
-	public static final int MAX_CHARSIZE_TO_DRAW = 6;
+	public static final int MAX_CHARSIZE_TO_DRAW = 8;
 	public static final int INTERACTION_MODE_VIEW = 0;
 	public static final int INTERACTION_MODE_EDIT = 1;
 	private static final Color ALPHACOLOR = new Color(255, 255,255, 128 );
@@ -87,25 +77,15 @@ public class AlignmentPane extends JPanel{
 	DrawCharBuffer drawCharBuffer = new DrawCharBuffer(5000);
 	private boolean ignoreGapInTranslation;
 	private byte byteToDraw;
-	private CharPixelsContainer charPixDefaultNuc;
-	private CharPixelsContainer charPixSelectedNuc;
-	private CharPixelsContainer charPixConsensusNuc;
-	private AACharPixelsContainer charPixDefaultAA;
-	private AACharPixelsContainer charPixSelectedAA;
-	private AACharPixelsContainer charPixConsensusAA;
-	private TranslationCharPixelsContainer charPixTranslationDefault;
-	private TranslationCharPixelsContainer charPixTranslationSelected;
-	private TranslationCharPixelsContainer charPixTranslationLetter;
-	private TranslationCharPixelsContainer charPixTranslationSelectedLetter;
-	private boolean forceRepaintAll;
 
-	public AlignmentPane() {
+
+
+	public AlignmentPane_Orig() {
 		//this.setDoubleBuffered(false);
 		//this.setBackground(Color.white);
 		//this.infoLabel = infoLabel;
 		alignmentRuler = new AlignmentRuler(this);
 		createAdjustedDerivedBaseFont();
-		createCharPixelsContainers();
 	}
 
 	public boolean isOnlyDrawDiff() {
@@ -140,14 +120,11 @@ public class AlignmentPane extends JPanel{
 		return this.drawCodonPosRuler;
 	}
 
-	public boolean decCharSize(){
+	public void decCharSize(){
 
 		// stop when everything is in view (or char is 1 for smaller alignments)
-		Dimension prefSize = getPreferredSize();	
-
-		// stop when everything is in view
-		boolean didDecrease = false;
-		if(this.getSize().width > this.getVisibleRect().width || this.getSize().height > this.getVisibleRect().height){
+		Dimension prefSize = getPreferredSize();
+		if((prefSize.width >= this.getSize().width || prefSize.height >= this.getSize().height) || charWidth > 1){
 
 			double preferredWidth = charWidth;
 			double preferredHeight = charHeight;
@@ -167,14 +144,12 @@ public class AlignmentPane extends JPanel{
 			//baseFont = new Font(baseFont.getName(), baseFont.getStyle(), (int)charWidth);
 
 			createAdjustedDerivedBaseFont();
-			createCharPixelsContainers();
-			//	logFontMetrics();
-			this.validateSize();	
-			didDecrease = true;
+
+			logFontMetrics();
+
+			this.validateSize();
+			this.repaint();
 		}
-
-		return didDecrease;
-
 	}
 
 	public void incCharSize(){
@@ -196,76 +171,10 @@ public class AlignmentPane extends JPanel{
 		//baseFont = new Font(baseFont.getName(), baseFont.getStyle(), (int)charWidth);
 
 		createAdjustedDerivedBaseFont();
-		createCharPixelsContainers();
-		//		logFontMetrics();
+		logFontMetrics();
 		this.validateSize();
 	}
 
-
-	private void createCharPixelsContainers(){
-
-		long startTime = System.currentTimeMillis();	
-
-		charPixDefaultNuc = CharPixelsContainer.createDefaultNucleotideImpl(getFont(), (int)MAX_CHARSIZE_TO_DRAW, (int)getCharWidth(), (int)getCharHeight(), colorSchemeNucleotide);
-		charPixSelectedNuc = CharPixelsContainer.createSelectedNucleotideImpl(getFont(), (int)MAX_CHARSIZE_TO_DRAW, (int)getCharWidth(), (int)getCharHeight(), colorSchemeNucleotide);
-		charPixConsensusNuc = CharPixelsContainer.createConsensusNucleotideImpl(getFont(), (int)MAX_CHARSIZE_TO_DRAW, (int)getCharWidth(), (int)getCharHeight(), colorSchemeNucleotide);
-
-		charPixTranslationDefault = TranslationCharPixelsContainer.createDefaultTranslationPixelsImpl(getFont(), (int)MAX_CHARSIZE_TO_DRAW,
-				(int)getCharWidth(), (int)getCharHeight(), colorSchemeNucleotide);
-
-		charPixTranslationSelected = TranslationCharPixelsContainer.createSelectedTranslationPixelsImpl(getFont(), (int)MAX_CHARSIZE_TO_DRAW,
-				(int)getCharWidth(), (int)getCharHeight(), colorSchemeNucleotide);
-
-		charPixTranslationLetter = TranslationCharPixelsContainer.createLetterTranslationPixelsImpl(getFont(), (int)MAX_CHARSIZE_TO_DRAW,
-				(int)getCharWidth(), (int)getCharHeight(), colorSchemeNucleotide);
-
-		charPixTranslationSelectedLetter = TranslationCharPixelsContainer.createSelectedLetterTranslationPixelsImpl(getFont(), (int)MAX_CHARSIZE_TO_DRAW,
-				(int)getCharWidth(), (int)getCharHeight(), colorSchemeNucleotide);
-
-
-		charPixDefaultAA =  new AACharPixelsContainer();
-		if(colorSchemeAminoAcid.getALLCompundColors() != null){
-			CompoundCharPixelsContainer compContainer = CompoundCharPixelsContainer.createDefaultCompoundColorImpl(getFont(), (int)MAX_CHARSIZE_TO_DRAW,
-					(int)getCharWidth(), (int)getCharHeight(), colorSchemeAminoAcid);
-			charPixDefaultAA.setCompoundContainer(compContainer);
-		}else{
-			CharPixelsContainer container = CharPixelsContainer.createDefaultAAImpl(getFont(), (int)MAX_CHARSIZE_TO_DRAW, (int)getCharWidth(), (int)getCharHeight(), colorSchemeAminoAcid);
-			charPixDefaultAA.setContainer(container);
-		}
-
-		charPixSelectedAA =  new AACharPixelsContainer();
-		if(colorSchemeAminoAcid.getALLCompundColors() != null){
-			logger.info("baseFont.getSize()" + baseFont.getSize());
-			logger.info("baseFont.getSize2D()" + baseFont.getSize2D());
-
-			CompoundCharPixelsContainer compContainer = CompoundCharPixelsContainer.createSelectedCompoundColorImpl(getFont(), (int)MAX_CHARSIZE_TO_DRAW,
-					(int)getCharWidth(), (int)getCharHeight(), colorSchemeAminoAcid);
-			charPixSelectedAA.setCompoundContainer(compContainer);
-		}else{
-			CharPixelsContainer container = CharPixelsContainer.createSelectedAAImpl(getFont(), (int)MAX_CHARSIZE_TO_DRAW, (int)getCharWidth(), (int)getCharHeight(), colorSchemeAminoAcid);
-			charPixSelectedAA.setContainer(container);
-		}
-
-		charPixConsensusAA =  new AACharPixelsContainer();
-		if(colorSchemeAminoAcid.getALLCompundColors() != null){
-			CompoundCharPixelsContainer compContainer = CompoundCharPixelsContainer.createDefaultCompoundColorImpl(getFont(), (int)MAX_CHARSIZE_TO_DRAW,
-					(int)getCharWidth(), (int)getCharHeight(), colorSchemeAminoAcid);
-			charPixConsensusAA.setCompoundContainer(compContainer);
-
-		}else{
-			CharPixelsContainer container = CharPixelsContainer.createConsensusAAImpl(getFont(), (int)MAX_CHARSIZE_TO_DRAW, (int)getCharWidth(), (int)getCharHeight(), colorSchemeAminoAcid);
-			charPixConsensusAA.setContainer(container);
-		}
-
-		endTime = System.currentTimeMillis();
-		logger.info("Creating charPixContainers took " + (endTime - startTime) + " milliseconds");
-
-	}
-
-	@Override
-	public Font getFont() {
-		return baseFont;
-	}
 
 	private void createAdjustedDerivedBaseFont() {
 		Map<TextAttribute, Object> attributes = new HashMap<TextAttribute, Object>();
@@ -319,8 +228,7 @@ public class AlignmentPane extends JPanel{
 		attributes.put(TextAttribute.SIZE, (int)charWidth);
 		Font spacedFont = baseFont.deriveFont(attributes);
 
-		baseFont = spacedFont;
-
+		baseFont = spacedFont;	
 	}
 
 	private void logFontMetrics(){
@@ -330,9 +238,7 @@ public class AlignmentPane extends JPanel{
 		logger.info("baseFont.getSize2D()" + baseFont.getSize2D());
 
 		// get the height of a line of text in this
-		// font and render context	logger.info("baseFont.getSize()" + baseFont.getSize());
-		logger.info("baseFont.getSize2D()" + baseFont.getSize2D());
-
+		// font and render context
 		int hgt = metrics.getHeight();
 		logger.info("metrics.getHeight()" + metrics.getHeight());
 		logger.info("metrics.getMaxAdvance()" + metrics.getMaxAdvance());	// get the advance of my text in this font
@@ -467,9 +373,12 @@ public class AlignmentPane extends JPanel{
 	}
 
 
-
-
-
+	/*
+	 *  Mainly for performance test-developing
+	 */
+	private long endTime;
+	private int drawCounter = 0;
+	private int DRAWCOUNT_LOF_INTERVAL = 1;
 
 	public void repaintForceRuler(){
 		rulerIsDirty = true;
@@ -481,13 +390,6 @@ public class AlignmentPane extends JPanel{
 		paintAlignment(g);
 	}
 
-
-	/*
-	 *  Mainly for performance test-developing
-	 */
-	private long endTime;
-	private int drawCounter = 0;
-	private int DRAWCOUNT_LOF_INTERVAL = 1;
 	public void paintAlignment(Graphics g){
 		drawCounter ++;
 		long startTime = System.currentTimeMillis();	
@@ -497,17 +399,16 @@ public class AlignmentPane extends JPanel{
 
 		//	logger.info("paintClipBounds" + g.getClipBounds());
 
-
-
 		Graphics2D g2d = (Graphics2D) g;
 
 		// This need to be off because I use exact font width in createAdjustedDerivedBaseFont
-		//		g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
-		//				RenderingHints.VALUE_FRACTIONALMETRICS_OFF);
-		//		g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-		//				RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
-		//		g2d.setRenderingHint(RenderingHints.KEY_RENDERING,
-		//				RenderingHints.VALUE_RENDER_SPEED);
+		g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
+				RenderingHints.VALUE_FRACTIONALMETRICS_OFF);
+
+		g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+				RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+		g2d.setRenderingHint(RenderingHints.KEY_RENDERING,
+				RenderingHints.VALUE_RENDER_SPEED);
 		//		g2d.setRenderingHint(RenderingHints.KEY_RENDERING,
 		//						RenderingHints.VALUE_RENDER_QUALITY);
 		//	g2d.setRenderingHint(RenderingHints.KEY_DITHERING,
@@ -520,17 +421,14 @@ public class AlignmentPane extends JPanel{
 
 
 		// Font
-		//		g2d.setFont(baseFont);
+		g2d.setFont(baseFont);
+
+		// to get some space left and bottom around characters
+		int charCenterXOffset = (int) (0.15 * charWidth);
+		int charCenterYOffset = (int) (0.2 * charHeight);
 
 		// What part of alignment matrix is in view (what part of matrix is in graphical view)
 		Rectangle clip = g2d.getClipBounds();
-
-		if(forceRepaintAll){
-			Rectangle allVisible = this.getVisibleRect();
-			clip = allVisible;
-			setForceRepaintAll(false);
-		}
-
 		Rectangle matrixClip = paneCoordToMatrixCoord(clip);
 
 		int xMin = matrixClip.x - 1;
@@ -538,167 +436,158 @@ public class AlignmentPane extends JPanel{
 		int xMax = (int) matrixClip.getMaxX() + 1;
 		int yMax = (int) matrixClip.getMaxY() + 1;
 
-		// add one extra position when drawing translated
-		// otherwise there could be some white borders when scrolling
-		if(showTranslation || showTranslationOnePos){
-			xMin --;
-			xMax ++;
-		}
-
 		// adjust for part of matrix that exists
 		xMin = Math.max(0, xMin);
 		yMin = Math.max(0, yMin);
 		xMax = Math.min(alignment.getMaxX(), xMax);
 		yMax = Math.min(alignment.getMaxY(), yMax);
+		//		int drawWidth = xMax - xMin;
+		//		int drawHeight = yMax - yMin;
 
-
-
-		// Extra because pixelCopyDraw
-		int height = (yMax - yMin) * (int)charHeight;
-		int width = (xMax - xMin) * (int)charWidth;
-
-		// Small chars
-		if(charWidth < 1){
-			height = clip.height;
-			width = clip.width;
+		// Draw bg (gap-background - makes us save some drawing operations)
+		if(alignment.isAAAlignment()){
+			g2d.setColor(colorSchemeAminoAcid.getBaseBackgroundColor(NucleotideUtilities.GAP));
+		}else{
+			g2d.setColor(colorSchemeNucleotide.getBaseBackgroundColor(NucleotideUtilities.GAP));
 		}
+		g2d.fillRect(clip.x,clip.y,clip.width,clip.height);
 
-		logger.info("yMax" + yMax);
-		logger.info("yMin" + yMin);
-		logger.info("width" + width);
-		logger.info("clipHeight" + clip.height);
-		logger.info("height" + height);
-
-		int[] pixArray = new int[width * height];
-		RGBArray clipRGB = new RGBArray(pixArray, width, height);
-
+		// left and right of viewport so scrolling always looks good
+		int EXTRA_POSITIONS = 1;
 
 		// If it is to be translated
 		AATranslator aaTransSeq = null;
 		if(showTranslation || showTranslationOnePos){
 			aaTransSeq = new AATranslator(alignment.getAlignentMeta().getCodonPositions(), alignment.getGeneticCode());
+			EXTRA_POSITIONS = 1; // one full codon
 		}
+
+		//		logger.info("matrixClip.getMaxX()" + matrixClip.getMaxX());
+		//		logger.info("matrixClip.getMaxY()" + matrixClip.getMaxY());
+		//		logger.info("clip.getMaxX()" + clip.getMaxX());
+		//		logger.info("clip.getMaxY()" + clip.getMaxY());
+		//		logger.info("xMax" + xMax);
+		//		logger.info("yMax" + yMax);	
+		//		logger.info("charWidth" + charWidth);
+
 
 		// small chars have their own loop here
 		if(charWidth < 1){
 
 			if(showTranslationOnePos || showTranslation){
-				int clipY = 0;
-				for(int y = clip.y; y < clip.y + clip.height; y ++){		
+				for(int y = clip.y; y < clip.getMaxY(); y++){			
 					int ySeq =(int)((double)y * (1/(double)charWidth));
-
+					drawCharBuffer.clear();
 					if(ySeq < alignment.getMaxY()){	
-
 						aaTransSeq.setSequence(alignment.getSequences().get(ySeq));
 
+						double maxX = clip.getMaxX();
 						if(showTranslationOnePos){
-							double maxX = clip.getMaxX();
 							if(maxX > alignment.getAlignentMeta().getCodonPositions().getLengthOfTranslatedPos()){
 								maxX = alignment.getAlignentMeta().getCodonPositions().getLengthOfTranslatedPos();
 							}						
-
-							// X Loop Start
-							int clipX = 0;						
 							for(int x = clip.x; x < maxX ; x++){
 								int xPos =(int)((double)x * (1/(double)charWidth));
-
-								if(xPos < aaTransSeq.getMaximumTranslationLength()){
-
-									AminoAcid acid;
+								if(alignment.isPositionValid(xPos, ySeq)){
+									byte base = alignment.getBaseAt(xPos,ySeq);
 									if(ignoreGapInTranslation){
-										acid = aaTransSeq.getAAinNoGapTranslatedPos(xPos);
+										AminoAcid acid = aaTransSeq.getAAinNoGapTranslatedPos(x);
+										drawAminoAcids(g2d,acid.getCodeByteVal(),x,y, x, y, 1, 1, charCenterXOffset, charCenterYOffset);	
 									}else{
-										acid = aaTransSeq.getAAinTranslatedPos(xPos);
+										AminoAcid acid = aaTransSeq.getAAinTranslatedPos(x);
+										drawAminoAcids(g2d,acid.getCodeByteVal(),x,y, x, y, 1, 1, charCenterXOffset, charCenterYOffset);	
 									}
-									copyAminoAcidPixels(clipRGB,(byte)acid.getCodeCharVal(),xPos,ySeq,clipX, clipY);
-
 								}
-								clipX ++;
-							}
-							// standard translation 3-pos
+							}	
 						}else{
 							// X Loop Start
-							int clipX = 0;
-							for(int x = clip.x; x < clip.getMaxX() ; x++){
+							for(int x = clip.x; x < maxX ; x++){
 								int xPos =(int)((double)x * (1/(double)charWidth));
 								if(alignment.isPositionValid(xPos, ySeq)){
-
-									byte residue = alignment.getBaseAt(xPos,ySeq);
-
+									byte base = alignment.getBaseAt(xPos,ySeq);
 									if(ignoreGapInTranslation){
-										copyTranslatedNucleotidesPixelsSkipGap(clipRGB,residue,xPos,ySeq,clipX, clipY, aaTransSeq);
+										drawTranslatedNucleotidesSkipGap(g2d, base,xPos,ySeq,0,0, 0, 0, aaTransSeq, charCenterXOffset, charCenterYOffset);
 									}
 									else{
-										copyTranslatedNucleotidesPixels(clipRGB,residue,xPos,ySeq,clipX, clipY, aaTransSeq);
+										if(y==1){
+											//	logger.info("xpos=" + xPos);
+										}
+										drawTranslatedNucleotides(g2d,base,xPos,ySeq,aaTransSeq, charCenterXOffset, charCenterYOffset);
 									}
 								}
-								clipX ++;
 							}
 						}
 					}
-					clipY ++;
-				}
 
+					// Now paint the buffered colors
+					HashSet<Color> unique = new CharBufferCreator(drawCharBuffer).getUniqueBGColors();
+					for(Color bgColor: unique){
+						int endPos = 0;
+						int MAX_LEN = 1000;
+						while(endPos < drawCharBuffer.length()){
+							int startPos = endPos;
+							//int drawCount = drawCharBuffer.getNextSameBGColorCount(startPos, MAX_LEN);
+							int drawCount = 1;
+							if(drawCharBuffer.getBgColor(startPos) == bgColor){
+								drawNucleotideBackground(g2d, startPos + (int)clip.getMinX(), y, drawCount, 1, drawCharBuffer.getBgColor(startPos));
+							}
+							endPos = startPos + drawCount;
+						}
+					}
+					// No painting chars because they are to small
+				}
 			}else{
 
-				// No longer: Always start at closest even 10
-				//			double startY = clip.y;
-				//			startY = Math.floor(startY/100) * 100;
-				int clipY = 0;
-				for(int y = clip.y; y < clip.y + clip.height; y ++){
+				// Always start at closest even 10
+				double startY = clip.y;
+				startY = Math.floor(startY/100) * 100;
+				for(int y = (int)startY; y < clip.getMaxY(); y++){					
 
-					int ySeq = (int)((double)(y) * (1/(double)charWidth));
+					int ySeq =(int)((double)y * (1/(double)charWidth));
 
 					if(ySeq < alignment.getMaxY()){	
+						//	aaTransSeq.setSequence(alignment.getSequences().get(ySeq));
 
 						// X Loop Start
-						int clipX = 0;
-						for(int x = clip.x; x < clip.getMaxX(); x++){
-
+						drawCharBuffer.clear();
+						for(int x = clip.x; x < clip.getMaxX() ; x++){
 							int xPos =(int)((double)x * (1/(double)charWidth));
-
 							if(alignment.isPositionValid(xPos, ySeq)){
-								byte residue = alignment.getBaseAt(xPos,ySeq);
+								byte base = alignment.getBaseAt(xPos,ySeq);
 
 								// Draw as Nucleotides
 								if(alignment.isNucleotideAlignment()){
-									//drawNucleotides(g2d,base,xPos,ySeq,x,y,1,1,0, 0);
-									copyNucleotidePixels(clipRGB,residue,xPos,ySeq,clipX,clipY);			
+									drawNucleotides(g2d,base,xPos,ySeq,x,y,1,1,0, 0);
 								}
 								// Draw as AA
 								else{
-									copyAminoAcidPixels(clipRGB,residue,xPos,ySeq,clipX,clipY);
+									drawAminoAcids(g2d,base,xPos,ySeq,x,y,1,1, 0, 0);
 								}
-
 							}
-							clipX ++;
-						}		
-						clipY ++;
+						}
+
+
+
+
+						// Now paint the buffered colors
+						HashSet<Color> unique = new CharBufferCreator(drawCharBuffer).getUniqueBGColors();
+						//Color bgColor = colorSchemeNucleotide.getBaseBackgroundColor(NucleotideUtilities.T);
+						for(Color bgColor: unique){
+							int endPos = 0;
+							int MAX_LEN = 1000;
+							while(endPos < drawCharBuffer.length()){
+								int startPos = endPos;
+								//int drawCount = drawCharBuffer.getNextSameBGColorCount(startPos, MAX_LEN);
+								int drawCount = 1;
+								if(drawCharBuffer.getBgColor(startPos) == bgColor){
+									drawNucleotideBackground(g2d, startPos + (int)clip.getMinX(), y, drawCount, 1, drawCharBuffer.getBgColor(startPos));
+								}
+								endPos = startPos + drawCount;
+							}
+						}
+						// No painting chars because they are to small
 					}
 				}
-			}
-
-			// Now draw the pixels
-			Image img = createImage(new MemoryImageSource(clipRGB.getScanWidth(), clipRGB.getHeight(), clipRGB.getBackend(), 0, clipRGB.getScanWidth()));
-
-			//						logger.info(clipRGB.getBackend().length);
-			//						logger.info("img.getWidth" + img.getWidth(null));
-			//						logger.info("img.getHeight" + img.getHeight(null));
-			//
-			//						
-			//						logger.info("xMin" + xMin);
-			//						logger.info("clip.x" + clip.x);
-			//						logger.info("clip.y" + clip.y);
-			//						logger.info("clip.width" + clip.width);
-			//						logger.info("clip.height" + clip.height);
-
-
-			if (img != null){
-				//							logger.info(img.getHeight(null));
-				//							logger.info("clip.y=" + clip.y);
-				//							logger.info("x=" + (int)(xMin * charWidth));
-				//							logger.info("y=" + (int)(yMin * charHeight));
-				g.drawImage(img, clip.x, clip.y, null);
 			}
 
 			// Draw excludes - only if not 
@@ -711,133 +600,166 @@ public class AlignmentPane extends JPanel{
 					if(alignment.isExcluded(xPos) == true){
 						g2d.setColor(ColorScheme.GREY_TRANSPARENT);
 						g2d.fillRect(x, this.getVisibleRect().y, 1, drawExcludesHeight);
-						//				logger.info("drawExclude");
+						logger.info("drawExclude");
 					}
 				}	
 			}
 		}	
-
-
-		/////////////////////////
-		//
 		// Normal char width
-		//
-		/////////////////////////
 		else{
-			if(showTranslationOnePos){			
-
-				int maxX = xMax;
-				if(maxX > alignment.getAlignentMeta().getCodonPositions().getLengthOfTranslatedPos()){
-					maxX = alignment.getAlignentMeta().getCodonPositions().getLengthOfTranslatedPos();
-				}
-
-				int clipY = 0;
-				for(int y = yMin; y < yMax; y = y + 1){
-
+			if(showTranslationOnePos){
+				for(int y = yMin; y < yMax ; y = y + 1){
 					aaTransSeq.setSequence(alignment.getSequences().get(y));
 
+					// Draw one extra codon at start and end
+					int minX = (int)(matrixClip.getMinX()-EXTRA_POSITIONS);
+					if(minX < 0){
+						minX=0;
+					}
+					int maxX = (int)(matrixClip.getMaxX()+EXTRA_POSITIONS);
+
+					if(maxX > alignment.getAlignentMeta().getCodonPositions().getLengthOfTranslatedPos()){
+						maxX = alignment.getAlignentMeta().getCodonPositions().getLengthOfTranslatedPos();
+					}
+
 					// X Loop Start
-					int clipX = 0;
-					for(int x = xMin; x < maxX ; x++){
-
-						AminoAcid acid;
+					drawCharBuffer.clear();
+					int yPaneCoord = (int)(y * charHeight);
+					int widthInPaneCoord = (int)charWidth * 1;
+					int heightInPaneCoord = (int)charHeight;
+					for(int x = minX; x < maxX ; x++){
+						int xPaneCoord = (int)(x * charWidth);
 						if(ignoreGapInTranslation){
-							acid = aaTransSeq.getAAinNoGapTranslatedPos(x);
+							AminoAcid acid = aaTransSeq.getAAinNoGapTranslatedPos(x);
+							drawAminoAcids(g2d,acid.getCodeByteVal(),x,y, xPaneCoord, yPaneCoord, widthInPaneCoord, heightInPaneCoord, charCenterXOffset, charCenterYOffset);
 						}else{
-							acid = aaTransSeq.getAAinTranslatedPos(x);
+							AminoAcid acid = aaTransSeq.getAAinTranslatedPos(x);
+							drawAminoAcids(g2d,acid.getCodeByteVal(),x,y, xPaneCoord, yPaneCoord, widthInPaneCoord, heightInPaneCoord, charCenterXOffset, charCenterYOffset);
 						}
-						copyAminoAcidPixels(clipRGB,(byte)acid.getCodeCharVal(),x,y,(int)(clipX*charWidth), (int)(clipY*charHeight));
-
-						clipX ++;
-					}		
-					clipY ++;
-				}// y loop end		
+					}
+					// Now paint the buffered background colors
+					HashSet<Color> unique = new CharBufferCreator(drawCharBuffer).getUniqueBGColors();
+					int xPaneStartCoord = (int)(minX * charWidth);
+					for(Color bgColor: unique){
+						int endPos = 0;
+						int MAX_LEN = 1000;
+						while(endPos < drawCharBuffer.length()){
+							int startPos = endPos;
+							//int drawCount = drawCharBuffer.getNextSameBGColorCount(startPos, MAX_LEN);
+							int drawCount = 1;
+							if(drawCharBuffer.getBgColor(startPos) == bgColor){
+								drawNucleotideBackground(g2d,xPaneStartCoord + (startPos * widthInPaneCoord), yPaneCoord, widthInPaneCoord * drawCount, heightInPaneCoord, drawCharBuffer.getBgColor(startPos));
+							}
+							endPos = startPos + drawCount;
+						}
+					}	
+					// Now draw the buffered chars
+					if(charHeight > MAX_CHARSIZE_TO_DRAW){
+						charCenterXOffset = (int)(0.2*charWidth);		
+						CharBufferCreator cbCreator = new CharBufferCreator(drawCharBuffer);
+						ArrayList<DrawCharBuffer> buffs = cbCreator.createFGBuffers();
+						//logger.info(buffs.size());
+						for(DrawCharBuffer charBuff: buffs){
+							int endPos = 0;
+							int MAX_LEN = 100;
+							while(endPos < charBuff.length()){
+								int startPos = endPos;
+								int drawCount = charBuff.getNextSameFGColorCount(startPos, MAX_LEN);
+								drawCharsBuffered(g2d, charBuff.byteBuffer, startPos, drawCount, xMin + startPos, y, charBuff.getFgColor(startPos), charCenterXOffset, charCenterYOffset);			
+								endPos = startPos + drawCount;
+							}	
+						}
+					}
+				}
 			}else{
-				// Most normal one
-				int clipY = 0;			
-				for(int y = yMin; y < yMax; y = y + 1){
+				for(int y = yMin; y < yMax ; y = y + 1){
 
 					if(showTranslation){
 						aaTransSeq.setSequence(alignment.getSequences().get(y));
 					}
 
-					// X Loop Start
-					int clipX = 0;
-					for(int x = xMin; x < xMax ; x++){
+					//aaTransSeq.setSequence(alignment.getSequences().get(y));
 
-						byte residue = alignment.getBaseAt(x,y);
+					// Draw one extra codon at start and end
+					int minX = (int)(matrixClip.getMinX()-EXTRA_POSITIONS);
+					if(minX < 0){
+						minX=0;
+					}
+					int maxX = (int)(matrixClip.getMaxX()+EXTRA_POSITIONS);
+					if(maxX > alignment.getLengthAt(y)){
+						maxX = alignment.getLengthAt(y);
+					}
+
+
+					drawCharBuffer.clear();
+					int widthInPaneCoord = (int)charWidth;
+					int heightInPaneCoord = (int)charHeight;
+					int yPaneCoord = (int)(y * charHeight);
+					// X Loop Start
+					for(int x = minX; x < maxX ; x++){
+						int xPaneCoord = (int)(x * charWidth);
+
 						// Draw as nucleotides
 						if(alignment.isNucleotideAlignment()){
+							byte base = alignment.getBaseAt(x,y);
+
 							// Draw as translated
 							if(showTranslation){
 								if(ignoreGapInTranslation){
-									copyTranslatedNucleotidesPixelsSkipGap(clipRGB,residue,x,y,(int)(clipX*charWidth), (int)(clipY*charHeight), aaTransSeq);
+									drawTranslatedNucleotidesSkipGap(g2d, base,x,y,xPaneCoord,yPaneCoord, widthInPaneCoord, heightInPaneCoord, aaTransSeq, charCenterXOffset, charCenterYOffset);
 								}
 								else{
-									copyTranslatedNucleotidesPixels(clipRGB,residue,x,y,(int)(clipX*charWidth), (int)(clipY*charHeight), aaTransSeq);
+									drawTranslatedNucleotides(g2d,base,x,y, aaTransSeq, charCenterXOffset, charCenterYOffset);
 								}
 							}else{
-								copyNucleotidePixels(clipRGB,residue,x,y,(int)(clipX*charWidth), (int)(clipY*charHeight));					
+								drawNucleotides(g2d, base,x,y,xPaneCoord,yPaneCoord, widthInPaneCoord, heightInPaneCoord, charCenterXOffset, charCenterYOffset);					
 							}
+
 						}
 						// Draw as AminoAcids
 						else{
-							copyAminoAcidPixels(clipRGB,residue,x,y,(int)(clipX*charWidth), (int)(clipY*charHeight));	
+							byte charAsByte = alignment.getBaseAt(x,y);
+							drawAminoAcids(g2d,charAsByte,x,y, xPaneCoord, yPaneCoord, widthInPaneCoord, heightInPaneCoord, charCenterXOffset, charCenterYOffset);	
 						}
-						clipX ++;
 					}		
-					clipY ++;
+					// Now paint the buffered background colors
+					HashSet<Color> unique = new CharBufferCreator(drawCharBuffer).getUniqueBGColors();
+					int xPaneStartCoord = (int)(minX * charWidth);
+					for(Color bgColor: unique){
+						int endPos = 0;
+						int MAX_LEN = 1000;
+						while(endPos < drawCharBuffer.length()){
+							int startPos = endPos;
+							//int drawCount = drawCharBuffer.getNextSameBGColorCount(startPos, MAX_LEN);
+							int drawCount = 1;
+							if(drawCharBuffer.getBgColor(startPos) == bgColor){
+								drawNucleotideBackground(g2d,xPaneStartCoord + (startPos * widthInPaneCoord), yPaneCoord, widthInPaneCoord * drawCount, heightInPaneCoord, drawCharBuffer.getBgColor(startPos));
+								//drawNucleotideBackground(g2d,xPaneStartCoord + (startPos * widthInPaneCoord), yPaneCoord, widthInPaneCoord * drawCount, heightInPaneCoord, drawCharBuffer.getBgColor(startPos), drawCharBuffer.getByte(startPos));
+							}
+							endPos = startPos + drawCount;
+						}
+					}	
+					// Now draw buffer of chars
+					// Draw all same chars at once(this is a lot faster than drawing them one at a time once - at least on linux)		
+					if(charHeight > MAX_CHARSIZE_TO_DRAW){
+						charCenterXOffset = (int)(0.2*charWidth);
+						CharBufferCreator cbCreator = new CharBufferCreator(drawCharBuffer);
+						ArrayList<DrawCharBuffer> buffs = cbCreator.createFGBuffers();
+						//logger.info(buffs.size());
+						for(DrawCharBuffer charBuff: buffs){
+							int endPos = 0;
+							int MAX_LEN = 100;
+							while(endPos < charBuff.length()){
+								int startPos = endPos;
+								int drawCount = charBuff.getNextSameFGColorCount(startPos, MAX_LEN);
+								drawCharsBuffered(g2d, charBuff.byteBuffer, startPos, drawCount, xMin + startPos, y, charBuff.getFgColor(startPos), charCenterXOffset, charCenterYOffset);
+								//drawCharsBuffered(g2d, charBuff.byteBuffer, startPos, drawCount, xPaneStartCoord + (startPos * widthInPaneCoord), y, charBuff.getFgColor(startPos), charCenterXOffset, charCenterYOffset);			
+								endPos = startPos + drawCount;
+							}	
+						}
+					}
 				}// x loop end
 			}// y loop end
-
-
-			//			logger.info(clip);
-			//						
-			//						for(int n = 0; n <clipRGB.getBackend().length; n++){
-			//							clipRGB.getBackend()[n] = ColorUtils.addTranspGrey(clipRGB.getBackend()[n], 0.45);
-			//							clipRGB.getBackend()[n] = clipRGB.getBackend()[n] | 0x333333;
-			//							getGolorVal(getR)
-			//						}
-
-
-			//						// Draw excludes (by manipulating color val)
-			//						if(! showTranslationOnePos){
-			//							// calculaate height for excludes (this is to avoid drawing below alignment if alignment is not filling panel)
-			//							int drawExcludesHeight = (int) Math.min(this.getVisibleRect().getHeight(), alignment.getSize()  * charHeight);
-			//							for(int x = xMin; x < xMax ; x++){
-			//								if(alignment.isExcluded(x) == true){
-			//									g2d.setColor(ColorScheme.GREY_TRANSPARENT);
-			//									g2d.fillRect((int)(x * charWidth), this.getVisibleRect().y, (int)charWidth, drawExcludesHeight);				
-			//								}
-			//							}
-			//						}
-
-			// Now draw the pixels
-			Image img = createImage(new MemoryImageSource(clipRGB.getScanWidth(), clipRGB.getHeight(), clipRGB.getBackend(), 0, clipRGB.getScanWidth()));
-
-			//			logger.info(clipRGB.getBackend().length);
-			//			logger.info("img.getWidth" + img.getWidth(null));
-			//			logger.info("img.getHeight" + img.getHeight(null));
-			//
-			//
-			//			logger.info("xMin" + xMin);
-			//			logger.info("clip.x" + clip.x);
-			//			logger.info("clip.y" + clip.y);
-			//			logger.info("clip.width" + clip.width);
-			//			logger.info("clip.height" + clip.height);
-
-
-
-
-
-
-			if (img != null){
-				//				logger.info(img.getHeight(null));
-				//				logger.info("x=" + (int)(xMin * charWidth));
-				//				logger.info("y=" + (int)(yMin * charHeight));
-				g.drawImage(img, (int)(xMin * charWidth), (int)(yMin * charHeight), null);
-			}
-
 
 			// Draw excludes
 			if(! showTranslationOnePos){
@@ -850,8 +772,6 @@ public class AlignmentPane extends JPanel{
 					}
 				}
 			}
-
-
 		}
 
 		if(drawCounter % DRAWCOUNT_LOF_INTERVAL == 0){
@@ -868,128 +788,23 @@ public class AlignmentPane extends JPanel{
 
 	}
 
+	private void drawAminoAcids(Graphics2D g2d, byte charAsByte, int x, int y,
+			int xPaneCoord, int yPaneCoord, int widthInPaneCoord, int heightInPaneCoord, int charCenterXOffset, int charCenterYOffset){
 
-	public void setForceRepaintAll(boolean b) {
-		forceRepaintAll = b;
+		// Set default
+		AminoAcid acid = AminoAcid.getAminoAcidFromByte(charAsByte);
 
-	}
+		Color baseForegroundColor = colorSchemeAminoAcid.getAminoAcidForgroundColor(acid, x, alignment);
+		Color baseBackgroundColor = colorSchemeAminoAcid.getAminoAcidBackgroundColor(acid, x, alignment);
 
-	private void copyTranslatedNucleotidesPixelsSkipGap(RGBArray clipArray, byte residue, int x, int y, int clipX, int clipY, AATranslator aaTransSeq){
-
-		// Ett litet hack
-		if(residue == 0){
-			residue = ' ';
-		}
-
-		// set defaults
-		AminoAcid acid =  aaTransSeq.getNoGapAminoAcidAtNucleotidePos(x);
-		int acidStartPos = aaTransSeq.getCachedClosestStartPos();
-
-		TranslationCharPixelsContainer pixContainerToUse = charPixTranslationDefault;
-		TranslationCharPixelsContainer pixLetterContainerToUse = charPixTranslationLetter;
-
-		// adjust colors if selected and temp selection
-		// We have to calculate within this way - because rect.contains(Point) is always returning false on a 0-width or 0 height Rectangle
-		boolean isPointWithinSelectionRect = false;
-		if(tempSelectionRect != null){
-			if(x <= tempSelectionRect.getMaxX() && x >= tempSelectionRect.getMinX() && y <= tempSelectionRect.getMaxY() && y >= tempSelectionRect.getMinY()){
-				isPointWithinSelectionRect = true;
-			}
-		}
-		if(alignment.isBaseSelected(x,y) || (tempSelectionRect != null && isPointWithinSelectionRect)){
-			pixContainerToUse = charPixTranslationSelected;
-			pixLetterContainerToUse = charPixTranslationSelectedLetter;
-		}
-
-		RGBArray newPiece;
-
-		if(! drawAminoAcidCode){	
-			newPiece = pixContainerToUse.getRGBArray(acid, residue);
-		}else{
-			if(x == acidStartPos + 1){ // this line is changed
-				newPiece = pixLetterContainerToUse.getRGBArray(acid, residue);
-			}else{
-				residue = ' ';
-				newPiece = pixContainerToUse.getRGBArray(acid, residue);
-			}
-		}
-
-		try {
-			ImageUtils.insertRGBArrayAt(clipX, clipY, newPiece, clipArray);
-		} catch (Exception e) {
-			logger.info("x" + x);
-			logger.info("y" + y);
-			logger.info("clipX" + clipX);
-			logger.info("clipY" + clipY);
-		}
-	}
-
-
-	private void copyTranslatedNucleotidesPixels(RGBArray clipArray, byte residue, int x, int y, int clipX, int clipY, AATranslator aaTransSeq){
-
-		// Ett litet hack
-		if(residue == 0){
-			residue = ' ';
-		}
-
-		// set defaults
-		AminoAcid acid =  aaTransSeq.getAminoAcidAtNucleotidePos(x);
-		TranslationCharPixelsContainer pixContainerToUse = charPixTranslationDefault;
-		TranslationCharPixelsContainer pixLetterContainerToUse = charPixTranslationLetter;
-
-		// adjust colors if selected and temp selection
-		// We have to calculate within this way - because rect.contains(Point) is always returning false on a 0-width or 0 height Rectangle
-		boolean isPointWithinSelectionRect = false;
-		if(tempSelectionRect != null){
-			if(x <= tempSelectionRect.getMaxX() && x >= tempSelectionRect.getMinX() && y <= tempSelectionRect.getMaxY() && y >= tempSelectionRect.getMinY()){
-				isPointWithinSelectionRect = true;
-			}
-		}
-		if(alignment.isBaseSelected(x,y) || (tempSelectionRect != null && isPointWithinSelectionRect)){
-			pixContainerToUse = charPixTranslationSelected;
-			pixLetterContainerToUse = charPixTranslationSelectedLetter;
-		}
-
-		RGBArray newPiece;
-
-		if(! drawAminoAcidCode){	
-			newPiece = pixContainerToUse.getRGBArray(acid, residue);
-		}else{
-			if(aaTransSeq.isCodonSecondPos(x)){
-				newPiece = pixLetterContainerToUse.getRGBArray(acid, residue);
-			}else{
-				residue = ' ';
-				newPiece = pixContainerToUse.getRGBArray(acid, residue);
-			}
-		}
-
-		try {
-			ImageUtils.insertRGBArrayAt(clipX, clipY, newPiece, clipArray);
-		} catch (Exception e) {
-			logger.info("clipX" + clipX);
-			logger.info("clipY" + clipY);
-		}
-	}
-
-
-
-	private void copyAminoAcidPixels(RGBArray clipArray, byte residue, int x, int y, int clipX, int clipY){
-
-		// Ett litet hack
-		if(residue == 0){
-			residue = ' ';
-		}
-
-		// set defaults
-		AACharPixelsContainer pixContainerToUse = charPixDefaultAA;
-		byteToDraw = residue;
-		AminoAcid acid = AminoAcid.getAminoAcidFromByte(residue);
+		// get char to draw
+		byteToDraw = charAsByte;
 
 		// adjustment if only diff to be shown
 		if(highlightDiffTrace){ // TODO CHANGE THIS SO IT IS WORKING EVEN IF TRACING SEQUENCE IS SHORTER THAN OTHER
 			if(y != differenceTraceSequencePosition && acid == AminoAcid.getAminoAcidFromByte(alignment.getBaseAt(x,differenceTraceSequencePosition))){
 				byteToDraw = '.';
-				pixContainerToUse = charPixDefaultAA;
+				baseBackgroundColor = colorSchemeAminoAcid.getAminoAcidBackgroundColor(AminoAcid.GAP, x, alignment);
 			}
 		}
 
@@ -999,19 +814,63 @@ public class AlignmentPane extends JPanel{
 				// no color on gap even if they are in maj.cons
 			}
 			else if(alignment.getHistogram().isMajorityRuleConsensus(x,acid.intVal)){
-				pixContainerToUse = charPixConsensusAA;
+				baseBackgroundColor = colorSchemeAminoAcid.getAminiAcidConsensusBackgroundColor();
+				//baseBackgroundColor = colorSchemeAminoAcid.getAminoAcidBackgroundColor(AminoAcid.GAP);
 			}
 		}
+
+		// adjustment if cons to be highlighted
 		if(highlightCons){
 			if(acid == AminoAcid.GAP){
 				// no color on gap even if they are in maj.cons
 			}
 			else if(! alignment.getHistogram().isMajorityRuleConsensus(x,acid.intVal)){
-				pixContainerToUse = charPixConsensusAA;
+				baseBackgroundColor = colorSchemeAminoAcid.getAminiAcidConsensusBackgroundColor();
+				//baseBackgroundColor = colorSchemeAminoAcid.getAminoAcidBackgroundColor(AminoAcid.GAP);
 			}
 		}
 
-		// adjust colors if selected and temp selection
+		// Temp Selection
+		// We have to calculate within this way - because rect.contains(Point) is always returning false on a 0-width or 0 height Rectangle
+		boolean isPointWithinSelectionRect = false;
+		if(tempSelectionRect != null){
+			if(x <= tempSelectionRect.getMaxX() && x >= tempSelectionRect.getMinX() &&
+					y <= tempSelectionRect.getMaxY() && y >= tempSelectionRect.getMinY()){
+				isPointWithinSelectionRect = true;
+			}
+		}
+
+		// draw selection and temp selection
+		if(alignment.isBaseSelected(x,y) || (tempSelectionRect != null && isPointWithinSelectionRect)){		
+			baseBackgroundColor = colorSchemeAminoAcid.getAminoAcidSelectionBackgroundColor(acid, x, alignment);
+			baseForegroundColor = colorSchemeAminoAcid.getAminoAcidSelectionForegroundColor(acid, x, alignment);
+
+			//drawNucleotideBackground(g2d, xPaneCoord, yPaneCoord, widthInPaneCoord, heightInPaneCoord, 1, baseBackgroundColor);
+		}
+
+		// Put char letter in buffer
+		drawCharBuffer.append(byteToDraw, baseForegroundColor, baseBackgroundColor);
+
+	}
+
+	private void drawTranslatedNucleotides(Graphics2D g2d, byte base, int x, int y, AATranslator aaTransSeq,
+			int charCenterXOffset, int charCenterYOffset){
+
+		int baseVal = NucleotideUtilities.baseValFromBase(base);
+
+		// get char to draw
+		// TODO remove this hack (file-sequences are including \n and they are removed when apppending to stringbuilder)
+		if(base == '\n'){
+			base = ' ';
+		}
+		byteToDraw = base;
+
+		AminoAcid acid = aaTransSeq.getAminoAcidAtNucleotidePos(x);
+
+		// Set default
+		Color baseForegroundColor = colorSchemeNucleotide.getBaseForegroundColor(baseVal);
+		Color backgroundColor = colorSchemeNucleotide.getAminoAcidBackgroundColor(acid);
+
 		// We have to calculate within this way - because rect.contains(Point) is always returning false on a 0-width or 0 height Rectangle
 		boolean isPointWithinSelectionRect = false;
 		if(tempSelectionRect != null){
@@ -1019,42 +878,143 @@ public class AlignmentPane extends JPanel{
 				isPointWithinSelectionRect = true;
 			}
 		}
+
+		// adjust colors if selected and temp selection
 		if(alignment.isBaseSelected(x,y) || (tempSelectionRect != null && isPointWithinSelectionRect)){
-			pixContainerToUse = charPixSelectedAA;
-		}
+			//acid = aaTransSeq.getAminoAcidAtNucleotidePos(x);
+			backgroundColor = colorSchemeNucleotide.getAminoAcidSelectionBackgroundColor(acid);
+		}	
 
-		RGBArray newPiece = pixContainerToUse.getRGBArray(byteToDraw, x, alignment);
 
-		try {
-			ImageUtils.insertRGBArrayAt(clipX, clipY, newPiece, clipArray);
-		} catch (Exception e) {
-			logger.info("clipX" + clipX);
-			logger.info("clipY" + clipY);
+		// Draw char letter
+		if(! drawAminoAcidCode){	
+			// Put char letter in buffer
+			drawCharBuffer.append(byteToDraw, baseForegroundColor, backgroundColor);
+		}else{
+			if(aaTransSeq.isCodonSecondPos(x)){
+				drawCharBuffer.append(acid.getCodeByteVal(), Color.white, backgroundColor);
+			}else{
+				drawCharBuffer.append((byte)' ', baseForegroundColor, backgroundColor);
+			}
 		}
 	}
 
+	private void drawTranslatedNucleotidesSkipGap(Graphics2D g2d, byte base, int x, int y, int xPaneCoord, int yPaneCoord, int width, int height, AATranslator aaTransSeq,
+			int charCenterXOffset, int charCenterYOffset){
 
+		int baseVal = NucleotideUtilities.baseValFromBase(base);
 
+		// get char to draw
+		// TODO remove this hack (file-sequences are including \n and they are removed when apppending to stringbuilder)
+		if(base == '\n'){
+			base = ' ';
+		}
+		byteToDraw = base;
 
-	private void copyNucleotidePixels(RGBArray clipArray, byte residue, int x, int y, int clipX, int clipY){
+		AminoAcid acid = aaTransSeq.getNoGapAminoAcidAtNucleotidePos(x);
+		int acidStartPos = aaTransSeq.getCachedClosestStartPos();
 
-		// Ett litet hack
-		if(residue == 0){
-			residue = ' ';
+		// Set default
+		Color baseForegroundColor = colorSchemeNucleotide.getBaseForegroundColor(baseVal);
+		Color backgroundColor = colorSchemeNucleotide.getAminoAcidBackgroundColor(acid);
+
+		// We have to calculate within this way - because rect.contains(Point) is always returning false on a 0-width or 0 height Rectangle
+		boolean isPointWithinSelectionRect = false;
+		if(tempSelectionRect != null){
+			if(x <= tempSelectionRect.getMaxX() && x >= tempSelectionRect.getMinX() && y <= tempSelectionRect.getMaxY() && y >= tempSelectionRect.getMinY()){
+				isPointWithinSelectionRect = true;
+			}
 		}
 
-		// set defaults
-		CharPixelsContainer pixContainerToUse = charPixDefaultNuc;
-		byteToDraw = residue;
+		// adjust colors if selected and temp selection
+		if(alignment.isBaseSelected(x,y) || (tempSelectionRect != null && isPointWithinSelectionRect)){
+			//acid = aaTransSeq.getAminoAcidAtNucleotidePos(x);
+			backgroundColor = colorSchemeNucleotide.getAminoAcidSelectionBackgroundColor(acid);
+		}	
+
+
+		// Draw char letter
+		if(! drawAminoAcidCode){	
+			// Put char letter in buffer
+			drawCharBuffer.append(byteToDraw, baseForegroundColor, backgroundColor);
+		}else{
+			if(x == acidStartPos + 1){
+				drawCharBuffer.append(acid.getCodeByteVal(), Color.white, backgroundColor);
+			}else{
+				drawCharBuffer.append((byte)' ', baseForegroundColor, backgroundColor);
+			}
+		}
+	}
+
+	/*
+		int baseVal = NucleotideUtilities.baseValFromBase(base);
+
+		byte[] byteToDraw = new byte[]{base};
+
+		// Set default
+		Color baseForegroundColor = colorSchemeNucleotide.getBaseForegroundColor(baseVal);
+
+		AminoAcid acid = aaTransSeq.getNoGapAminoAcidAtNucleotidePos(x);
+		Color backgroundColor = colorSchemeNucleotide.getAminoAcidBackgroundColor(acid);
+		// Draw background color
+		drawNucleotideBackground(g2d, xPaneCoord, yPaneCoord, width, height, backgroundColor);	
+
+		if(drawAminoAcidCode){
+			if(aaTransSeq.isNoGapAminoAcidFirstPos(x)){
+				drawAminoAcidCodeSimple(g2d, x, y, acid, Color.WHITE, charCenterXOffset, charCenterYOffset);
+			}
+		}
+
+		// We have to calculate within this way - because rect.contains(Point) is always returning false on a 0-width or 0 height Rectangle
+		boolean isPointWithinSelectionRect = false;
+		if(tempSelectionRect != null){
+			if(x <= tempSelectionRect.getMaxX() && x >= tempSelectionRect.getMinX() && y <= tempSelectionRect.getMaxY() && y >= tempSelectionRect.getMinY()){
+				isPointWithinSelectionRect = true;
+			}
+		}
+
+		// adjust colors if selected and temp selection
+		if(alignment.isBaseSelected(x,y) || (tempSelectionRect != null && isPointWithinSelectionRect)){
+			backgroundColor = colorSchemeNucleotide.getAminoAcidSelectionBackgroundColor(acid);
+			//drawNucleotideBackground(g2d, xPaneCoord, yPaneCoord, width, height, backgroundColor);
+		}
+
+		// Draw char letter
+		if(! drawAminoAcidCode){
+			drawCharBuffer.append(byteToDraw, baseForegroundColor, backgroundColor);
+			drawNucleotideLetter(g2d, byteToDraw, x, y, baseForegroundColor, charCenterXOffset, charCenterYOffset);
+		}
+	 */
+
+
+
+	private void drawNucleotides(Graphics2D g2d, byte residue, int x, int y, int xPaneCoord, int yPaneCoord, int width, int height,
+			int charCenterXOffset, int charCenterYOffset){
+
 		int baseVal = NucleotideUtilities.baseValFromBase(residue);
+		
+		byteToDraw = residue;
+
+		// Set default
+		Color baseForegroundColor = colorSchemeNucleotide.getBaseForegroundColor(baseVal);
+		Color baseBackgroundColor = colorSchemeNucleotide.getBaseBackgroundColor(baseVal);
+
+		// We have to calculate within this way - because rect.contains(Point) is always returning false on a 0-width or 0 height Rectangle
+		boolean isPointWithinSelectionRect = false;
+		if(tempSelectionRect != null){
+			if(x <= tempSelectionRect.getMaxX() && x >= tempSelectionRect.getMinX() && y <= tempSelectionRect.getMaxY() && y >= tempSelectionRect.getMinY()){
+				isPointWithinSelectionRect = true;
+			}
+		}
 
 
 		// adjustment if only diff to be shown
 		if(highlightDiffTrace){ // TODO CHANGE THIS SO IT IS WORKING EVEN IF TRACING SEQUENCE IS SHORTER THAN OTHER
 			if(y != differenceTraceSequencePosition){
-				if(baseVal == NucleotideUtilities.baseValFromBase(alignment.getBaseAt(x,differenceTraceSequencePosition))){
+				if(NucleotideUtilities.baseValFromBase(residue) == NucleotideUtilities.baseValFromBase(alignment.getBaseAt(x,differenceTraceSequencePosition))){
 					byteToDraw = '.';
-					pixContainerToUse = charPixDefaultNuc;
+					//logger.info("bytetodraw");
+					baseBackgroundColor = colorSchemeNucleotide.getBaseBackgroundColor(NucleotideUtilities.GAP);
 				}
 			}
 		}
@@ -1066,7 +1026,8 @@ public class AlignmentPane extends JPanel{
 				// no color on gap even if they are in maj.cons
 			}
 			else if(nucHistogram.isMajorityRuleConsensus(x,baseVal)){
-				pixContainerToUse = charPixConsensusNuc;
+				baseBackgroundColor = colorSchemeNucleotide.getBaseConsensusBackgroundColor();
+				//baseBackgroundColor = colorSchemeNucleotide.getBaseBackgroundColor(NucleotideUtilities.UNKNOWN);
 			}
 		}
 		if(highlightCons){
@@ -1075,35 +1036,89 @@ public class AlignmentPane extends JPanel{
 				// no color on gap even if they are in maj.cons
 			}
 			else if(! nucHistogram.isMajorityRuleConsensus(x,baseVal)){
-				pixContainerToUse = charPixConsensusNuc;
+				baseBackgroundColor = colorSchemeNucleotide.getBaseConsensusBackgroundColor();
+				//baseBackgroundColor = colorSchemeNucleotide.getBaseBackgroundColor(NucleotideUtilities.UNKNOWN);
 			}
 		}
 
 		// adjust colors if selected and temp selection
-		// We have to calculate within this way - because rect.contains(Point) is always returning false on a 0-width or 0 height Rectangle
-		boolean isPointWithinSelectionRect = false;
-		if(tempSelectionRect != null){
-			if(x <= tempSelectionRect.getMaxX() && x >= tempSelectionRect.getMinX() && y <= tempSelectionRect.getMaxY() && y >= tempSelectionRect.getMinY()){
-				isPointWithinSelectionRect = true;
-			}
-		}
 		if(alignment.isBaseSelected(x,y) || (tempSelectionRect != null && isPointWithinSelectionRect)){
-			pixContainerToUse = charPixSelectedNuc;
+			baseBackgroundColor = colorSchemeNucleotide.getBaseSelectionBackgroundColor(baseVal);
+			baseForegroundColor = colorSchemeNucleotide.getBaseSelectionForegroundColor(baseVal);
 		}
 
-		RGBArray newPiece = pixContainerToUse.getRGBArray(byteToDraw);
-
-		try {
-			ImageUtils.insertRGBArrayAt(clipX, clipY, newPiece, clipArray);
-		} catch (Exception e) {
-			logger.info("x" + x);
-			logger.info("y" + y);
-			logger.info("clipX" + clipX);
-			logger.info("clipY" + clipY);
-			//break;
+		// Draw background
+		if(baseBackgroundColor == colorSchemeNucleotide.getBaseBackgroundColor(NucleotideUtilities.GAP)){
+			// dont draw if gap or anything with gap-color (already bg-color is drawn on whole pane)
+			// this is to improve performance
+		}else{
+			//		drawNucleotideBackground(g2d, xPaneCoord, yPaneCoord, width, height, 1, baseBackgroundColor);
 		}
 
+		// Put char letter in buffer
+		drawCharBuffer.append(byteToDraw, baseForegroundColor, baseBackgroundColor);
 	}
+
+	private void drawCharsBuffered(Graphics2D g2d, byte[] bytesToDraw, int startPos, int drawCount, int x, int y, Color baseForegroundColor, int charCenterXOffset, int charCenterYOffset) {	
+		g2d.setColor(baseForegroundColor);
+		if(charHeight > MAX_CHARSIZE_TO_DRAW){
+			g2d.drawBytes(bytesToDraw, startPos, drawCount, (int)((x + 0) * charWidth + charCenterXOffset), (int)(y * charHeight + charHeight - charCenterYOffset));
+			//g2d.drawBytes(bytesToDraw, startPos, drawCount, x + charCenterXOffset, (int)(y * charHeight + charHeight - charCenterYOffset));
+		}
+	}
+
+	private void drawNucleotideLetter(Graphics2D g2d, byte[] bytesToDraw, int x, int y, Color baseForegroundColor, int charCenterXOffset, int charCenterYOffset) {
+		g2d.setColor(baseForegroundColor);
+		if(charHeight > MAX_CHARSIZE_TO_DRAW){
+			g2d.drawBytes(bytesToDraw, 0, bytesToDraw.length, (int)((x + 0) * charWidth + charCenterXOffset), (int)(y * charHeight + charHeight - charCenterYOffset));
+		}
+	}
+
+	private void drawNucleotideBackground(Graphics2D g2d, int xPaneCoord, int yPaneCoord, int width, int height, Color baseBackgroundColor){
+		g2d.setColor(baseBackgroundColor);
+		g2d.fillRect(xPaneCoord,yPaneCoord,width,height);
+	}
+
+	/*
+	 * 
+	 * TODO it is not working with very large alignments
+	 * 
+	 */
+	private void drawNucleotideBackground(Graphics2D g2d, int xPaneCoord, int yPaneCoord, int width, int height, Color baseBackgroundColor, byte b){
+		g2d.setColor(baseBackgroundColor);
+		g2d.drawRect(xPaneCoord,yPaneCoord,width,height);		
+		String draw = "" + (char) b;
+		char[] drawChars = new char[(char) b];
+		g2d.setColor(Color.BLACK);
+	//	g2d.setColor(Color.BLACK);
+	//	logger.info("" + (char) b );
+	//	g2d.drawBytes(new byte[(byte)'e'], 0, 1, xPaneCoord, yPaneCoord);
+//		g2d.drawBytes(data, offset, length, x, y)
+	//	g2d.drawChars(drawChars, 0, 1, xPaneCoord + 1, yPaneCoord + 12);
+		g2d.drawString(draw, xPaneCoord + 1, yPaneCoord + 12);
+		//g2d.drawBytes(bytesToDraw, 0, bytesToDraw.length, (int)((x + 0) * charWidth + charCenterXOffset), (int)(y * charHeight + charHeight - charCenterYOffset));
+	}
+
+	private void drawAminoAcidCode(Graphics2D g2d, int xAlignmentCoord, int yAlignmentCoord, AminoAcid acid, Color foregroundColor, int charCenterXOffset, int charCenterYOffset) {
+		g2d.setColor(foregroundColor);
+		if(charHeight > MAX_CHARSIZE_TO_DRAW){
+			g2d.drawBytes(acid.getCodeByteArray(), 0, 1, (int)(xAlignmentCoord * charWidth + charCenterXOffset + charWidth), (int)(yAlignmentCoord * charHeight + charHeight - charCenterYOffset));
+		}
+	}
+
+	private void drawAminoAcidCodeSimple(Graphics2D g2d, int xAlignmentCoord, int yAlignmentCoord, AminoAcid acid, Color foregroundColor, int charCenterXOffset, int charCenterYOffset) {
+		g2d.setColor(foregroundColor);
+		if(charHeight > MAX_CHARSIZE_TO_DRAW){
+			g2d.drawBytes(acid.getCodeByteArray(), 0, 1, (int)(xAlignmentCoord * charWidth + charCenterXOffset), (int)(yAlignmentCoord * charHeight + charHeight - charCenterYOffset));
+		}
+	}
+
+	private void drawTranslatedTripletAminoAcidBackground(Graphics2D g2d, int xAlignmentCoord, int yAlignmentCoord, Color aminoAcidBackgroundColor, byte[] codon) {
+		// draw background
+		g2d.setColor(aminoAcidBackgroundColor);
+		g2d.fillRect((int)(xAlignmentCoord * charWidth), (int)(yAlignmentCoord * charHeight), (int)charWidth * codon.length, (int)charHeight);	
+	}
+
 
 
 	public Alignment getAlignment() {
@@ -1207,16 +1222,11 @@ public class AlignmentPane extends JPanel{
 	}
 
 	private Dimension getCalculatedPreferredSize(){
-		Dimension newDim;
 		if(showTranslationOnePos){
-			newDim = new Dimension((int) (charWidth * alignment.getAlignentMeta().getCodonPositions().getLengthOfTranslatedPos()), (int)(charHeight * alignment.getSize()));
+			return new Dimension((int) (charWidth * alignment.getAlignentMeta().getCodonPositions().getLengthOfTranslatedPos()), (int)(charHeight * alignment.getSize()));
 		}else{
-			newDim = new Dimension((int) (charWidth * alignment.getMaximumSequenceLength()), (int)(charHeight * alignment.getSize()));
+			return new Dimension((int) (charWidth * alignment.getMaximumSequenceLength()), (int)(charHeight * alignment.getSize()));
 		}
-
-		//		logger.info("newDim" + newDim);
-		return newDim;
-
 	}
 
 	public Point paneCoordToMatrixCoord(Point pos){
@@ -1338,9 +1348,9 @@ public class AlignmentPane extends JPanel{
 
 	private class AlignmentRuler extends JPanel{
 
-		private AlignmentPane alignmentPane;
+		private AlignmentPane_Orig alignmentPane;
 
-		public AlignmentRuler(AlignmentPane alignmentPane) {
+		public AlignmentRuler(AlignmentPane_Orig alignmentPane) {
 			this.alignmentPane = alignmentPane;
 		}
 
@@ -1409,99 +1419,89 @@ public class AlignmentPane extends JPanel{
 			int count = 0;
 			int maxX = alignment.getMaxX(); // alignment maxX is 
 			int maxY = alignment.getMaxY();
-
-			int step = 1;
-			int matrixClipSize = (int) (matrixClip.getMaxX() - matrixClip.x);
-
-			if(matrixClipSize < 10000000){
-
-				for(int x = matrixClip.x ; x < matrixClip.getMaxX() + 1; x++){
+			for(int x = matrixClip.x ; x < matrixClip.getMaxX() + 1; x ++){
 
 
-					// TODO Ruler tickmark and numbers is off....
+				// TODO Ruler tickmark and numbers is off....
 
-					// draw background depending on codonpos
+				// draw background depending on codonpos
 
-					// Only draw part of matrix that exists 
-					if(maxY > 0 && x >= 0 && x < maxX){
+				// Only draw part of matrix that exists 
+				if(maxY > 0 && x >= 0 && x < maxX){
 
-						if(drawCodonPosRuler && ! showTranslationOnePos){
-							int codonPos = alignment.getCodonPosAt(x);
-							//logger.info(codonPos);
-							Color codonPosColor = Color.GREEN;
-							if(codonPos == 0){
-								codonPosColor = Color.LIGHT_GRAY;
-							}else if(codonPos == 1){
-								codonPosColor = Color.GREEN;
-							}else if(codonPos == 2){
-								codonPosColor = Color.orange;
-							}else if(codonPos == 3){
-								codonPosColor = Color.red;
-							}
-
-							g2d.setColor(codonPosColor);
-
-							int boxHeight = 5;
-							g2d.fillRect((int)(posTick * charCenterXOffset * charWidth - offsetDueToScrollPanePosition), (int) (rulerRect.getMaxY() - boxHeight), (int)charWidth, boxHeight);
-							//g2d.fillRect((int)(x * charWidth), (int) (rulerRect.getMaxY() - 4), (int)charWidth, boxHeight);
+					if(drawCodonPosRuler && ! showTranslationOnePos){
+						int codonPos = alignment.getCodonPosAt(x);
+						//logger.info(codonPos);
+						Color codonPosColor = Color.GREEN;
+						if(codonPos == 0){
+							codonPosColor = Color.LIGHT_GRAY;
+						}else if(codonPos == 1){
+							codonPosColor = Color.GREEN;
+						}else if(codonPos == 2){
+							codonPosColor = Color.orange;
+						}else if(codonPos == 3){
+							codonPosColor = Color.red;
 						}
 
-						g2d.setColor(Color.DARK_GRAY);
-						// make every 5 a bit bigger
-						if(x % 5 == 4 && charHeight > 0.6){ // it has to be 4 and not 0 due to the fact that 1:st base har position 0 in matrix
-							g2d.drawLine((int)(posTick * charCenterXOffset * charWidth + charWidth/2 - offsetDueToScrollPanePosition), (int) (rulerRect.getMaxY() - 2), (int)(posTick * charCenterXOffset * charWidth +  charWidth/2 - offsetDueToScrollPanePosition), (int)rulerRect.getMaxY() - 5);
-						}
-						// dont draw smallest tick if to small
-						else if(charHeight > 4){
-							g2d.drawLine((int)(posTick * charCenterXOffset * charWidth + charWidth/2 - offsetDueToScrollPanePosition), (int) (rulerRect.getMaxY() - 2), (int)(posTick * charCenterXOffset * charWidth +  charWidth/2 - offsetDueToScrollPanePosition), (int)rulerRect.getMaxY() - 3);
-						}
-						posTick ++;
+						g2d.setColor(codonPosColor);
+
+						int boxHeight = 5;
+						g2d.fillRect((int)(posTick * charCenterXOffset * charWidth - offsetDueToScrollPanePosition), (int) (rulerRect.getMaxY() - boxHeight), (int)charWidth, boxHeight);
+						//g2d.fillRect((int)(x * charWidth), (int) (rulerRect.getMaxY() - 4), (int)charWidth, boxHeight);
 					}
-					count ++;
 
-				}
-
-				// NUMBERS
-				int rulerCharWidth = 11;
-				int rulerCharHeight = 11;
-				Font rulerFont = new Font(baseFont.getName(), baseFont.getStyle(), (int)rulerCharWidth);
-				g2d.setFont(rulerFont);
-
-				// Only draw every 20-10000 pos
-				int drawEveryNpos = 10;
-
-				if(charHeight < 0.001){
-					drawEveryNpos = 1000000;
-				}else if(charHeight < 0.02){
-					drawEveryNpos = 10000;
-				}else if(charHeight < 0.04){
-					drawEveryNpos = 5000;
-				}else if(charHeight < 0.1){
-					drawEveryNpos = 1000;
-				}else if(charHeight < 0.4){
-					drawEveryNpos = 500;
-				}else if(charHeight < 1){
-					drawEveryNpos = 100;
-				}else if(charHeight < 4){
-					drawEveryNpos = 50;
-				}else if(charHeight < 5){
-					drawEveryNpos = 20;
-				}
-
-				// position numbers
-				int pos = 0;
-				for(int x = matrixClip.x ; x < matrixClip.getMaxX() + 1; x++){
-
-					if(x % drawEveryNpos == 0){
-						String number = Integer.toString(x);
-						int stringSizeOffset = (int)((number.length() * rulerCharWidth) / 2);
-						int xPos = (int)(pos * charWidth - stringSizeOffset - offsetDueToScrollPanePosition);
-						g2d.drawString(number, xPos, 10);
-						//	g2d.drawBytes(number.getBytes(), 0,number.getBytes().length,xPos, 10);
+					g2d.setColor(Color.DARK_GRAY);
+					// make every 5 a bit bigger
+					if(x % 5 == 4 && charHeight > 0.6){ // it has to be 4 and not 0 due to the fact that 1:st base har position 0 in matrix
+						g2d.drawLine((int)(posTick * charCenterXOffset * charWidth + charWidth/2 - offsetDueToScrollPanePosition), (int) (rulerRect.getMaxY() - 2), (int)(posTick * charCenterXOffset * charWidth +  charWidth/2 - offsetDueToScrollPanePosition), (int)rulerRect.getMaxY() - 5);
 					}
-					pos ++;
-				}	
+					// dont draw smallest tick if to small
+					else if(charHeight > 4){
+						g2d.drawLine((int)(posTick * charCenterXOffset * charWidth + charWidth/2 - offsetDueToScrollPanePosition), (int) (rulerRect.getMaxY() - 2), (int)(posTick * charCenterXOffset * charWidth +  charWidth/2 - offsetDueToScrollPanePosition), (int)rulerRect.getMaxY() - 3);
+					}
+					posTick ++;
+				}
+				count ++;
+
 			}
+
+			// NUMBERS
+			int rulerCharWidth = 11;
+			int rulerCharHeight = 11;
+			Font rulerFont = new Font(baseFont.getName(), baseFont.getStyle(), (int)rulerCharWidth);
+			g2d.setFont(rulerFont);
+
+			// Only draw every 20-10000 pos
+			int drawEveryNpos = 10;
+			if(charHeight < 0.02){
+				drawEveryNpos = 10000;
+			}else if(charHeight < 0.04){
+				drawEveryNpos = 5000;
+			}else if(charHeight < 0.1){
+				drawEveryNpos = 1000;
+			}else if(charHeight < 0.4){
+				drawEveryNpos = 500;
+			}else if(charHeight < 1){
+				drawEveryNpos = 100;
+			}else if(charHeight < 4){
+				drawEveryNpos = 50;
+			}else if(charHeight < 5){
+				drawEveryNpos = 20;
+			}
+
+			// position numbers
+			int pos = 0;
+			for(int x = matrixClip.x ; x < matrixClip.getMaxX() + 1; x ++){
+
+				if(x % drawEveryNpos == 0){
+					String number = Integer.toString(x);
+					int stringSizeOffset = (int)((number.length() * rulerCharWidth) / 2);
+					int xPos = (int)(pos * charWidth - stringSizeOffset - offsetDueToScrollPanePosition);
+					g2d.drawString(number, xPos, 10);
+					//	g2d.drawBytes(number.getBytes(), 0,number.getBytes().length,xPos, 10);
+				}
+				pos ++;
+			}	
 
 
 			long endTime = System.currentTimeMillis();
@@ -1519,15 +1519,12 @@ public class AlignmentPane extends JPanel{
 		return this.drawAminoAcidCode;
 	}
 
-	public void setColorSchemeAminoAcid(ColorScheme aScheme){
+	public void setColorSchemeAminoAcid(ColorScheme aScheme) {
 		this.colorSchemeAminoAcid = aScheme;
-		createCharPixelsContainers();
-
 	}
 
 	public void setColorSchemeNucleotide(ColorScheme aScheme) {
 		this.colorSchemeNucleotide = aScheme;
-		createCharPixelsContainers();
 	}
 
 	public Point getVisibleUpperLeftMatrixPos() {
