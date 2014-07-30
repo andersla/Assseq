@@ -4,7 +4,7 @@
 cp -v aliview /usr/bin/aliview
 if [ $? -ne 0 ]
 then
-    echo "could not copy files, need to be sudo?"
+    echo "!!! could not copy files, need to be sudo? e.g. sudo ./aliview.install.run"
     exit 1
 fi
 

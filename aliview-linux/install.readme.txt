@@ -1,22 +1,28 @@
 Install:
 
--***---*** SIMPLEST ***---***-
+---------- SIMPLEST ------------
 
 download and run the installer:
 
 aliview.install.run
 
-(this is a executable archive that will copy the file "aliview" to the /usr/home/bin/ and the rest to /usr/share/aliview/)
+(this is a executable archive that will copy the files to the /usr/home/bin/ and /usr/share, and will also install a .desktop link to the start-menu on compatible systems)
 
-on most systems you need to change the execution rights of the downloaded file:
-
+- after downloading you will likely need to change the execution rights of the install file:
 chmod +x aliview.install.run 
+
+- install by issuing command: 
 sudo ./aliview.install.run 
 
-(most likely you need to sudo the installation)
+(most likely you need to sudo the installation, if you don't have super user rights to the system see below)
 
-start the program with aliview (this is a .sh script that will execute java -jar aliview.jar)
+- start the program with command:
+aliview (this is a sh-script that will execute java -jar aliview.jar)
 
+-----*** ALTERNATIVE (as non super-user) ***-----
 
-----*** ALTERNATIVE ***----
-aliview.tgz is an archive including the program files
+1. Download the archive aliview.tgz and extract it into a folder of your choice
+2. Run program from this folder by issuing command ./aliview from the terminal (this is a sh-script that will execute command java -jar aliview.jar)
+
+NOTE: If you are running Linux, consider upgrading to Java 8, there is a significant improvement in drawing speed since it is using Linux built in XRender. 
+Installation is very simple (1 minute) - Java 8 installation instructions for Ubuntu/Debian/OpenSuse/RedHat
