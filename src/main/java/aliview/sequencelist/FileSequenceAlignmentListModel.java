@@ -23,14 +23,14 @@ import aliview.sequences.Sequence;
 import aliview.sequences.SequenceUtils;
 import aliview.settings.Settings;
 
-public class FileSequenceListModel extends SequenceListModel implements ListDataListener{
-	private static final Logger logger = Logger.getLogger(FileSequenceListModel.class);
+public class FileSequenceAlignmentListModel extends AlignmentListModel{
+	private static final Logger logger = Logger.getLogger(FileSequenceAlignmentListModel.class);
 	private static final String LF = System.getProperty("line.separator");
 	private List<FileSequenceLoadListener> fileSeqLoadListeners = new ArrayList<FileSequenceLoadListener>();
 	
-	public FileSequenceListModel(File aliFile, FileFormat foundFormat) throws IOException {
+	public FileSequenceAlignmentListModel(File aliFile, FileFormat foundFormat) throws IOException {
 		super(new FileMMSequenceList(aliFile, foundFormat));
-		this.getSequences().addListDataListener(this);
+//		this.getSequences().addListDataListener(this);
 		this.setFileFormat(foundFormat);
 	}
 
@@ -51,11 +51,11 @@ public class FileSequenceListModel extends SequenceListModel implements ListData
 		}
 		return maxLen;
 	}
-
+/*
 	public void contentsChanged(ListDataEvent e) {
 		fireContentsChanged(this, 0, this.getSequences().size()-1);
 	}
-
+*/
 
 	public List<FilePage> getFilePages() {
 		return this.getSequences().getFilePages();
@@ -71,8 +71,8 @@ public class FileSequenceListModel extends SequenceListModel implements ListData
 	}
 
 	@Override
-	public void setSelectionAt(int xPos, int yPos, boolean b) {
-		super.setSelectionAt(xPos, yPos, b);
+	public void setSelectionAt(int xPos, int yPos, boolean clearFirst) {
+		super.setSelectionAt(xPos, yPos, clearFirst);
 	}
 
 	public void writeSelectionAsFasta(Writer out) {
@@ -84,7 +84,7 @@ public class FileSequenceListModel extends SequenceListModel implements ListData
 		}
 		else{	
 			int n = 0;
-			for(Sequence sequence : this.sequences){
+			for(Sequence sequence : this.delegateSequences){
 				if(sequence.hasSelection()){
 					String tempSeq = sequence.getSelectedBasesAsString();
 					try {
@@ -136,7 +136,7 @@ public class FileSequenceListModel extends SequenceListModel implements ListData
 		
 		// only do MAX_HISTOGRAM_SEQUENCES
 		int counter = 0;
-		for(Sequence seq: sequences){
+		for(Sequence seq: delegateSequences){
 			if(counter > Settings.getMaxFileHistogramSequences().getIntValue()){
 				break;
 			}

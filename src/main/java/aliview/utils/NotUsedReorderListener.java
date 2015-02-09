@@ -5,17 +5,19 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.JList;
 
-import aliview.sequencelist.SequenceListModel;
+import aliview.sequencelist.AlignmentListModel;
 import aliview.sequences.Sequence;
 
-public class ReorderListener extends MouseAdapter {
-	 
+public class NotUsedReorderListener extends MouseAdapter {
+	
+	/*
+	
 	   private JList list;
 	   private int pressIndex = 0;
 	   private int releaseIndex = 0;
 	 
 	   public ReorderListener(JList list) {
-	      if (!(list.getModel() instanceof SequenceListModel)) {
+	      if (!(list.getModel() instanceof AlignmentListModel)) {
 	         throw new IllegalArgumentException("List must have a SequenceListModel");
 	      }
 	      this.list = list;
@@ -41,9 +43,11 @@ public class ReorderListener extends MouseAdapter {
 	   }
 	 
 	   private void reorder() {
-		   SequenceListModel model = (SequenceListModel) list.getModel();
+		   AlignmentListModel model = (AlignmentListModel) list.getModel();
 	      Sequence dragee = model.get(pressIndex);
 	      model.removeAt(pressIndex);
 	      model.insertAt(dragee, releaseIndex);
 	   }
+	   */
 	}
+	
