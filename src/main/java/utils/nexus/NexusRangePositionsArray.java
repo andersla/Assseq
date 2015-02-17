@@ -1,74 +1,62 @@
 package utils.nexus;
 
+import java.util.ArrayList;
+
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 
 import com.sun.org.apache.bcel.internal.generic.BALOAD;
 
 
-public class PositionsArray {
-	private static final Logger logger = Logger.getLogger(PositionsArray.class);
-	private int [] backend;
+public class NexusRangePositionsArray {
+	private static final Logger logger = Logger.getLogger(NexusRangePositionsArray.class);
+	private Ranges ranges = new Ranges();
 
-
-	public PositionsArray() {
+	public NexusRangePositionsArray() {
+		logger.info("new");
+		ranges.add(new CodonRange(0, Integer.MAX_VALUE - 1000, 1)); // - 1000 on MaxVal to make sure there is room for adding one or two
 	}
 	
-	private PositionsArray(int[] backend) {
-		this.backend = backend;
+	private NexusRangePositionsArray(Ranges ranges) {
+		this.ranges = ranges;
 	}
-/*
-	public int getLength() {
-		if(backend != null){
-			return backend.length;
-		}else{
-			return 0;
-		}
-	}
-*/
 	
 	public int size() {
-		if(backend != null){
-			return backend.length;
-		}else{
-			return 0;
-		}
+		return 0;//1000000000;
 	}
 	
-	public int getPos(int pos) {
+	
+	public int getPos(int pos){
 		
-		if(backend == null || backend.length == 0){
-			return (pos % 3) + 1;
-		}
-		else if(pos < backend.length){
-			return backend[pos];
-		}
-		else{
-			int lastVal = backend[backend.length - 1];
-			if(lastVal == 0){
-				return 0;
-			}
-			else{
-				return (pos % 3) + lastVal;
-			}
-		}		
+		CodonRange range = getRange(pos);
+		
+		int posVal = range.getPosVal(pos);
+		
+		return posVal;
+		
 	}
 
 
-	public PositionsArray getCopy() {
-		if(backend == null){
-			return new PositionsArray();
-		}
-		else{
-			int[] clonedBackend = backend = ArrayUtils.clone(this.backend);
-			return new PositionsArray(clonedBackend);
-		}
+	
+	private CodonRange getRange(int pos) {
+		return ranges.getRange(pos);
+	}
+
+	public NexusRangePositionsArray getCopy() {
+		return new NexusRangePositionsArray(ranges.getCopy());
+		
 	}
 
 	public int get(int x) {
 		return getPos(x);
 	}
 
+	public void addRange(CodonRange range){
+		logger.info("addRange");
+		this.ranges.add(range);
+	}
+	
+	/*
 	public void set(int pos, int val) {
 		if(backend == null){
 			createNewBackend(pos + 1);
@@ -95,6 +83,10 @@ public class PositionsArray {
 		}
 	}
 
+	*/
+	
+	/*
+
 	public void reverse() {
 		if(backend != null){
 			ArrayUtils.reverse(backend);
@@ -113,7 +105,7 @@ public class PositionsArray {
 		}
 	}
 
-	public void append(PositionsArray otherPos) {
+	public void append(NexusRangePositionsArray otherPos) {
 		if(this.backend != null && otherPos.backend != null){
 			int newSize = backend.length + otherPos.backend.length;
 			int[] newPositions = new int[newSize];
@@ -126,6 +118,8 @@ public class PositionsArray {
 		}
 	
 	}
+	
+	
 
 	public void remove(int pos) {
 		logger.info("remove" + pos);
@@ -158,31 +152,40 @@ public class PositionsArray {
 		}
 		backend = ArrayUtils.add(backend, pos, 0);
 	}
+*/
 
 	private boolean isBackendAnythingBut123(){
-		boolean isAnythingBut123 = false; 
-		if(backend != null){
-			for(int n = 0; n < backend.length; n++){
-				int defaltVal = (n % 3) + 1;
-				if(backend[n] != defaltVal){
-					isAnythingBut123 = true;
-					break;
-				}
-			}
-		}
-		return isAnythingBut123;
+		return ranges.size() != 1;
 	}
 	
 	public boolean isAnythingButDefault() {
-		boolean isAnythingButDefault = false;
-		if(backend == null){
-			isAnythingButDefault = false;
-		}else{
-			isAnythingButDefault = isBackendAnythingBut123();
-		}
-		return isAnythingButDefault;
+		return ranges.size() != 1;
 	}
 
+	public void reverse() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void remove(int n) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void insert(int n) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public int nucPosFromAAPos(int pos, int readingFrame) {
+		return ranges.nucPosFromAAPos(pos, readingFrame);
+	}
+
+	public int aaPosFromNucPos(int pos, int readingFrame) {
+		return ranges.aaPosFromNucPos(pos, readingFrame);
+	}
+
+	/*
 	public void resizeBackend(int len) {
 		if(backend == null){
 			createNewBackend(len);
@@ -205,6 +208,7 @@ public class PositionsArray {
 
 		}
 	}
+	*/
 
 	
 

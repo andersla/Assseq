@@ -15,14 +15,14 @@ import aliview.AliViewWindow;
 import aliview.alignment.Alignment;
 import aliview.gui.AlignmentPane;
 
-public class AlignmentDataAndSelectionListener implements AlignmentSelectionListener, AlignmentDataListener{
+public class NotUsed_AlignmentDataAndSelectionListener implements AlignmentSelectionListener, AlignmentDataListener{
 
-	private Logger logger = Logger.getLogger(AlignmentDataAndSelectionListener.class);
+	private Logger logger = Logger.getLogger(NotUsed_AlignmentDataAndSelectionListener.class);
 	private AlignmentPane alignmentPane;
 	private AliViewWindow aliViewWindow;
 	private SequenceJList aliList;
 
-	public AlignmentDataAndSelectionListener(AlignmentPane aliPane, AliViewWindow aliWindow, SequenceJList aliList) {
+	public NotUsed_AlignmentDataAndSelectionListener(AlignmentPane aliPane, AliViewWindow aliWindow, SequenceJList aliList) {
 		this.alignmentPane = aliPane;
 		this.aliViewWindow = aliWindow;
 		this.aliList = aliList;
@@ -55,7 +55,7 @@ public class AlignmentDataAndSelectionListener implements AlignmentSelectionList
 			aliViewWindow.fileSequencesChanged();
 		}
 		
-		Rectangle grown = new Rectangle(e.getBounds().x, e.getBounds().y, e.getBounds().width + 1, e.getBounds().height + 1);
+		Rectangle grown = new Rectangle(e.getBounds().x - 3, e.getBounds().y - 1, e.getBounds().width + 6, e.getBounds().height + 2);
 		Rectangle paneBounds = alignmentPane.matrixCoordToPaneCoord(grown);
 		
 		alignmentPane.validateSize();
@@ -80,7 +80,7 @@ public class AlignmentDataAndSelectionListener implements AlignmentSelectionList
 	public void selectionChanged(AlignmentSelectionEvent e) {
 		logger.info("selectionChanged");
 		//alignmentPane.paintImmediately(0, 0, alignmentPane.getWidth(), alignmentPane.getHeight());
-		Rectangle grown = new Rectangle(e.getBounds().x, e.getBounds().y, e.getBounds().width + 1, e.getBounds().height + 1);
+		Rectangle grown = new Rectangle(e.getBounds().x - 3, e.getBounds().y - 1, e.getBounds().width + 6, e.getBounds().height + 2);
 		Rectangle paneBounds = alignmentPane.matrixCoordToPaneCoord(grown);
 
 		alignmentPane.repaint(paneBounds);

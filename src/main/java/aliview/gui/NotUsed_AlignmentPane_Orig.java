@@ -23,12 +23,12 @@ import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
 
-import aliview.AATranslator;
 import aliview.AliView;
 import aliview.AminoAcid;
 import aliview.Base;
 import aliview.NucleotideUtilities;
 import aliview.alignment.AAHistogram;
+import aliview.alignment.AATranslator;
 import aliview.alignment.AliHistogram;
 import aliview.alignment.Alignment;
 import aliview.alignment.NucleotideHistogram;
@@ -40,9 +40,10 @@ import aliview.utils.ArrayUtilities;
 
 // HAS to be JPanel - JComponent is not enough for only partial cliprect when in jscrollpane when painting
 // When JComponent only then I had to paint it all (maybe because of layoutmanager?)
-public class AlignmentPane_Orig extends JPanel{
+public class NotUsed_AlignmentPane_Orig extends JPanel{
+	/*
 	private static final long serialVersionUID = 601195400946835871L;
-	private static final Logger logger = Logger.getLogger(AlignmentPane_Orig.class);
+	private static final Logger logger = Logger.getLogger(NotUsed_AlignmentPane_Orig.class);
 	private static final double MIN_CHAR_SIZE = 0;
 	private static final int MAX_CHAR_SIZE = 100;
 	private static final double CHAR_HEIGHT_RATIO = 1.4;
@@ -80,7 +81,7 @@ public class AlignmentPane_Orig extends JPanel{
 
 
 
-	public AlignmentPane_Orig() {
+	public NotUsed_AlignmentPane_Orig() {
 		//this.setDoubleBuffered(false);
 		//this.setBackground(Color.white);
 		//this.infoLabel = infoLabel;
@@ -178,34 +179,7 @@ public class AlignmentPane_Orig extends JPanel{
 
 	private void createAdjustedDerivedBaseFont() {
 		Map<TextAttribute, Object> attributes = new HashMap<TextAttribute, Object>();
-		/*
-		if(charWidth == 17){
-			attributes.put(TextAttribute.TRACKING, 0.4117647);
-		}else if(charWidth == 16){
-			attributes.put(TextAttribute.TRACKING, 0.375);
-		}else if(charWidth == 15){
-			attributes.put(TextAttribute.TRACKING, 0.400);
-		}else if(charWidth == 14){
-			attributes.put(TextAttribute.TRACKING, 0.4 + 0.0285);
-		}else if(charWidth == 13){
-			attributes.put(TextAttribute.TRACKING, 0.384 + 0.0007);
-		}else if(charWidth == 12){
-			//attributes.put(TextAttribute.TRACKING, 0.400001 + 0.2);// + 0.008);
-			attributes.put(TextAttribute.TRACKING, 0.416 + 0.0008);// + 0.008);
-		}else if(charWidth == 11){
-			attributes.put(TextAttribute.TRACKING, 0.363);
-		}else if(charWidth == 10){
-			attributes.put(TextAttribute.TRACKING, 0.400);
-		}else if(charWidth == 9){
-			attributes.put(TextAttribute.TRACKING, 0.445);
-		}else if(charWidth == 8){
-			attributes.put(TextAttribute.TRACKING, 0.375);
-		}else if(charWidth == 7){
-			attributes.put(TextAttribute.TRACKING, 0.4285);
-		}else if(charWidth == 6){
-			attributes.put(TextAttribute.TRACKING, 0.4);
-		}
-		 */
+
 		//; // 11
 		//attributes.put(TextAttribute.TRACKING, 0.443); // 10
 		//attributes.put(TextAttribute.TRACKING, 0.375); // 9
@@ -217,7 +191,8 @@ public class AlignmentPane_Orig extends JPanel{
 		Font calcFont = baseFont.deriveFont(attributes);
 		FontMetrics metrics = getFontMetrics(calcFont);
 		int fontActualWidth = metrics.stringWidth("X");
-
+		
+		
 		double sizeDiff = charWidth - fontActualWidth;
 		// Calculate tracking for font size
 		double tracking = (double)sizeDiff/charWidth;
@@ -373,9 +348,9 @@ public class AlignmentPane_Orig extends JPanel{
 	}
 
 
-	/*
-	 *  Mainly for performance test-developing
-	 */
+	//
+	// Mainly for performance test-developing
+	//
 	private long endTime;
 	private int drawCounter = 0;
 	private int DRAWCOUNT_LOF_INTERVAL = 1;
@@ -946,47 +921,7 @@ public class AlignmentPane_Orig extends JPanel{
 		}
 	}
 
-	/*
-		int baseVal = NucleotideUtilities.baseValFromBase(base);
-
-		byte[] byteToDraw = new byte[]{base};
-
-		// Set default
-		Color baseForegroundColor = colorSchemeNucleotide.getBaseForegroundColor(baseVal);
-
-		AminoAcid acid = aaTransSeq.getNoGapAminoAcidAtNucleotidePos(x);
-		Color backgroundColor = colorSchemeNucleotide.getAminoAcidBackgroundColor(acid);
-		// Draw background color
-		drawNucleotideBackground(g2d, xPaneCoord, yPaneCoord, width, height, backgroundColor);	
-
-		if(drawAminoAcidCode){
-			if(aaTransSeq.isNoGapAminoAcidFirstPos(x)){
-				drawAminoAcidCodeSimple(g2d, x, y, acid, Color.WHITE, charCenterXOffset, charCenterYOffset);
-			}
-		}
-
-		// We have to calculate within this way - because rect.contains(Point) is always returning false on a 0-width or 0 height Rectangle
-		boolean isPointWithinSelectionRect = false;
-		if(tempSelectionRect != null){
-			if(x <= tempSelectionRect.getMaxX() && x >= tempSelectionRect.getMinX() && y <= tempSelectionRect.getMaxY() && y >= tempSelectionRect.getMinY()){
-				isPointWithinSelectionRect = true;
-			}
-		}
-
-		// adjust colors if selected and temp selection
-		if(alignment.isBaseSelected(x,y) || (tempSelectionRect != null && isPointWithinSelectionRect)){
-			backgroundColor = colorSchemeNucleotide.getAminoAcidSelectionBackgroundColor(acid);
-			//drawNucleotideBackground(g2d, xPaneCoord, yPaneCoord, width, height, backgroundColor);
-		}
-
-		// Draw char letter
-		if(! drawAminoAcidCode){
-			drawCharBuffer.append(byteToDraw, baseForegroundColor, backgroundColor);
-			drawNucleotideLetter(g2d, byteToDraw, x, y, baseForegroundColor, charCenterXOffset, charCenterYOffset);
-		}
-	 */
-
-
+	
 
 	private void drawNucleotides(Graphics2D g2d, byte residue, int x, int y, int xPaneCoord, int yPaneCoord, int width, int height,
 			int charCenterXOffset, int charCenterYOffset){
@@ -1079,11 +1014,9 @@ public class AlignmentPane_Orig extends JPanel{
 		g2d.fillRect(xPaneCoord,yPaneCoord,width,height);
 	}
 
-	/*
-	 * 
-	 * TODO it is not working with very large alignments
-	 * 
-	 */
+	// 
+	// TODO it is not working with very large alignments
+	// 
 	private void drawNucleotideBackground(Graphics2D g2d, int xPaneCoord, int yPaneCoord, int width, int height, Color baseBackgroundColor, byte b){
 		g2d.setColor(baseBackgroundColor);
 		g2d.drawRect(xPaneCoord,yPaneCoord,width,height);		
@@ -1348,9 +1281,9 @@ public class AlignmentPane_Orig extends JPanel{
 
 	private class AlignmentRuler extends JPanel{
 
-		private AlignmentPane_Orig alignmentPane;
+		private NotUsed_AlignmentPane_Orig alignmentPane;
 
-		public AlignmentRuler(AlignmentPane_Orig alignmentPane) {
+		public AlignmentRuler(NotUsed_AlignmentPane_Orig alignmentPane) {
 			this.alignmentPane = alignmentPane;
 		}
 
@@ -1558,6 +1491,8 @@ public class AlignmentPane_Orig extends JPanel{
 	//		preserveBaseSelection = false;
 	//
 	//	}
+	
+	*/
 
 }
 

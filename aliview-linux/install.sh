@@ -1,32 +1,29 @@
 #!/bin/sh
 
 # first copy sh-bin
-cp -v aliview /usr/bin/aliview
+install -m755 aliview /usr/bin/aliview
 if [ $? -ne 0 ]
 then
-    echo "!!! could not copy files, need to be sudo? e.g. sudo ./aliview.install.run"
+    echo "!!! could not install files, need to be sudo? e.g. sudo ./aliview.install.run"
     exit 1
 fi
 
-# make dir if needed
-if [ ! -d /usr/share/aliview ]; then
-  mkdir -v -m 755 /usr/share/aliview/
-fi
+# make dir (install automatically checks if needed)
+install -d -m755 /usr/share/aliview/
 
-# archive etc.
-
-cp -v aliview.jar /usr/share/aliview/
-cp -v aliicon_128x128.png /usr/share/aliview/
-cp -v README.txt /usr/share/aliview/
-cp -v install.sh /usr/share/aliview/
+install -v -m755 aliview.jar /usr/share/aliview/
+install -v -m755 aliicon_128x128.png /usr/share/aliview/
+install -v -m755 README.txt /usr/share/aliview/
+install -v -m755 install.sh /usr/share/aliview/
 
 # and program launcher
 if [ -d ~/.local/share/applications ]; then
-  cp -v AliView.desktop ~/.local/share/applications/
+  install -v -m755 AliView.desktop ~/.local/share/applications/
 else 
   if [ -d /usr/share/applications ]; then
-    cp -v AliView.desktop /usr/share/applications/
+    install -v -m755 AliView.desktop /usr/share/applications/
   fi
 fi
+
 
 
