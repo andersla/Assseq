@@ -1,4 +1,4 @@
-package aliview.gui;
+package aliview.pane;
 
 public class InvalidAlignmentPositionException extends Exception{
 	/**

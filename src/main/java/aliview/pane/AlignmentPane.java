@@ -1,4 +1,4 @@
-package aliview.gui;
+package aliview.pane;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -17,16 +17,12 @@ import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
-import java.io.File;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
-import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
@@ -38,20 +34,12 @@ import aliview.AminoAcid;
 import aliview.Base;
 import aliview.NucleotideUtilities;
 import aliview.alignment.AAHistogram;
-import aliview.alignment.AATranslator;
 import aliview.alignment.AliHistogram;
 import aliview.alignment.Alignment;
 import aliview.alignment.NucleotideHistogram;
 import aliview.color.ColorScheme;
 import aliview.color.ColorUtils;
 import aliview.messenges.Messenger;
-import aliview.pane.AACharPixelsContainer;
-import aliview.pane.CharPixels;
-import aliview.pane.CharPixelsContainer;
-import aliview.pane.CompoundCharPixelsContainer;
-import aliview.pane.ImageUtils;
-import aliview.pane.RGBArray;
-import aliview.pane.TranslationCharPixelsContainer;
 import aliview.sequences.AminoAcidAndPosition;
 import aliview.sequences.Sequence;
 import aliview.settings.Settings;
@@ -73,52 +61,52 @@ public class AlignmentPane extends JPanel{
 	private Font baseFont = new Font(Font.MONOSPACED, Font.PLAIN, (int)charWidth);
 	private Font highDPIFont = new Font(Font.MONOSPACED, Font.PLAIN, (int)charWidth);
 	private int highDPIScaleFactor = 1;
-	
+
 	private Alignment alignment;
 
 	private ColorScheme colorSchemeAminoAcid = Settings.getColorSchemeAminoAcid();
 	private ColorScheme colorSchemeNucleotide = Settings.getColorSchemeNucleotide();
-//	private Rectangle tempSelectionRect;
+	//	private Rectangle tempSelectionRect;
 
 	// TODO This should instead be tracing a sequence instead of a position?
-	private int differenceTraceSequencePosition = 0;
+	int differenceTraceSequencePosition = 0;
 	private boolean showTranslation = false;
 	private boolean showTranslationAndNuc = false;
-//	private boolean showTranslationOnePos = false;
+	//	private boolean showTranslationOnePos = false;
 	private AlignmentRuler alignmentRuler;
 	private boolean drawAminoAcidCode; 
 	private boolean drawCodonPosRuler;
 	private Rectangle lastClip = new Rectangle();
 	private boolean rulerIsDirty;
-	private boolean highlightDiffTrace = false;
-	private boolean highlightNonCons;
-	private boolean highlightCons;
+	boolean highlightDiffTrace = false;
+	boolean highlightNonCons;
+	boolean highlightCons;
 	private boolean ignoreGapInTranslation;
 	private byte byteToDraw;
-	private CharPixelsContainer charPixDefaultNuc;
-	private CharPixelsContainer charPixSelectedNuc;
-	private CharPixelsContainer charPixConsensusNuc;
-	private AACharPixelsContainer charPixDefaultAA;
-	private AACharPixelsContainer charPixSelectedAA;
-	private AACharPixelsContainer charPixConsensusAA;
-	private TranslationCharPixelsContainer charPixTranslationDefault;
-	private TranslationCharPixelsContainer charPixTranslationSelected;
-	private TranslationCharPixelsContainer charPixTranslationLetter;
-	private TranslationCharPixelsContainer charPixTranslationSelectedLetter;
-	private boolean forceRepaintAll;
 	private long endTime; // performance measure
 	private int drawCounter = 0; // performance measure
 	private int DRAWCOUNT_LOF_INTERVAL = 1; // performance measure
 	private int fontCase = Settings.getFontCase().getIntValue();
-	private TranslationCharPixelsContainer charPixTranslationAndNucDefault;
-	private TranslationCharPixelsContainer charPixTranslationAndNucSelected;
-	private TranslationCharPixelsContainer charPixTranslationAndNucDefaultNoAALetter;
-	private TranslationCharPixelsContainer charPixTranslationAndNucSelectedNoAALetter;
-	private TranslationCharPixelsContainer charPixTranslationAndNucDominantNuc;
-	private TranslationCharPixelsContainer charPixTranslationAndNucDominantNucNoAALetter;
-	private TranslationCharPixelsContainer charPixTranslationAndNucDominantNucSelected;
-	private TranslationCharPixelsContainer charPixTranslationAndNucDominantNucNoAALetterSelected;
-	
+
+	CharPixelsContainer charPixDefaultNuc;
+	CharPixelsContainer charPixSelectedNuc;
+	CharPixelsContainer charPixConsensusNuc;
+	AACharPixelsContainer charPixDefaultAA;
+	AACharPixelsContainer charPixSelectedAA;
+	AACharPixelsContainer charPixConsensusAA;
+	TranslationCharPixelsContainer charPixTranslationDefault;
+	TranslationCharPixelsContainer charPixTranslationSelected;
+	TranslationCharPixelsContainer charPixTranslationLetter;
+	TranslationCharPixelsContainer charPixTranslationSelectedLetter;
+	TranslationCharPixelsContainer charPixTranslationAndNucDefault;
+	TranslationCharPixelsContainer charPixTranslationAndNucSelected;
+	TranslationCharPixelsContainer charPixTranslationAndNucDefaultNoAALetter;
+	TranslationCharPixelsContainer charPixTranslationAndNucSelectedNoAALetter;
+	TranslationCharPixelsContainer charPixTranslationAndNucDominantNuc;
+	TranslationCharPixelsContainer charPixTranslationAndNucDominantNucNoAALetter;
+	TranslationCharPixelsContainer charPixTranslationAndNucDominantNucSelected;
+	TranslationCharPixelsContainer charPixTranslationAndNucDominantNucNoAALetterSelected;
+
 
 
 	public AlignmentPane() {
@@ -126,17 +114,17 @@ public class AlignmentPane extends JPanel{
 		createAdjustedDerivedBaseFont();
 		createAdjustedDerivedHighDPIFont();
 		createCharPixelsContainers();
-	//	highDPIScaleFactor = 1;
+		//	highDPIScaleFactor = 1;
 		logger.info("highDPIScaleFactor" + highDPIScaleFactor);
 		this.setOpaque(true);
 		//this.setDoubleBuffered(false);
 		//this.setBackground(Color.white);
 		//this.infoLabel = infoLabel;
 		alignmentRuler = new AlignmentRuler(this);
-		
-		
+
+
 	}
-	
+
 	public long getEndTime(){
 		return endTime;
 	}
@@ -176,7 +164,7 @@ public class AlignmentPane extends JPanel{
 	public boolean decCharSize(){
 
 		// stop when everything is in view (or char is 1 for smaller alignments)
-//		Dimension prefSize = getPreferredSize();	
+		//		Dimension prefSize = getPreferredSize();	
 
 		// go on decreasing while everything is not in view or while font size >=1
 		boolean didDecrease = false;
@@ -199,7 +187,7 @@ public class AlignmentPane extends JPanel{
 				preferredWidth = 0.85 * charWidth;
 				preferredHeight = preferredWidth;
 			}
-			
+
 			if(preferredWidth >= MIN_CHAR_SIZE){
 				charWidth = preferredWidth;
 				charHeight = preferredHeight;
@@ -261,17 +249,20 @@ public class AlignmentPane extends JPanel{
 		// no less than 1
 		int charPixHeight = Math.max(1, (int)(getCharHeight()));
 		charPixHeight = charPixHeight * highDPIScaleFactor;
-		
+
 		int charMaxSizeToDraw = (int)MAX_CHARSIZE_TO_DRAW * highDPIScaleFactor;
-		
+
 		logger.info("charFont" + charFont.getSize());
 		logger.info("charPixWidth" + charPixWidth);
-		
-		
+
+
+		// Nucleotides
 
 		charPixDefaultNuc = CharPixelsContainer.createDefaultNucleotideContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
 		charPixSelectedNuc = CharPixelsContainer.createSelectedNucleotideContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
 		charPixConsensusNuc = CharPixelsContainer.createConsensusNucleotideContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
+
+		// Translated
 
 		charPixTranslationDefault = TranslationCharPixelsContainer.createDefaultTranslationPixelsContainer(charFont, charMaxSizeToDraw,
 				charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
@@ -284,36 +275,38 @@ public class AlignmentPane extends JPanel{
 
 		charPixTranslationSelectedLetter = TranslationCharPixelsContainer.createSelectedLetterTranslationPixelsContainer(charFont, charMaxSizeToDraw,
 				charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
-		
-		
-		
-		
-		
+
+
+
+		// Translated and nuc at same time
+
 		charPixTranslationAndNucDefault = TranslationCharPixelsContainer.createDefaultTranslationAndNucPixelsContainer(charFont, charMaxSizeToDraw,
 				charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
-		
+
 		charPixTranslationAndNucDefaultNoAALetter = TranslationCharPixelsContainer.createDefaultTranslationAndNucPixelsContainerNoAALetter(charFont, charMaxSizeToDraw,
 				charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
 
 		charPixTranslationAndNucSelected = TranslationCharPixelsContainer.createSelectedTranslationAndNucPixelsContainer(charFont, charMaxSizeToDraw,
 				charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
-		
+
 		charPixTranslationAndNucSelectedNoAALetter = TranslationCharPixelsContainer.createSelectedTranslationAndNucPixelsContainerNoAALetter(charFont, charMaxSizeToDraw,
 				charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
 
 		charPixTranslationAndNucDominantNuc = TranslationCharPixelsContainer.createDominantNucTranslationAndNucPixelsContainer(charFont, charMaxSizeToDraw,
 				charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
-		
+
 		charPixTranslationAndNucDominantNucNoAALetter = TranslationCharPixelsContainer.createDominantNucTranslationAndNucPixelsContainerNoAALetter(charFont, charMaxSizeToDraw,
 				charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
 
 		charPixTranslationAndNucDominantNucSelected = TranslationCharPixelsContainer.createSelectedDominantNucTranslationAndNucPixelsContainer(charFont, charMaxSizeToDraw,
 				charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
-		
+
 		charPixTranslationAndNucDominantNucNoAALetterSelected = TranslationCharPixelsContainer.createSelectedDominantNucTranslationAndNucPixelsContainerNoAALetter(charFont, charMaxSizeToDraw,
 				charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
-		
-		
+
+
+		// AminoAcid
+
 		charPixDefaultAA =  new AACharPixelsContainer();
 		if(colorSchemeAminoAcid.getALLCompundColors() != null){
 			CompoundCharPixelsContainer compContainer = CompoundCharPixelsContainer.createDefaultCompoundColorContainer(charFont, charMaxSizeToDraw,
@@ -363,37 +356,6 @@ public class AlignmentPane extends JPanel{
 	private void createAdjustedDerivedBaseFont() {
 		Map<TextAttribute, Object> attributes = new HashMap<TextAttribute, Object>();
 
-		/*
-		if(charWidth == 17){
-			attributes.put(TextAttribute.TRACKING, 0.4117647);
-		}else if(charWidth == 16){
-			attributes.put(TextAttribute.TRACKING, 0.375);
-		}else if(charWidth == 15){
-			attributes.put(TextAttribute.TRACKING, 0.400);
-		}else if(charWidth == 14){
-			attributes.put(TextAttribute.TRACKING, 0.4 + 0.0285);
-		}else if(charWidth == 13){
-			attributes.put(TextAttribute.TRACKING, 0.384 + 0.0007);
-		}else if(charWidth == 12){
-			//attributes.put(TextAttribute.TRACKING, 0.400001 + 0.2);// + 0.008);
-			attributes.put(TextAttribute.TRACKING, 0.416 + 0.0008);// + 0.008);
-		}else if(charWidth == 11){
-			attributes.put(TextAttribute.TRACKING, 0.363);
-		}else if(charWidth == 10){
-			attributes.put(TextAttribute.TRACKING, 0.400);
-		}else if(charWidth == 9){
-			attributes.put(TextAttribute.TRACKING, 0.445);
-		}else if(charWidth == 8){
-			attributes.put(TextAttribute.TRACKING, 0.375);
-		}else if(charWidth == 7){
-			attributes.put(TextAttribute.TRACKING, 0.4285);
-		}else if(charWidth == 6){
-			attributes.put(TextAttribute.TRACKING, 0.4);
-		}
-		 */
-		
-		
-
 		// create a font without Tracking to see the diff in font actual size and specified font size
 		attributes.put(TextAttribute.TRACKING, 0);
 		attributes.put(TextAttribute.SIZE, (int)charWidth);
@@ -414,40 +376,9 @@ public class AlignmentPane extends JPanel{
 		baseFont = spacedFont;
 
 	}
-	
+
 	private void createAdjustedDerivedHighDPIFont() {
 		Map<TextAttribute, Object> attributes = new HashMap<TextAttribute, Object>();
-
-		/*
-		if(charWidth == 17){
-			attributes.put(TextAttribute.TRACKING, 0.4117647);
-		}else if(charWidth == 16){
-			attributes.put(TextAttribute.TRACKING, 0.375);
-		}else if(charWidth == 15){
-			attributes.put(TextAttribute.TRACKING, 0.400);
-		}else if(charWidth == 14){
-			attributes.put(TextAttribute.TRACKING, 0.4 + 0.0285);
-		}else if(charWidth == 13){
-			attributes.put(TextAttribute.TRACKING, 0.384 + 0.0007);
-		}else if(charWidth == 12){
-			//attributes.put(TextAttribute.TRACKING, 0.400001 + 0.2);// + 0.008);
-			attributes.put(TextAttribute.TRACKING, 0.416 + 0.0008);// + 0.008);
-		}else if(charWidth == 11){
-			attributes.put(TextAttribute.TRACKING, 0.363);
-		}else if(charWidth == 10){
-			attributes.put(TextAttribute.TRACKING, 0.400);
-		}else if(charWidth == 9){
-			attributes.put(TextAttribute.TRACKING, 0.445);
-		}else if(charWidth == 8){
-			attributes.put(TextAttribute.TRACKING, 0.375);
-		}else if(charWidth == 7){
-			attributes.put(TextAttribute.TRACKING, 0.4285);
-		}else if(charWidth == 6){
-			attributes.put(TextAttribute.TRACKING, 0.4);
-		}
-		 */
-		
-		
 
 		// create a font without Tracking to see the diff in font actual size and specified font size
 		attributes.put(TextAttribute.TRACKING, 0);
@@ -532,9 +463,9 @@ public class AlignmentPane extends JPanel{
 			ungapedPos = base.getUngapedPosition();
 		}
 		else{
-			
+
 		}
-		
+
 		return ungapedPos;
 	}
 
@@ -633,34 +564,22 @@ public class AlignmentPane extends JPanel{
 
 		// What part of alignment matrix is in view (what part of matrix is in graphical view)
 		Rectangle clip = g2d.getClipBounds();
-		
-		if(forceRepaintAll){
-			Rectangle allVisible = this.getVisibleRect();
-			clip = allVisible;
-			setForceRepaintAll(false);
-			logger.info("Premature exit");
-			return;
-		}else{
-		//	logger.info("Premature exit");
-		//	return;
-		}
-		
-//		 logger.info(clip);
 
+		
 		Rectangle matrixClip = paneCoordToMatrixCoord(clip);
 
-//		 logger.info(matrixClip);
+		//		 logger.info(matrixClip);
 
 		int xMin = matrixClip.x - 1;
 		int yMin = matrixClip.y - 1;
 		int xMax = (int) matrixClip.getMaxX() + 1;
 		int yMax = (int) matrixClip.getMaxY() + 1;
-//
-//				logger.info("yMin" + yMin);
-//				logger.info("yMin" + yMax);
-//				logger.info("xMin" + xMin);
-//				logger.info("xMax" + xMax);
-//
+		//
+		//				logger.info("yMin" + yMin);
+		//				logger.info("yMin" + yMax);
+		//				logger.info("xMin" + xMin);
+		//				logger.info("xMax" + xMax);
+		//
 		// add one extra position when drawing translated
 		// otherwise there could be some white borders when scrolling
 		if(showTranslation){
@@ -678,43 +597,44 @@ public class AlignmentPane extends JPanel{
 		xMax = Math.min(alignment.getMaxX(), xMax);
 		yMax = Math.min(alignment.getMaxY(), yMax);
 
-//				logger.info("yMin" + yMin);
-//				logger.info("yMax" + yMax);
-//				logger.info("xMin" + xMin);
-//				logger.info("xMax" + xMax);
+		//				logger.info("yMin" + yMin);
+		//				logger.info("yMax" + yMax);
+		//				logger.info("xMin" + xMin);
+		//				logger.info("xMax" + xMax);
 
 		// Extra because pixelCopyDraw
 		int height = (yMax - yMin) * (int)charHeight;
 		int width = (xMax - xMin) * (int)charWidth;
-//
-//				logger.info("width" + width);
-//				logger.info("height" + height);
-//
+		//
+		//				logger.info("width" + width);
+		//				logger.info("height" + height);
+		//
 		// Small chars
 		if(charWidth < 1){
 			height = clip.height;
 			width = clip.width;
 		}
-//
-//				logger.info("yMax" + yMax);
-//				logger.info("yMin" + yMin);
-//				logger.info("width" + width);
-//				logger.info("clipHeight" + clip.height);
-//				logger.info("width" + width);
-//				logger.info("height" + height);
+		//
+		//				logger.info("yMax" + yMax);
+		//				logger.info("yMin" + yMin);
+		//				logger.info("width" + width);
+		//				logger.info("clipHeight" + clip.height);
+		//				logger.info("width" + width);
+		//				logger.info("height" + height);
 
-		
+
 		// TODO adjust for retina
-		
+
 		int[] pixArray = new int[width* highDPIScaleFactor * height * highDPIScaleFactor];
-	//	logger.info(pixArray.length);
+		//	logger.info(pixArray.length);
 		RGBArray clipRGB = new RGBArray(pixArray, width*highDPIScaleFactor, height*highDPIScaleFactor);
 
-	 
-		
-		
+
+
+
 		// HERE FILL RGB-ARRAY DRAW...
-		fillRGBArray(xMin, xMax, yMin, yMax, clipRGB, clip, g2d);
+		//		fillRGBArrayAndPaint(xMin, xMax, yMin, yMax, clipRGB, clip, g2d);
+		fillRGBArrayAndPaintMultithreaded(xMin, xMax, yMin, yMax, clipRGB, clip, g2d);
 		
 		
 
@@ -732,244 +652,103 @@ public class AlignmentPane extends JPanel{
 
 	}
 
-
-	public void setForceRepaintAll(boolean b) {
-		forceRepaintAll = b;
-	}
-	
-	
-	private void fillRGBArray(int xMin, int xMax, int yMin, int yMax, RGBArray clipRGB, Rectangle clip, Graphics2D g2d){
+	private void fillRGBArrayAndPaintMultithreaded(int xMin, int xMax, int yMin, int yMax, RGBArray clipRGB, Rectangle clip, Graphics2D g2d){
 		// these vals are not going to change so get it only once
 		boolean isNucleotideAlignment = alignment.isNucleotideAlignment();
 		double seqPerPixX = 1/(double)charWidth;
 		double seqPerPixY = 1/(double)charWidth;
-		int ySeqMax = alignment.getMaxY();
 
+		logger.info("Runtime.getRuntime().availableProcessors()" + Runtime.getRuntime().availableProcessors());
+		int nThreads = 1;
 		
-		// test time to get all bases
-		boolean testloop = false;
-		if(testloop && charWidth >= 1){
-			long sTimeMS = System.currentTimeMillis();
-			long sTimeNS = System.nanoTime();
-			
-			int testWidth = (xMax - xMin) * (int)charWidth;
-			int testHeight = (yMax - yMin) * (int)charHeight;
-			int[] testpixArray = new int[testWidth * testHeight];
-			RGBArray testclipRGB = new RGBArray(testpixArray, testWidth, testHeight);
-			
-			int count = 0;
-			int clipY = 0;
-			for(int y = yMin; y < yMax; y = y + 1){
+		// Only one thread if filesequences - more threads make reading file slower
+		if(alignment.isFileSequences()){
+			nThreads = 1;
+		}else{
+			if(Runtime.getRuntime().availableProcessors() > 2){
+				nThreads = 2;
+			}
+			if(Runtime.getRuntime().availableProcessors() > 4){
+				nThreads = 3;
+			}
+		}
+		
+		
 
-				// X Loop Start
-				int clipX = 0;
-				for(int x = xMin; x < xMax ; x++){
-					byte residue = alignment.getBaseAt(x,y);
-					// Draw as nucleotides
+
+		// small chars have their own loop here
+		if(charWidth < 1){
+			ExecutorService executor = Executors.newFixedThreadPool(nThreads);
+
+			// No longer: Always start at closest even 10
+			//			double startY = clip.y;
+			//			startY = Math.floor(startY/100) * 100;
+
+			int clipYPos = 0;
+			for(int y = clip.y; y < clip.getMaxY(); y ++){
+
+				int ySeq = (int)((double)(y) * seqPerPixY);
+
+				if(ySeq <= yMax && ySeq >= 0){
+
+					double xMinimum = clip.x;
+					double xMaximum = clip.getMaxX();
+					double xSeqMin =  (int)((double)xMinimum * seqPerPixX);
+					double xSeqMax =  (int)((double)xMaximum * seqPerPixX);
+					int seqYPos = ySeq;
+					Sequence seq = alignment.getSequences().get(seqYPos);
+					double step = seqPerPixX;
+					int xPosStart = (int) xSeqMin;
+					int xPosEnd = (int) xSeqMax;
+
 					if(isNucleotideAlignment){
-						// Draw as translated
-						if(showTranslation){
-							if(ignoreGapInTranslation){
-								//copyTranslatedNucleotidesPixelsSkipGap(clipRGB,residue,x,y,(int)(clipX*charWidth), (int)(clipY*charHeight), aaTransSeq);
+						if(isShowTranslationOnePos()){							
+							SequencePainter seqPainter = new SequencePainterAminoAcid(seq, seqYPos, clipYPos, xPosStart, xPosEnd, step, 1, 1, highDPIScaleFactor, clipRGB, this, alignment);	
+							executor.execute(seqPainter);
+
+						}else if(showTranslation && !isShowTranslationOnePos() && ignoreGapInTranslation){
+							SequencePainter seqPainter = new SequencePainterAminoAcidTranslatedIgnoreGap(seq, seqYPos, clipYPos, xPosStart, xPosEnd, step, 1, 1, highDPIScaleFactor, clipRGB, this, alignment);	
+							executor.execute(seqPainter);
+
+						}else if(showTranslation){
+							if(showTranslationAndNuc){
+								SequencePainter seqPainter = new SequencePainterNucleotideTranslatedShowNucAndAcid(seq, seqYPos, clipYPos, xPosStart, xPosEnd, step, 1, 1, highDPIScaleFactor, clipRGB, this, alignment);	
+								executor.execute(seqPainter);
+
+							}else{
+								SequencePainter seqPainter = new SequencePainterAminoAcidTranslated(seq, seqYPos, clipYPos, xPosStart, xPosEnd, step, 1, 1, highDPIScaleFactor, clipRGB, this, alignment);	
+								executor.execute(seqPainter);
 							}
-							else{
-								//copyTranslatedNucleotidesPixels(clipRGB,residue,x,y,(int)(clipX*charWidth), (int)(clipY*charHeight), aaTransSeq);
-							}
+
 						}else{
-							//logger.info("testPixArr" + testpixArray.length);
-						copyNucleotidePixelsTimeTest(testclipRGB,residue,x,y,(int)(clipX*charWidth*highDPIScaleFactor), (int)(clipY*charHeight*highDPIScaleFactor));					
+							SequencePainter seqPainter = new SequencePainterNucleotide(seq, seqYPos, clipYPos, xPosStart, xPosEnd, step, 1, 1, highDPIScaleFactor, clipRGB, this, alignment);	
+							executor.execute(seqPainter);
 						}
 					}
 					// Draw as AminoAcids
 					else{
-						//copyAminoAcidPixels(clipRGB,residue,x,y,(int)(clipX*charWidth), (int)(clipY*charHeight));	
+						SequencePainter seqPainter = new SequencePainterAminoAcid(seq, seqYPos, clipYPos, xPosStart, xPosEnd, step, 1, 1, highDPIScaleFactor, clipRGB, this, alignment);	
+						executor.execute(seqPainter);
 					}
-					clipX ++;
-					count ++;
-				}		
-				clipY ++;
-			}
-			long eTimeMS = System.currentTimeMillis();
-			long eTimeNS = System.nanoTime();
-			logger.info("Testloop took " + (eTimeMS - sTimeMS) + " milliseconds, count " + count);
-			logger.info("Testloop took " + (eTimeNS - sTimeNS) + " nanoseconds, count " + count);
-		}
-		
-		
-		// small chars have their own loop here
-		if(charWidth < 1){
 
-			if(showTranslation && ! isShowTranslationOnePos()){
 
-				// this only need to be calculated once
-				double maxX = clip.getMaxX();
-//				if(maxX > alignment.getAlignentMeta().getCodonPositions().getLengthOfTranslatedPos()){
-//					maxX = alignment.getAlignentMeta().getCodonPositions().getLengthOfTranslatedPos();
-//				}
-				
-				int clipY = 0;
-				for(int y = clip.y; y < clip.getMaxY(); y ++){		
-					
-					int ySeq = (int)((double)(y) * seqPerPixY);
-			
-					if(ySeq < ySeqMax && ySeq >= 0){	
-
-							// X Loop Start
-							int seqMaxX = alignment.getLengthAt(ySeq);
-							int clipX = 0;
-							for(int x = clip.x; x < clip.getMaxX(); x++){
-								int xSeqPos =(int)((double)x * seqPerPixX);
-								
-								if(xSeqPos < seqMaxX && xSeqPos >= 0){
-
-									byte residue = alignment.getBaseAt(xSeqPos,ySeq);
-									
-									if(ignoreGapInTranslation){
-										AminoAcidAndPosition aaAndPos = alignment.getSequences().get(y).getNoGapAminoAcidAtNucleotidePos(xSeqPos);
-										copyTranslatedNucleotidesPixelsSkipGap(clipRGB,residue,aaAndPos.acid,xSeqPos,ySeq,clipX*highDPIScaleFactor, clipY*highDPIScaleFactor, aaAndPos.position);
-									}
-									else{
-										AminoAcid aminoAcid = alignment.getTranslatedAminoAcidAtNucleotidePos(xSeqPos,ySeq);
-										copyTranslatedNucleotidesPixels(clipRGB,residue, aminoAcid,xSeqPos,ySeq,clipX*highDPIScaleFactor, clipY*highDPIScaleFactor, alignment.getSequences().get(y));
-									}
-								}
-
-								clipX ++;
-							}
-						
-					}
-					clipY ++;
+				}
+				else{
+					logger.info("outside");
 				}
 
-			
-			}else{
-
-				// No longer: Always start at closest even 10
-				//			double startY = clip.y;
-				//			startY = Math.floor(startY/100) * 100;
-				int clipY = 0;
-				for(int y = clip.y; y < clip.getMaxY(); y ++){
-
-					int ySeq = (int)((double)(y) * seqPerPixY);
-					
-					if(ySeq < ySeqMax && ySeq >= 0){
-
-						int seqMaxX = alignment.getLengthAt(ySeq);
-
-						// X Loop Start
-						int clipX = 0;
-						for(int x = clip.x; x < clip.getMaxX(); x++){
-
-							int xSeqPos =(int)((double)x * seqPerPixX);
-							
-							if(xSeqPos < seqMaxX && xSeqPos >= 0){
-	
-								boolean valid = alignment.isPositionValid(xSeqPos, ySeq);
-								if(! valid){
-									logger.info("invalidx="+xSeqPos + "y=" + ySeq);
-								}
-								byte residue = alignment.getBaseAt(xSeqPos,ySeq);
-
-								// Draw as Nucleotides
-								if(isNucleotideAlignment){
-									if(isShowTranslationOnePos()){
-										copyAminoAcidPixels(clipRGB,residue,xSeqPos,ySeq,clipX*highDPIScaleFactor,clipY*highDPIScaleFactor);
-									}
-									else{
-										copyNucleotidePixels(clipRGB,residue,xSeqPos,ySeq,clipX*highDPIScaleFactor,clipY*highDPIScaleFactor);
-									}			
-								}
-								// Draw as AA
-								else{
-									copyAminoAcidPixels(clipRGB,residue,xSeqPos,ySeq,clipX*highDPIScaleFactor,clipY*highDPIScaleFactor);
-								}
-							}
-							
-							clipX ++;
-						}		
-						
-					}
-					clipY ++;
-				}
-			}
-			
-
-			// Now draw the pixels onto the image
-			Image img = createImage(new MemoryImageSource(clipRGB.getScanWidth(), clipRGB.getHeight(), clipRGB.getBackend(), 0, clipRGB.getScanWidth()));
-//
-//									logger.info(clipRGB.getBackend().length);
-//									logger.info("img.getWidth" + img.getWidth(null));
-//									logger.info("img.getHeight" + img.getHeight(null));
-//			
-//									
-//									logger.info("xMin" + xMin);
-//									logger.info("clip.x" + clip.x);
-//									logger.info("clip.y" + clip.y);
-//									logger.info("clip.width" + clip.width);
-//									logger.info("clip.height" + clip.height);
-//
-			
-			// First fill background
-			//long fillStartTime = System.currentTimeMillis();
-			g2d.setColor(this.getBackground());
-			g2d.fill(clip);
-			//long fillTime = System.currentTimeMillis() - fillStartTime;
-			//logger.info("fillTime" + fillTime);
-			
-			if (img != null){
-//											logger.info(img.getHeight(null));
-//											logger.info(img.getWidth(null));
-//											logger.info("clip.y=" + clip.y);
-//											logger.info("x=" + (int)(xMin * charWidth));
-//											logger.info("y=" + (int)(yMin * charHeight));
-				
-				// Mac retina screen
-				if(highDPIScaleFactor > 1){
-					
-					//translate and scale with AffineTransform
-//	                AffineTransform affineTransform = new AffineTransform();
-//	                affineTransform.translate((int)(xMin * charWidth),(int)(yMin * charHeight));
-//	                affineTransform.scale(0.5, 0.5);
-//	                Graphics2D g2 = (Graphics2D) g;
-//	                g2.drawImage(img, affineTransform, null);			
-					
-	                
-	                int dx1 = clip.x;
-	                int dx2 = dx1 + clipRGB.getScanWidth() / highDPIScaleFactor;
-	                int dy1 = clip.y;
-	                int dy2 = dy1 + clipRGB.getHeight() / highDPIScaleFactor;
-	                
-	                int sx1 = 0;
-	                int sx2 = sx1 + clipRGB.getScanWidth();
-	                int sy1 = 0;
-	                int sy2 = sy1 + clipRGB.getHeight();
-	                
-	              //  g.drawImage(img, clip.x, clip.y, null);
-	                
-	                g2d.drawImage(img, dx1,dy1,dx2,dy2,sx1,sy1,sx2,sy2, null);
-	                //g.drawImage(img, (int)(xMin * charWidth), (int)(yMin * charHeight), null);
-	             
-	            // normal
-				}else{
-					g2d.drawImage(img, clip.x, clip.y, null);
-					//g.drawImage(img, (int)(xMin * charWidth), (int)(yMin * charHeight),null);
-				}		
+				clipYPos ++;
 			}
 
-			// Draw excludes - only if not isShowTranslationOnePos
-			if(! isShowTranslationOnePos()){
-				// calculaate height for excludes (this is to avoid drawing below alignment if alignment is not filling panel)
-				int drawExcludesHeight = (int) Math.min(this.getVisibleRect().getHeight(), alignment.getSize()  * charHeight);
-				//for(int x = xMin; x < xMax ; x++){
-				for(int x = clip.x; x < clip.getMaxX() ; x++){
-					int xPos =(int)((double)x * (1/(double)charWidth));
-					if(alignment.isExcluded(xPos) == true){
-						g2d.setColor(ColorScheme.GREY_TRANSPARENT);
-						g2d.fillRect(x, this.getVisibleRect().y, 1, drawExcludesHeight);
-						//				logger.info("drawExclude");
-					}
-				}	
+
+			executor.shutdown();
+			try {
+				executor.awaitTermination(1000, TimeUnit.MILLISECONDS);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
+
 		}	
 
 
@@ -979,194 +758,125 @@ public class AlignmentPane extends JPanel{
 		//
 		/////////////////////////
 		else{
-//			if(showTranslationOnePos){			
-//
-//				int maxX = xMax;
-//				if(maxX > alignment.getAlignentMeta().getCodonPositions().getLengthOfTranslatedPos()){
-//					maxX = alignment.getAlignentMeta().getCodonPositions().getLengthOfTranslatedPos();
-//				}
-//
-//				int clipY = 0;
-//				for(int y = yMin; y < yMax; y = y + 1){
-//
-//					aaTransSeq.setSequence(alignment.getSequences().get(y));
-//
-//					// X Loop Start
-//					int clipX = 0;
-//					for(int x = xMin; x < maxX ; x++){
-//
-//						AminoAcid acid;
-//						if(ignoreGapInTranslation){
-//							acid = aaTransSeq.getAAinNoGapTranslatedPos(x);
-//						}else{
-//							acid = aaTransSeq.getAAinTranslatedPos(x);
-//						}
-//						copyAminoAcidPixels(clipRGB,(byte)acid.getCodeCharVal(),x,y,(int)(clipX*charWidth*highDPIScaleFactor), (int)(clipY*charHeight*highDPIScaleFactor));
-//
-//						clipX ++;
-//					}		
-//					clipY ++;
-//				}// y loop end		
-//			}else{
-				// Most normal one
 
-				int clipY = 0;			
-				for(int y = yMin; y < yMax; y = y + 1){
 
-					// X Loop Start
-					int clipX = 0;
-					for(int x = xMin; x < xMax ; x++){
+			ExecutorService executor = Executors.newFixedThreadPool(nThreads);
 
-						byte residue = alignment.getBaseAt(x,y);
-						// Draw as nucleotides
-						if(isNucleotideAlignment){
-							// Draw as translated
-							if(isShowTranslationOnePos()){
-								
-								copyAminoAcidPixels(clipRGB,residue,x,y,(int)(clipX*charWidth*highDPIScaleFactor), (int)(clipY*charHeight*highDPIScaleFactor));			
-								
-							}else if(showTranslation && !isShowTranslationOnePos()){
-								
-								if(ignoreGapInTranslation){
-									AminoAcidAndPosition aaAndPos = alignment.getSequences().get(y).getNoGapAminoAcidAtNucleotidePos(x);
-									copyTranslatedNucleotidesPixelsSkipGap(clipRGB,residue,aaAndPos.acid,x,y,(int)(clipX*charWidth*highDPIScaleFactor), (int)(clipY*charHeight*highDPIScaleFactor), aaAndPos.position);
-								}
-								else{
-									AminoAcid aminoAcid = alignment.getTranslatedAminoAcidAtNucleotidePos(x,y);
-									if(showTranslationAndNuc){
-										copyTranslatedNucleotidesPixelsShowTranslationAndNuc(clipRGB,residue,aminoAcid,x,y,(int)(clipX*charWidth*highDPIScaleFactor), (int)(clipY*charHeight*highDPIScaleFactor), alignment.getSequences().get(y));
-									}else{
-										copyTranslatedNucleotidesPixels(clipRGB,residue,aminoAcid,x,y,(int)(clipX*charWidth*highDPIScaleFactor), (int)(clipY*charHeight*highDPIScaleFactor), alignment.getSequences().get(y));
-									}	
-								}
-								
-							}else{
-								copyNucleotidePixels(clipRGB,residue,x,y,(int)(clipX*charWidth*highDPIScaleFactor), (int)(clipY*charHeight*highDPIScaleFactor));					
-							}
+			int clipYPos = 0;			
+			for(int y = yMin; y < yMax; y = y + 1){
+
+				int seqYPos = y;
+				Sequence seq = alignment.getSequences().get(seqYPos);
+				int step = 1;
+				int xPosStart = xMin;
+				int xPosEnd = xMax;
+
+
+				if(isNucleotideAlignment){
+					if(isShowTranslationOnePos()){							
+						SequencePainter seqPainter = new SequencePainterAminoAcid(seq, seqYPos, clipYPos, xPosStart, xPosEnd, step, charWidth, charHeight, highDPIScaleFactor, clipRGB, this, alignment);	
+						executor.execute(seqPainter);
+
+					}else if(showTranslation && !isShowTranslationOnePos() && ignoreGapInTranslation){
+						SequencePainter seqPainter = new SequencePainterAminoAcidTranslatedIgnoreGap(seq, seqYPos, clipYPos, xPosStart, xPosEnd, step, charWidth, charHeight, highDPIScaleFactor, clipRGB, this, alignment);	
+						executor.execute(seqPainter);
+
+					}else if(showTranslation){
+						if(showTranslationAndNuc){
+							SequencePainter seqPainter = new SequencePainterNucleotideTranslatedShowNucAndAcid(seq, seqYPos, clipYPos, xPosStart, xPosEnd, step, charWidth, charHeight, highDPIScaleFactor, clipRGB, this, alignment);	
+							executor.execute(seqPainter);
+
+						}else{
+							SequencePainter seqPainter = new SequencePainterAminoAcidTranslated(seq, seqYPos, clipYPos, xPosStart, xPosEnd, step, charWidth, charHeight, highDPIScaleFactor, clipRGB, this, alignment);	
+							executor.execute(seqPainter);
 						}
-						// Draw as AminoAcids
-						else{
-							copyAminoAcidPixels(clipRGB,residue,x,y,(int)(clipX*charWidth*highDPIScaleFactor), (int)(clipY*charHeight*highDPIScaleFactor));	
-						}
-						clipX ++;
-					}		
-					clipY ++;
-				}// x loop end
-		//	}// y loop end
 
-
-			//			logger.info(clip);
-			//						
-			//						for(int n = 0; n <clipRGB.getBackend().length; n++){
-			//							clipRGB.getBackend()[n] = ColorUtils.addTranspGrey(clipRGB.getBackend()[n], 0.45);
-			//							clipRGB.getBackend()[n] = clipRGB.getBackend()[n] | 0x333333;
-			//							getGolorVal(getR)
-			//						}
-
-
-			//						// Draw excludes (by manipulating color val)
-			//						if(! showTranslationOnePos){
-			//							// calculaate height for excludes (this is to avoid drawing below alignment if alignment is not filling panel)
-			//							int drawExcludesHeight = (int) Math.min(this.getVisibleRect().getHeight(), alignment.getSize()  * charHeight);
-			//							for(int x = xMin; x < xMax ; x++){
-			//								if(alignment.isExcluded(x) == true){
-			//									g2d.setColor(ColorScheme.GREY_TRANSPARENT);
-			//									g2d.fillRect((int)(x * charWidth), this.getVisibleRect().y, (int)charWidth, drawExcludesHeight);				
-			//								}
-			//							}
-			//						}
-
-			
-			// First fill background
-			//long fillStartTime = System.currentTimeMillis();
-			g2d.setColor(this.getBackground());
-			g2d.fill(clip);
-//			Rectangle larger = new Rectangle(clip);
-//			larger.grow(300, 300);
-			//long fillTime = System.currentTimeMillis() - fillStartTime;
-			//logger.info("fillTime" + fillTime);
-			
-			// Now draw the pixels
-			Image img = createImage(new MemoryImageSource(clipRGB.getScanWidth(), clipRGB.getHeight(), clipRGB.getBackend(), 0, clipRGB.getScanWidth()));
-
-//						logger.info(clipRGB.getBackend().length);
-//						logger.info("img.getWidth" + img.getWidth(null));
-//						logger.info("img.getHeight" + img.getHeight(null));
-//			
-//			
-//						logger.info("xMin" + xMin);
-//						
-//						logger.info("clip.width" + clip.width);
-//						logger.info("clip.height" + clip.height);
-//
-
-
-
-			if (img != null){
-//								logger.info(img.getHeight(null));
-//								logger.info("x=" + (int)(xMin * charWidth));
-//								logger.info("y=" + (int)(yMin * charHeight));
-//								logger.info("clip.x" + clip.x);
-//								logger.info("clip.y" + clip.y);
-				//g.drawImage(img, clip.x, clip.y, clip.width, clip.height, null);
-				if(highDPIScaleFactor > 1){
-					
-					//translate and scale with AffineTransform
-//	                AffineTransform affineTransform = new AffineTransform();
-//	                affineTransform.translate((int)(xMin * charWidth),(int)(yMin * charHeight));
-//	                affineTransform.scale(0.5, 0.5);
-//	                Graphics2D g2 = (Graphics2D) g;
-//	                g2.drawImage(img, affineTransform, null);			
-					
-	                
-	                int dx1 = (int)(xMin * charWidth);
-	                int dx2 = dx1 + clipRGB.getScanWidth() / highDPIScaleFactor;
-	                int dy1 = (int)(yMin * charHeight);
-	                int dy2 = dy1 + clipRGB.getHeight() / highDPIScaleFactor;
-	                
-	                int sx1 = 0;
-	                int sx2 = sx1 + clipRGB.getScanWidth();
-	                int sy1 = 0;
-	                int sy2 = sy1 + clipRGB.getHeight();
-	                
-	                logger.info("dx1" + dx1);
-	                logger.info("dx2" + dx2);
-	                
-	                logger.info("sx1" + sx1);
-	                logger.info("sx2" + sx2);
-	                
-	                g2d.drawImage(img, dx1,dy1,dx2,dy2,sx1,sy1,sx2,sy2, null);
-	                //g.drawImage(img, (int)(xMin * charWidth), (int)(yMin * charHeight), null);
-	                
-				}else{
-					g2d.drawImage(img, (int)(xMin * charWidth), (int)(yMin * charHeight),null);
+					}else{
+						SequencePainter seqPainter = new SequencePainterNucleotide(seq, seqYPos, clipYPos, xPosStart, xPosEnd, step, charWidth, charHeight, highDPIScaleFactor, clipRGB, this, alignment);	
+						executor.execute(seqPainter);
+					}
 				}
-//
-//			    try {
-//			    	BufferedImage buffImg = ImageUtils.toBufferedImage(img);
-//					ImageIO.write(buffImg, "png", new File("/home/anders/tmp/aliviewpane.png"));
-//				} catch (IOException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			    
+				// Draw as AminoAcids
+				else{
+					SequencePainter seqPainter = new SequencePainterAminoAcid(seq, seqYPos, clipYPos, xPosStart, xPosEnd, step, charWidth, charHeight, highDPIScaleFactor, clipRGB, this, alignment);	
+					executor.execute(seqPainter);
+				}
+
+				clipYPos ++;
 			}
-			
-//			Rectangle testRect = new Rectangle(350, 200, 400, 400);		
-//			Color randomColor = new Color((int)(Math.random()*255), (int)(Math.random()*255),(int)(Math.random()*255));		
-//			g2d.setColor(randomColor);
-//			g2d.fill(testRect);
 
-			
-			
+			executor.shutdown();
+			try {
+				executor.awaitTermination(1000, TimeUnit.MILLISECONDS);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 
-			// Draw excludes
-			if(! isShowTranslationOnePos()){
-				// calculaate height for excludes (this is to avoid drawing below alignment if alignment is not filling panel)
-				int drawExcludesHeight = (int) Math.min(this.getVisibleRect().getHeight(), alignment.getSize()  * charHeight);
+
+		//          // Excludes by manipulating pixelColor		
+		//			for(int n = 0; n <clipRGB.getBackend().length; n++){	
+		//				clipRGB.
+		//				clipRGB.getBackend()[n] = ColorUtils.darkerRGB(clipRGB.getBackend()[n]);
+		//			}
+
+
+
+		// Now draw the pixels onto the image
+		Image img = createImage(new MemoryImageSource(clipRGB.getScanWidth(), clipRGB.getHeight(), clipRGB.getBackend(), 0, clipRGB.getScanWidth()));
+		// First fill background
+		g2d.setColor(this.getBackground());
+		g2d.fill(clip);
+
+
+
+		int clipRGBXPos = clip.x;
+		int clipRGBYPos = clip.y;
+		// Adjust because we start always on exact char upp to one pos before
+		if(charWidth > 1){
+			clipRGBXPos = (int)(xMin * charWidth);
+			clipRGBYPos = (int)(yMin * charHeight);
+		}
+
+		if (img != null){	
+			// Mac retina screen
+			if(highDPIScaleFactor > 1){
+				int dx1 = clipRGBXPos;
+				int dx2 = dx1 + clipRGB.getScanWidth() / highDPIScaleFactor;
+				int dy1 = clipRGBYPos;
+				int dy2 = dy1 + clipRGB.getHeight() / highDPIScaleFactor;
+
+				int sx1 = 0;
+				int sx2 = sx1 + clipRGB.getScanWidth();
+				int sy1 = 0;
+				int sy2 = sy1 + clipRGB.getHeight();
+				g2d.drawImage(img,dx1,dy1,dx2,dy2,sx1,sy1,sx2,sy2, null);
+			}else{
+				g2d.drawImage(img, clipRGBXPos, clipRGBYPos, null);
+			}
+		}
+
+
+		// Draw excludes	
+		if(! isShowTranslationOnePos()){
+
+			// calculate height for excludes (this is to avoid drawing below alignment if alignment is not filling panel)
+			int drawExcludesHeight = (int) Math.min(this.getVisibleRect().getHeight(), alignment.getSize()  * charHeight);
+
+			// Two versions depending on if it is small chars or not
+			if(charWidth < 1){
+				for(int x = clip.x; x < clip.getMaxX() ; x++){
+					int xPos =(int)((double)x * (1/(double)charWidth));
+					if(alignment.isExcluded(xPos) == true){
+						g2d.setColor(ColorScheme.GREY_TRANSPARENT);
+						g2d.fillRect(x, this.getVisibleRect().y, 1, drawExcludesHeight);
+						//				logger.info("drawExclude");
+					}
+				}
+			}else{
 				for(int x = xMin; x < xMax ; x++){
 					if(alignment.isExcluded(x) == true){
-
 						g2d.setColor(ColorScheme.GREY_TRANSPARENT);
 						g2d.fillRect((int)(x * charWidth), this.getVisibleRect().y, (int)charWidth, drawExcludesHeight);				
 					}
@@ -1226,7 +936,7 @@ public class AlignmentPane extends JPanel{
 		}
 	}
 
-	
+
 
 	private void copyTranslatedNucleotidesPixelsShowTranslationAndNuc(RGBArray clipArray, byte residue, AminoAcid acid, int x, int y, int clipX, int clipY, Sequence seq){
 
@@ -1252,7 +962,7 @@ public class AlignmentPane extends JPanel{
 		if(seq.isCodonSecondPos(x)){
 			isSecondPos = true;
 		}
-		
+
 		TranslationCharPixelsContainer pixContainerToUse = charPixTranslationAndNucDefault;
 		if(! drawAminoAcidCode){
 			if(isSecondPos){
@@ -1285,7 +995,7 @@ public class AlignmentPane extends JPanel{
 		}
 
 		RGBArray newPiece = pixContainerToUse.getRGBArray(acid, residue);
-			
+
 
 		try {
 			ImageUtils.insertRGBArrayAt(clipX, clipY, newPiece, clipArray);
@@ -1294,7 +1004,7 @@ public class AlignmentPane extends JPanel{
 			logger.info("clipY" + clipY);
 		}
 	}
-	
+
 	private void copyTranslatedNucleotidesPixels(RGBArray clipArray, byte residue, AminoAcid acid, int x, int y, int clipX, int clipY, Sequence seq){
 
 		// A small hack
@@ -1307,7 +1017,7 @@ public class AlignmentPane extends JPanel{
 		TranslationCharPixelsContainer pixContainerToUse = charPixTranslationDefault;
 		TranslationCharPixelsContainer pixLetterContainerToUse = charPixTranslationLetter;
 		TranslationCharPixelsContainer pixLetterContainerToUseNoAALetter = charPixTranslationDefault;
-		
+
 
 		// adjust colors if selected and temp selection
 		// We have to calculate within this way - because rect.contains(Point) is always returning false on a 0-width or 0 height Rectangle
@@ -1321,7 +1031,7 @@ public class AlignmentPane extends JPanel{
 			pixContainerToUse = charPixTranslationSelected;
 			pixLetterContainerToUse = charPixTranslationSelectedLetter;			
 		}
-			
+
 		RGBArray newPiece;
 
 		if(! drawAminoAcidCode){	
@@ -1342,8 +1052,6 @@ public class AlignmentPane extends JPanel{
 			logger.info("clipY" + clipY);
 		}
 	}
-
-
 
 	private void copyAminoAcidPixels(RGBArray clipArray, byte residue, int x, int y, int clipX, int clipY){
 
@@ -1407,73 +1115,73 @@ public class AlignmentPane extends JPanel{
 
 	private void copyNucleotidePixelsTimeTest(RGBArray clipArray, byte residue, int x, int y, int clipX, int clipY){
 		// A small hack
-				if(residue == 0){
-					residue = ' ';
-				}
+		if(residue == 0){
+			residue = ' ';
+		}
 
-				// set defaults
-				CharPixelsContainer pixContainerToUse = charPixDefaultNuc;
-				byteToDraw = residue;
+		// set defaults
+		CharPixelsContainer pixContainerToUse = charPixDefaultNuc;
+		byteToDraw = residue;
 		//		int baseVal = NucleotideUtilities.baseValFromBase(residue);
 
-				int baseVal = NucleotideUtilities.baseValFromBaseOtherVer(residue);
-				
-				//int baseVal = 1;
-				
+		int baseVal = NucleotideUtilities.baseValFromBaseOtherVer(residue);
 
-				// adjustment if only diff to be shown
-				if(highlightDiffTrace){ // TODO CHANGE THIS SO IT IS WORKING EVEN IF TRACING SEQUENCE IS SHORTER THAN OTHER
-					if(y != differenceTraceSequencePosition){
-						if(baseVal == NucleotideUtilities.baseValFromBase(alignment.getBaseAt(x,differenceTraceSequencePosition))){
-							byteToDraw = '.';
-							pixContainerToUse = charPixDefaultNuc;
-						}
-					}
-				}
+		//int baseVal = 1;
 
-				// adjustment if non-cons to be highlighted
-				if(highlightNonCons){
-					NucleotideHistogram nucHistogram = (NucleotideHistogram) alignment.getHistogram();
-					if(baseVal == NucleotideUtilities.GAP){
-						// no color on gap even if they are in maj.cons
-					}
-					else if(nucHistogram.isMajorityRuleConsensus(x,baseVal)){
-						pixContainerToUse = charPixConsensusNuc;
-					}
-				}
-				if(highlightCons){
-					NucleotideHistogram nucHistogram = (NucleotideHistogram) alignment.getHistogram();
-					if(baseVal == NucleotideUtilities.GAP){
-						// no color on gap even if they are in maj.cons
-					}
-					else if(! nucHistogram.isMajorityRuleConsensus(x,baseVal)){
-						pixContainerToUse = charPixConsensusNuc;
-					}
-				}
 
-				// adjust colors if selected and temp selection
-				// We have to calculate within this way - because rect.contains(Point) is always returning false on a 0-width or 0 height Rectangle
-				boolean isPointWithinSelectionRect = false;
-				if(alignment.getTempSelection() != null){
-					if(x <= alignment.getTempSelection().getMaxX() && x >= alignment.getTempSelection().getMinX() && y <= alignment.getTempSelection().getMaxY() && y >= alignment.getTempSelection().getMinY()){
-						isPointWithinSelectionRect = true;
-					}
+		// adjustment if only diff to be shown
+		if(highlightDiffTrace){ // TODO CHANGE THIS SO IT IS WORKING EVEN IF TRACING SEQUENCE IS SHORTER THAN OTHER
+			if(y != differenceTraceSequencePosition){
+				if(baseVal == NucleotideUtilities.baseValFromBase(alignment.getBaseAt(x,differenceTraceSequencePosition))){
+					byteToDraw = '.';
+					pixContainerToUse = charPixDefaultNuc;
 				}
-//				if(alignment.isBaseSelected(x,y) || (tempSelectionRect != null && isPointWithinSelectionRect)){
-//					pixContainerToUse = charPixSelectedNuc;
-//				}
+			}
+		}
 
-//				RGBArray newPiece = pixContainerToUse.getRGBArray(byteToDraw);
+		// adjustment if non-cons to be highlighted
+		if(highlightNonCons){
+			NucleotideHistogram nucHistogram = (NucleotideHistogram) alignment.getHistogram();
+			if(baseVal == NucleotideUtilities.GAP){
+				// no color on gap even if they are in maj.cons
+			}
+			else if(nucHistogram.isMajorityRuleConsensus(x,baseVal)){
+				pixContainerToUse = charPixConsensusNuc;
+			}
+		}
+		if(highlightCons){
+			NucleotideHistogram nucHistogram = (NucleotideHistogram) alignment.getHistogram();
+			if(baseVal == NucleotideUtilities.GAP){
+				// no color on gap even if they are in maj.cons
+			}
+			else if(! nucHistogram.isMajorityRuleConsensus(x,baseVal)){
+				pixContainerToUse = charPixConsensusNuc;
+			}
+		}
 
-				try {
-//					ImageUtils.insertRGBArrayAt(clipX, clipY, newPiece, clipArray);
-				} catch (Exception e) {
-					logger.info("x" + x);
-					logger.info("y" + y);
-					logger.info("clipX" + clipX);
-					logger.info("clipY" + clipY);
-				}
-		
+		// adjust colors if selected and temp selection
+		// We have to calculate within this way - because rect.contains(Point) is always returning false on a 0-width or 0 height Rectangle
+		boolean isPointWithinSelectionRect = false;
+		if(alignment.getTempSelection() != null){
+			if(x <= alignment.getTempSelection().getMaxX() && x >= alignment.getTempSelection().getMinX() && y <= alignment.getTempSelection().getMaxY() && y >= alignment.getTempSelection().getMinY()){
+				isPointWithinSelectionRect = true;
+			}
+		}
+		//				if(alignment.isBaseSelected(x,y) || (tempSelectionRect != null && isPointWithinSelectionRect)){
+		//					pixContainerToUse = charPixSelectedNuc;
+		//				}
+
+		//				RGBArray newPiece = pixContainerToUse.getRGBArray(byteToDraw);
+
+		try {
+			//					ImageUtils.insertRGBArrayAt(clipX, clipY, newPiece, clipArray);
+		} catch (Exception e) {
+			logger.info("x" + x);
+			logger.info("y" + y);
+			logger.info("clipX" + clipX);
+			logger.info("clipY" + clipY);
+		}
+
 	}
 
 
@@ -1595,14 +1303,14 @@ public class AlignmentPane extends JPanel{
 	private Rectangle getTempSelection() {
 		return alignment.getTempSelection();
 	}
-	*/
+	 */
 
 	/*
 	public void clearTempSelection() {
 		this.tempSelectionRect = null;
 	}
-	
-	*/
+
+	 */
 
 	public Rectangle paneCoordToMatrixCoord(Rectangle rect){
 
@@ -1616,13 +1324,13 @@ public class AlignmentPane extends JPanel{
 		int matrixMaxX = (int) Math.floor(rect.getMaxX()/charWidth); // always round up
 		int matrixMinY = (int) Math.floor(rect.getMinY()/charHeight); // always round down
 		int matrixMaxY = (int) Math.floor(rect.getMaxY()/charHeight); // always round down
-		
+
 		// also set min to 0
 		matrixMinX = Math.max(0, matrixMinX);
 		matrixMaxX = Math.max(0, matrixMaxX);
 		matrixMinY = Math.max(0, matrixMinY);
 		matrixMaxY = Math.max(0, matrixMaxY);
-		
+
 		//		logger.info("matrixMinX" + matrixMinX);
 		//		logger.info("matrixMaxX" + matrixMaxX);
 		////	logger.info(getMatrixTopOffset());
@@ -1642,16 +1350,17 @@ public class AlignmentPane extends JPanel{
 
 	public void validateSize() {
 		// Set component preferred size
-	//	Dimension current = getSize();
+		Dimension current = getSize();
 		Dimension prefSize = getCalculatedPreferredSize();
-	//	Rectangle prefRect = this.getVisibleRect();
-		
-		//if(current.width != prefSize.width){
-		this.setPreferredSize(prefSize);
-		//this.updateStatisticsLabel();
-//		this.rulerIsDirty = true;
-		this.revalidate();
-//		this.scrollRectToVisible(prefRect);
+		//	Rectangle prefRect = this.getVisibleRect();
+
+		if(current.width != prefSize.width || current.height != prefSize.height){
+			this.setPreferredSize(prefSize);
+			//this.updateStatisticsLabel();
+			this.rulerIsDirty = true;
+			this.revalidate();
+		}
+		//		this.scrollRectToVisible(prefRect);
 	}
 
 	@Override
@@ -1666,20 +1375,20 @@ public class AlignmentPane extends JPanel{
 
 	private Dimension getCalculatedPreferredSize(){
 		Dimension newDim;
-		
-//		logger.info("charWidth" + charWidth);
-//		logger.info("charHeight" + charHeight);
-		
-//		if(showTranslationOnePos){
-//			newDim = new Dimension((int) (charWidth * alignment.getAlignentMeta().getCodonPositions().getLengthOfTranslatedPos()), (int)(charHeight * alignment.getSize()));
-//		}else{
-			newDim = new Dimension((int) (charWidth * alignment.getMaximumSequenceLength()), (int)(charHeight * alignment.getSize()));
-//		}		
-//		logger.info("newDim" + newDim);
-		
+
+		//		logger.info("charWidth" + charWidth);
+		//		logger.info("charHeight" + charHeight);
+
+		//		if(showTranslationOnePos){
+		//			newDim = new Dimension((int) (charWidth * alignment.getAlignentMeta().getCodonPositions().getLengthOfTranslatedPos()), (int)(charHeight * alignment.getSize()));
+		//		}else{
+		newDim = new Dimension((int) (charWidth * alignment.getMaximumSequenceLength()), (int)(charHeight * alignment.getSize()));
+		//		}		
+		//		logger.info("newDim" + newDim);
+
 		if(newDim.width == Integer.MAX_VALUE || newDim.height == Integer.MAX_VALUE){
 			Messenger.showMaxJPanelSizeMessageOnceThisSession();
-//			logger.info("Hit max jpanel length");
+			//			logger.info("Hit max jpanel length");
 		}
 		return newDim;
 
@@ -1791,7 +1500,7 @@ public class AlignmentPane extends JPanel{
 		this.drawAminoAcidCode = drawCode;
 	}
 
-	public boolean getDrawAminoAcidCode(){
+	public boolean isDrawAminoAcidCode(){
 		return this.drawAminoAcidCode;
 	}
 
@@ -1881,9 +1590,9 @@ public class AlignmentPane extends JPanel{
 			//					RenderingHints.VALUE_COLOR_RENDER_SPEED);
 			//g2d.setRenderingHint(RenderingHints.KEY_DITHERING,
 			//					RenderingHints.VALUE_DITHER_DISABLE);
-	
 
-	//		g2d.setFont(baseFont);
+
+			//		g2d.setFont(baseFont);
 
 			// What part of alignment matrix is in view (what part of matrix is in graphical view)
 			Rectangle paneClip = alignmentPane.getVisibleRect();
@@ -1899,8 +1608,8 @@ public class AlignmentPane extends JPanel{
 			Font rulerFont = new Font(alignmentPane.getFont().getName(), alignmentPane.getFont().getStyle(), (int)rulerCharWidth);
 			g2d.setFont(rulerFont);
 
-			
-			
+
+
 			//
 			// Draw ruler background
 			//
@@ -1910,9 +1619,9 @@ public class AlignmentPane extends JPanel{
 
 			int offsetDueToScrollPanePosition = 0;
 
-			
-			
-			
+
+
+
 
 			// Normal char-with smaller 
 			if(charWidth >= 1){
@@ -1923,12 +1632,12 @@ public class AlignmentPane extends JPanel{
 				// Tickmarks
 				int posTick = 0;
 				int count = 0;
-				
+
 				int maxY = alignment.getMaxY();
 				int maxX = alignment.getMaxX();
-//				if(showTranslationOnePos){
-//					maxX = alignment.getAlignentMeta().getCodonPositions().getTranslatedAminAcidLength();
-//				}
+				//				if(showTranslationOnePos){
+				//					maxX = alignment.getAlignentMeta().getCodonPositions().getTranslatedAminAcidLength();
+				//				}
 
 				for(int x = matrixClip.x ; x < matrixClip.getMaxX() + 1; x++){
 
@@ -1974,11 +1683,11 @@ public class AlignmentPane extends JPanel{
 							// since it is hidden in scrollpane 
 							g2d.drawLine((int)(posTick * charCenterXOffset * charWidth + charWidth/2 - offsetDueToScrollPanePosition), (int) (rulerRect.getMaxY() - 2), (int)(posTick * charCenterXOffset * charWidth +  charWidth/2 - offsetDueToScrollPanePosition), (int)rulerRect.getMaxY() - 3);
 						}
-						
-						
+
+
 						// and numbers
-						
-						
+
+
 						posTick ++;
 					}
 					count ++;
@@ -2005,7 +1714,7 @@ public class AlignmentPane extends JPanel{
 						int stringSizeOffset = g2d.getFontMetrics().stringWidth(posText) / 2;
 						//int stringSizeOffset = (int)((posText.length()*0.8 * rulerCharWidth) / 2) + 5;
 						//int stringSizeOffset = ( posText.length()*(rulerFont.getSize()) ) / 2;
-					//	int stringSizeOffset = (int)((posText.length()*0.8 * rulerCharWidth) / 2) + 5;
+						//	int stringSizeOffset = (int)((posText.length()*0.8 * rulerCharWidth) / 2) + 5;
 						int textPosX = (int)((pos -1) * charCenterXOffset * charWidth + charWidth/2 - offsetDueToScrollPanePosition) - stringSizeOffset;
 						// dont draw on top of last (if number is very long)
 						if(lastTextEndPos < textPosX){
@@ -2093,12 +1802,12 @@ public class AlignmentPane extends JPanel{
 				//				logger.info("ruler startPosPane" + startPosPane);		
 				//				logger.info("posPerPix" + posPerPix);
 
-				
+
 				int maxY = alignment.getMaxY();
 				int maxX = alignment.getMaxX();
-//				if(showTranslationOnePos){
-//					maxX = alignment.getAlignentMeta().getCodonPositions().getTranslatedAminAcidLength();
-//				}
+				//				if(showTranslationOnePos){
+				//					maxX = alignment.getAlignentMeta().getCodonPositions().getTranslatedAminAcidLength();
+				//				}
 
 				int maxVisibleSeq = (int)matrixClip.getMaxX();
 				logger.info("maxVisibleSeq" + maxVisibleSeq + 200);
@@ -2136,10 +1845,10 @@ public class AlignmentPane extends JPanel{
 
 						if(xSeq % largerInterval == 0){																				
 							String posText = Integer.toString(xSeq);
-							
+
 							int stringSizeOffset = g2d.getFontMetrics().stringWidth(posText) / 2;
-							
-			//				int stringSizeOffset = ( posText.length()*(rulerFont.getSize() -1) ) / 2;
+
+							//				int stringSizeOffset = ( posText.length()*(rulerFont.getSize() -1) ) / 2;
 							//int stringSizeOffset = (int)((posText.length() * (rulerCharWidth)) / 2) ;
 							int textPosX = (int)(tickPosX - stringSizeOffset);
 							// dont draw text outside
@@ -2168,7 +1877,7 @@ public class AlignmentPane extends JPanel{
 
 			long endTime = System.currentTimeMillis();
 			logger.info("Ruler PaintComponent took " + (endTime - startTime) + " milliseconds");
-			
+
 
 		}
 
@@ -2180,7 +1889,7 @@ public class AlignmentPane extends JPanel{
 		}
 
 	} // end Ruler class
-	
+
 	private class AlignmentCharsetRuler extends JPanel{
 
 		private AlignmentPane alignmentPane;
@@ -2225,9 +1934,9 @@ public class AlignmentPane extends JPanel{
 			//					RenderingHints.VALUE_COLOR_RENDER_SPEED);
 			//g2d.setRenderingHint(RenderingHints.KEY_DITHERING,
 			//					RenderingHints.VALUE_DITHER_DISABLE);
-	
 
-	//		g2d.setFont(baseFont);
+
+			//		g2d.setFont(baseFont);
 
 			// What part of alignment matrix is in view (what part of matrix is in graphical view)
 			Rectangle paneClip = alignmentPane.getVisibleRect();
@@ -2252,9 +1961,9 @@ public class AlignmentPane extends JPanel{
 
 			int offsetDueToScrollPanePosition = 0;
 
-			
-			
-			
+
+
+
 
 			// Normal char-with smaller 
 			if(charWidth >= 1){
@@ -2265,12 +1974,12 @@ public class AlignmentPane extends JPanel{
 				// Tickmarks
 				int posTick = 0;
 				int count = 0;
-				
+
 				int maxY = alignment.getMaxY();
 				int maxX = alignment.getMaxX();
-//				if(showTranslationOnePos){
-//					maxX = alignment.getAlignentMeta().getCodonPositions().getTranslatedAminAcidLength();
-//				}
+				//				if(showTranslationOnePos){
+				//					maxX = alignment.getAlignentMeta().getCodonPositions().getTranslatedAminAcidLength();
+				//				}
 
 				for(int x = matrixClip.x ; x < matrixClip.getMaxX() + 1; x++){
 
@@ -2316,11 +2025,11 @@ public class AlignmentPane extends JPanel{
 							// since it is hidden in scrollpane 
 							g2d.drawLine((int)(posTick * charCenterXOffset * charWidth + charWidth/2 - offsetDueToScrollPanePosition), (int) (rulerRect.getMaxY() - 2), (int)(posTick * charCenterXOffset * charWidth +  charWidth/2 - offsetDueToScrollPanePosition), (int)rulerRect.getMaxY() - 3);
 						}
-						
-						
+
+
 						// and numbers
-						
-						
+
+
 						posTick ++;
 					}
 					count ++;
@@ -2347,7 +2056,7 @@ public class AlignmentPane extends JPanel{
 						int stringSizeOffset = g2d.getFontMetrics().stringWidth(posText) / 2;
 						//int stringSizeOffset = (int)((posText.length()*0.8 * rulerCharWidth) / 2) + 5;
 						//int stringSizeOffset = ( posText.length()*(rulerFont.getSize()) ) / 2;
-					//	int stringSizeOffset = (int)((posText.length()*0.8 * rulerCharWidth) / 2) + 5;
+						//	int stringSizeOffset = (int)((posText.length()*0.8 * rulerCharWidth) / 2) + 5;
 						int textPosX = (int)((pos -1) * charCenterXOffset * charWidth + charWidth/2 - offsetDueToScrollPanePosition) - stringSizeOffset;
 						// dont draw on top of last (if number is very long)
 						if(lastTextEndPos < textPosX){
@@ -2429,19 +2138,19 @@ public class AlignmentPane extends JPanel{
 
 
 				double startPosSeq = roundToClosestUpper((int)seqOffsetVisiblePanePos,xStep);
-				
+
 				int startPosPane = (int) (charWidth * startPosSeq);
 
 				//				logger.info("ruler startPosSeq" + startPosSeq);
 				//				logger.info("ruler startPosPane" + startPosPane);		
 				//				logger.info("posPerPix" + posPerPix);
 
-				
+
 				int maxY = alignment.getMaxY();
 				int maxX = alignment.getMaxX();
-//				if(showTranslationOnePos){
-//					maxX = alignment.getAlignentMeta().getCodonPositions().getTranslatedAminAcidLength();
-//				}
+				//				if(showTranslationOnePos){
+				//					maxX = alignment.getAlignentMeta().getCodonPositions().getTranslatedAminAcidLength();
+				//				}
 
 				int maxVisibleSeq = (int)matrixClip.getMaxX();
 				logger.info("maxVisibleSeq" + maxVisibleSeq + 200);
@@ -2479,10 +2188,10 @@ public class AlignmentPane extends JPanel{
 
 						if(xSeq % largerInterval == 0){																				
 							String posText = Integer.toString(xSeq);
-							
+
 							int stringSizeOffset = g2d.getFontMetrics().stringWidth(posText) / 2;
-							
-			//				int stringSizeOffset = ( posText.length()*(rulerFont.getSize() -1) ) / 2;
+
+							//				int stringSizeOffset = ( posText.length()*(rulerFont.getSize() -1) ) / 2;
 							//int stringSizeOffset = (int)((posText.length() * (rulerCharWidth)) / 2) ;
 							int textPosX = (int)(tickPosX - stringSizeOffset);
 							// dont draw text outside
@@ -2513,7 +2222,7 @@ public class AlignmentPane extends JPanel{
 			logger.info("Ruler PaintComponent took " + (endTime - startTime) + " milliseconds");
 
 		}
-		
+
 		private int roundToClosestUpper(int inval, int roundTo) {
 			// int rounded = ((num + 99) / 100 ) * 100;
 			int rounded = ((inval + roundTo -1) / roundTo ) * roundTo;
@@ -2527,7 +2236,7 @@ public class AlignmentPane extends JPanel{
 		this.fontCase = fontCase;
 		createCharPixelsContainers();
 	}
-	
+
 	public void scrollRectToSelection() {
 		Rectangle selectRect = alignment.getSelectionAsMinRect();
 		if(selectRect != null){
@@ -2539,7 +2248,7 @@ public class AlignmentPane extends JPanel{
 			}
 		}
 	}
-	
+
 	public void scrollRectToSelectionCenter() {
 		Rectangle selectRect = alignment.getSelectionAsMinRect();
 		if(selectRect != null){
@@ -2561,8 +2270,453 @@ public class AlignmentPane extends JPanel{
 
 	public void setShowTranslationAndNuc(boolean b) {
 		showTranslationAndNuc = b;
-		
+
 	}
+
+	public int getDifferenceTraceSequencePosition() {
+		return differenceTraceSequencePosition;
+	}
+
+	public boolean isHighlightDiffTrace() {
+		return highlightDiffTrace;
+	}
+	
+	private void fillRGBArrayAndPaint(int xMin, int xMax, int yMin, int yMax, RGBArray clipRGB, Rectangle clip, Graphics2D g2d){
+		// these vals are not going to change so get it only once
+		boolean isNucleotideAlignment = alignment.isNucleotideAlignment();
+		double seqPerPixX = 1/(double)charWidth;
+		double seqPerPixY = 1/(double)charWidth;
+		//int ySeqMax = alignment.getMaxY();
+
+		// test time to get all bases
+		boolean testloop = false;
+		if(testloop && charWidth >= 1){
+			long sTimeMS = System.currentTimeMillis();
+			long sTimeNS = System.nanoTime();
+
+			int testWidth = (xMax - xMin) * (int)charWidth;
+			int testHeight = (yMax - yMin) * (int)charHeight;
+			int[] testpixArray = new int[testWidth * testHeight];
+			RGBArray testclipRGB = new RGBArray(testpixArray, testWidth, testHeight);
+
+			int count = 0;
+			int clipY = 0;
+			for(int y = yMin; y <= yMax; y++){
+
+				// X Loop Start
+				int clipX = 0;
+				for(int x = xMin; x < xMax ; x++){
+					byte residue = alignment.getBaseAt(x,y);
+					// Draw as nucleotides
+					if(isNucleotideAlignment){
+						// Draw as translated
+						if(showTranslation){
+							if(ignoreGapInTranslation){
+								//copyTranslatedNucleotidesPixelsSkipGap(clipRGB,residue,x,y,(int)(clipX*charWidth), (int)(clipY*charHeight), aaTransSeq);
+							}
+							else{
+								//copyTranslatedNucleotidesPixels(clipRGB,residue,x,y,(int)(clipX*charWidth), (int)(clipY*charHeight), aaTransSeq);
+							}
+						}else{
+							//logger.info("testPixArr" + testpixArray.length);
+							copyNucleotidePixelsTimeTest(testclipRGB,residue,x,y,(int)(clipX*charWidth*highDPIScaleFactor), (int)(clipY*charHeight*highDPIScaleFactor));					
+						}
+					}
+					// Draw as AminoAcids
+					else{
+						//copyAminoAcidPixels(clipRGB,residue,x,y,(int)(clipX*charWidth), (int)(clipY*charHeight));	
+					}
+					clipX ++;
+					count ++;
+				}		
+				clipY ++;
+			}
+			long eTimeMS = System.currentTimeMillis();
+			long eTimeNS = System.nanoTime();
+			logger.info("Testloop took " + (eTimeMS - sTimeMS) + " milliseconds, count " + count);
+			logger.info("Testloop took " + (eTimeNS - sTimeNS) + " nanoseconds, count " + count);
+		}
+
+
+		// small chars have their own loop here
+		if(charWidth < 1){
+
+			if(showTranslation && ! isShowTranslationOnePos()){
+
+				// this only need to be calculated once
+				double maxX = clip.getMaxX();
+				//				if(maxX > alignment.getAlignentMeta().getCodonPositions().getLengthOfTranslatedPos()){
+				//					maxX = alignment.getAlignentMeta().getCodonPositions().getLengthOfTranslatedPos();
+				//				}
+
+				int clipY = 0;
+				for(int y = clip.y; y < clip.getMaxY(); y ++){		
+
+					int ySeq = (int)((double)(y) * seqPerPixY);
+
+					if(ySeq <= yMax && ySeq >= 0){	
+
+						// X Loop Start
+						int seqMaxX = alignment.getLengthAt(ySeq);
+						int clipX = 0;
+						for(int x = clip.x; x < clip.getMaxX(); x++){
+							int xSeqPos =(int)((double)x * seqPerPixX);
+
+							if(xSeqPos < seqMaxX && xSeqPos >= 0){
+
+								byte residue = alignment.getBaseAt(xSeqPos,ySeq);
+
+								if(ignoreGapInTranslation){
+									AminoAcidAndPosition aaAndPos = alignment.getSequences().get(y).getNoGapAminoAcidAtNucleotidePos(xSeqPos);
+									copyTranslatedNucleotidesPixelsSkipGap(clipRGB,residue,aaAndPos.acid,xSeqPos,ySeq,clipX*highDPIScaleFactor, clipY*highDPIScaleFactor, aaAndPos.position);
+								}
+								else{
+									AminoAcid aminoAcid = alignment.getTranslatedAminoAcidAtNucleotidePos(xSeqPos,ySeq);
+									copyTranslatedNucleotidesPixels(clipRGB,residue, aminoAcid,xSeqPos,ySeq,clipX*highDPIScaleFactor, clipY*highDPIScaleFactor, alignment.getSequences().get(y));
+								}
+							}
+
+							clipX ++;
+						}
+
+					}
+					clipY ++;
+				}
+
+
+			}else{
+
+				// No longer: Always start at closest even 10
+				//			double startY = clip.y;
+				//			startY = Math.floor(startY/100) * 100;
+				int clipY = 0;
+				for(int y = clip.y; y < clip.getMaxY(); y ++){
+
+					int ySeq = (int)((double)(y) * seqPerPixY);
+
+					if(ySeq <= yMax && ySeq >= 0){
+
+						int seqMaxX = alignment.getLengthAt(ySeq);
+
+						// X Loop Start
+						int clipX = 0;
+						for(int x = clip.x; x < clip.getMaxX(); x++){
+
+							int xSeqPos =(int)((double)x * seqPerPixX);
+
+							if(xSeqPos < seqMaxX && xSeqPos >= 0){
+
+								boolean valid = alignment.isPositionValid(xSeqPos, ySeq);
+								if(! valid){
+									logger.info("invalidx="+xSeqPos + "y=" + ySeq);
+								}
+								byte residue = alignment.getBaseAt(xSeqPos,ySeq);
+
+								// Draw as Nucleotides
+								if(isNucleotideAlignment){
+									if(isShowTranslationOnePos()){
+										copyAminoAcidPixels(clipRGB,residue,xSeqPos,ySeq,clipX*highDPIScaleFactor,clipY*highDPIScaleFactor);
+									}
+									else{
+										copyNucleotidePixels(clipRGB,residue,xSeqPos,ySeq,clipX*highDPIScaleFactor,clipY*highDPIScaleFactor);
+									}			
+								}
+								// Draw as AA
+								else{
+									copyAminoAcidPixels(clipRGB,residue,xSeqPos,ySeq,clipX*highDPIScaleFactor,clipY*highDPIScaleFactor);
+								}
+							}
+
+							clipX ++;
+
+						}		
+
+					}
+					clipY ++;
+				}
+			}
+
+
+			// Now draw the pixels onto the image
+			Image img = createImage(new MemoryImageSource(clipRGB.getScanWidth(), clipRGB.getHeight(), clipRGB.getBackend(), 0, clipRGB.getScanWidth()));
+			//
+			//									logger.info(clipRGB.getBackend().length);
+			//									logger.info("img.getWidth" + img.getWidth(null));
+			//									logger.info("img.getHeight" + img.getHeight(null));
+			//			
+			//									
+			//									logger.info("xMin" + xMin);
+			//									logger.info("clip.x" + clip.x);
+			//									logger.info("clip.y" + clip.y);
+			//									logger.info("clip.width" + clip.width);
+			//									logger.info("clip.height" + clip.height);
+			//
+
+			// First fill background
+			//long fillStartTime = System.currentTimeMillis();
+			g2d.setColor(this.getBackground());
+			g2d.fill(clip);
+			//long fillTime = System.currentTimeMillis() - fillStartTime;
+			//logger.info("fillTime" + fillTime);
+
+			if (img != null){
+				//											logger.info(img.getHeight(null));
+				//											logger.info(img.getWidth(null));
+				//											logger.info("clip.y=" + clip.y);
+				//											logger.info("x=" + (int)(xMin * charWidth));
+				//											logger.info("y=" + (int)(yMin * charHeight));
+
+				// Mac retina screen
+				if(highDPIScaleFactor > 1){
+
+					//translate and scale with AffineTransform
+					//	                AffineTransform affineTransform = new AffineTransform();
+					//	                affineTransform.translate((int)(xMin * charWidth),(int)(yMin * charHeight));
+					//	                affineTransform.scale(0.5, 0.5);
+					//	                Graphics2D g2 = (Graphics2D) g;
+					//	                g2.drawImage(img, affineTransform, null);			
+
+
+					int dx1 = clip.x;
+					int dx2 = dx1 + clipRGB.getScanWidth() / highDPIScaleFactor;
+					int dy1 = clip.y;
+					int dy2 = dy1 + clipRGB.getHeight() / highDPIScaleFactor;
+
+					int sx1 = 0;
+					int sx2 = sx1 + clipRGB.getScanWidth();
+					int sy1 = 0;
+					int sy2 = sy1 + clipRGB.getHeight();
+
+					//  g.drawImage(img, clip.x, clip.y, null);
+
+					g2d.drawImage(img, dx1,dy1,dx2,dy2,sx1,sy1,sx2,sy2, null);
+					//g.drawImage(img, (int)(xMin * charWidth), (int)(yMin * charHeight), null);
+
+					// normal
+				}else{
+					g2d.drawImage(img, clip.x, clip.y, null);
+					//g.drawImage(img, (int)(xMin * charWidth), (int)(yMin * charHeight),null);
+				}		
+			}
+
+			// Draw excludes - only if not isShowTranslationOnePos
+			if(! isShowTranslationOnePos()){
+				// calculaate height for excludes (this is to avoid drawing below alignment if alignment is not filling panel)
+				int drawExcludesHeight = (int) Math.min(this.getVisibleRect().getHeight(), alignment.getSize()  * charHeight);
+				//for(int x = xMin; x < xMax ; x++){
+				for(int x = clip.x; x < clip.getMaxX() ; x++){
+					int xPos =(int)((double)x * (1/(double)charWidth));
+					if(alignment.isExcluded(xPos) == true){
+						g2d.setColor(ColorScheme.GREY_TRANSPARENT);
+						g2d.fillRect(x, this.getVisibleRect().y, 1, drawExcludesHeight);
+						//				logger.info("drawExclude");
+					}
+				}	
+			}
+		}	
+
+
+		/////////////////////////
+		//
+		// Normal char width
+		//
+		/////////////////////////
+		else{
+			//			if(showTranslationOnePos){			
+			//
+			//				int maxX = xMax;
+			//				if(maxX > alignment.getAlignentMeta().getCodonPositions().getLengthOfTranslatedPos()){
+			//					maxX = alignment.getAlignentMeta().getCodonPositions().getLengthOfTranslatedPos();
+			//				}
+			//
+			//				int clipY = 0;
+			//				for(int y = yMin; y < yMax; y = y + 1){
+			//
+			//					aaTransSeq.setSequence(alignment.getSequences().get(y));
+			//
+			//					// X Loop Start
+			//					int clipX = 0;
+			//					for(int x = xMin; x < maxX ; x++){
+			//
+			//						AminoAcid acid;
+			//						if(ignoreGapInTranslation){
+			//							acid = aaTransSeq.getAAinNoGapTranslatedPos(x);
+			//						}else{
+			//							acid = aaTransSeq.getAAinTranslatedPos(x);
+			//						}
+			//						copyAminoAcidPixels(clipRGB,(byte)acid.getCodeCharVal(),x,y,(int)(clipX*charWidth*highDPIScaleFactor), (int)(clipY*charHeight*highDPIScaleFactor));
+			//
+			//						clipX ++;
+			//					}		
+			//					clipY ++;
+			//				}// y loop end		
+			//			}else{
+			// Most normal one
+
+			int clipY = 0;			
+			for(int y = yMin; y < yMax; y = y + 1){
+
+				// X Loop Start
+				int clipX = 0;
+				for(int x = xMin; x < xMax ; x++){
+
+					byte residue = alignment.getBaseAt(x,y);
+					// Draw as nucleotides
+					if(isNucleotideAlignment){
+						// Draw as translated
+						if(isShowTranslationOnePos()){
+
+							copyAminoAcidPixels(clipRGB,residue,x,y,(int)(clipX*charWidth*highDPIScaleFactor), (int)(clipY*charHeight*highDPIScaleFactor));			
+
+						}else if(showTranslation && !isShowTranslationOnePos()){
+
+							if(ignoreGapInTranslation){
+								AminoAcidAndPosition aaAndPos = alignment.getSequences().get(y).getNoGapAminoAcidAtNucleotidePos(x);
+								copyTranslatedNucleotidesPixelsSkipGap(clipRGB,residue,aaAndPos.acid,x,y,(int)(clipX*charWidth*highDPIScaleFactor), (int)(clipY*charHeight*highDPIScaleFactor), aaAndPos.position);
+							}
+							else{
+								AminoAcid aminoAcid = alignment.getTranslatedAminoAcidAtNucleotidePos(x,y);
+								if(showTranslationAndNuc){
+									copyTranslatedNucleotidesPixelsShowTranslationAndNuc(clipRGB,residue,aminoAcid,x,y,(int)(clipX*charWidth*highDPIScaleFactor), (int)(clipY*charHeight*highDPIScaleFactor), alignment.getSequences().get(y));
+								}else{
+									copyTranslatedNucleotidesPixels(clipRGB,residue,aminoAcid,x,y,(int)(clipX*charWidth*highDPIScaleFactor), (int)(clipY*charHeight*highDPIScaleFactor), alignment.getSequences().get(y));
+								}	
+							}
+
+						}else{
+							copyNucleotidePixels(clipRGB,residue,x,y,(int)(clipX*charWidth*highDPIScaleFactor), (int)(clipY*charHeight*highDPIScaleFactor));					
+						}
+					}
+					// Draw as AminoAcids
+					else{
+						copyAminoAcidPixels(clipRGB,residue,x,y,(int)(clipX*charWidth*highDPIScaleFactor), (int)(clipY*charHeight*highDPIScaleFactor));	
+					}
+					clipX ++;
+				}		
+				clipY ++;
+			}// x loop end
+			//	}// y loop end
+
+			//			logger.info(clip);
+			//						
+			//						for(int n = 0; n <clipRGB.getBackend().length; n++){
+			//							clipRGB.getBackend()[n] = ColorUtils.addTranspGrey(clipRGB.getBackend()[n], 0.45);
+			//							clipRGB.getBackend()[n] = clipRGB.getBackend()[n] | 0x333333;
+			//							getGolorVal(getR)
+			//						}
+
+
+			//						// Draw excludes (by manipulating color val)
+			//						if(! showTranslationOnePos){
+			//							// calculaate height for excludes (this is to avoid drawing below alignment if alignment is not filling panel)
+			//							int drawExcludesHeight = (int) Math.min(this.getVisibleRect().getHeight(), alignment.getSize()  * charHeight);
+			//							for(int x = xMin; x < xMax ; x++){
+			//								if(alignment.isExcluded(x) == true){
+			//									g2d.setColor(ColorScheme.GREY_TRANSPARENT);
+			//									g2d.fillRect((int)(x * charWidth), this.getVisibleRect().y, (int)charWidth, drawExcludesHeight);				
+			//								}
+			//							}
+			//						}
+
+
+			// First fill background
+			//long fillStartTime = System.currentTimeMillis();
+			g2d.setColor(this.getBackground());
+			g2d.fill(clip);
+			//			Rectangle larger = new Rectangle(clip);
+			//			larger.grow(300, 300);
+			//long fillTime = System.currentTimeMillis() - fillStartTime;
+			//logger.info("fillTime" + fillTime);
+
+			// Now draw the pixels
+			Image img = createImage(new MemoryImageSource(clipRGB.getScanWidth(), clipRGB.getHeight(), clipRGB.getBackend(), 0, clipRGB.getScanWidth()));
+
+			//						logger.info(clipRGB.getBackend().length);
+			//						logger.info("img.getWidth" + img.getWidth(null));
+			//						logger.info("img.getHeight" + img.getHeight(null));
+			//			
+			//			
+			//						logger.info("xMin" + xMin);
+			//						
+			//						logger.info("clip.width" + clip.width);
+			//						logger.info("clip.height" + clip.height);
+			//
+
+
+
+			if (img != null){
+				//								logger.info(img.getHeight(null));
+				//								logger.info("x=" + (int)(xMin * charWidth));
+				//								logger.info("y=" + (int)(yMin * charHeight));
+				//								logger.info("clip.x" + clip.x);
+				//								logger.info("clip.y" + clip.y);
+				//g.drawImage(img, clip.x, clip.y, clip.width, clip.height, null);
+				if(highDPIScaleFactor > 1){
+
+					//translate and scale with AffineTransform
+					//	                AffineTransform affineTransform = new AffineTransform();
+					//	                affineTransform.translate((int)(xMin * charWidth),(int)(yMin * charHeight));
+					//	                affineTransform.scale(0.5, 0.5);
+					//	                Graphics2D g2 = (Graphics2D) g;
+					//	                g2.drawImage(img, affineTransform, null);			
+
+
+					int dx1 = (int)(xMin * charWidth);
+					int dx2 = dx1 + clipRGB.getScanWidth() / highDPIScaleFactor;
+					int dy1 = (int)(yMin * charHeight);
+					int dy2 = dy1 + clipRGB.getHeight() / highDPIScaleFactor;
+
+					int sx1 = 0;
+					int sx2 = sx1 + clipRGB.getScanWidth();
+					int sy1 = 0;
+					int sy2 = sy1 + clipRGB.getHeight();
+
+					logger.info("dx1" + dx1);
+					logger.info("dx2" + dx2);
+
+					logger.info("sx1" + sx1);
+					logger.info("sx2" + sx2);
+
+					g2d.drawImage(img, dx1,dy1,dx2,dy2,sx1,sy1,sx2,sy2, null);
+					//g.drawImage(img, (int)(xMin * charWidth), (int)(yMin * charHeight), null);
+
+				}else{
+					g2d.drawImage(img, (int)(xMin * charWidth), (int)(yMin * charHeight),null);
+				}
+				//
+				//			    try {
+				//			    	BufferedImage buffImg = ImageUtils.toBufferedImage(img);
+				//					ImageIO.write(buffImg, "png", new File("/home/anders/tmp/aliviewpane.png"));
+				//				} catch (IOException e) {
+				//					// TODO Auto-generated catch block
+				//					e.printStackTrace();
+				//				}
+				//			    
+			}
+
+			//			Rectangle testRect = new Rectangle(350, 200, 400, 400);		
+			//			Color randomColor = new Color((int)(Math.random()*255), (int)(Math.random()*255),(int)(Math.random()*255));		
+			//			g2d.setColor(randomColor);
+			//			g2d.fill(testRect);
+
+
+
+
+			// Draw excludes
+			if(! isShowTranslationOnePos()){
+				// calculaate height for excludes (this is to avoid drawing below alignment if alignment is not filling panel)
+				int drawExcludesHeight = (int) Math.min(this.getVisibleRect().getHeight(), alignment.getSize()  * charHeight);
+				for(int x = xMin; x < xMax ; x++){
+					if(alignment.isExcluded(x) == true){
+
+						g2d.setColor(ColorScheme.GREY_TRANSPARENT);
+						g2d.fillRect((int)(x * charWidth), this.getVisibleRect().y, (int)charWidth, drawExcludesHeight);				
+					}
+				}
+			}
+		}
+	}
+	
 
 }
 

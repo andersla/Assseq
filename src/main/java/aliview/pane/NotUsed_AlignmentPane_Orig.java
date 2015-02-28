@@ -1,4 +1,4 @@
-package aliview.gui;
+package aliview.pane;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -28,7 +28,7 @@ import aliview.AminoAcid;
 import aliview.Base;
 import aliview.NucleotideUtilities;
 import aliview.alignment.AAHistogram;
-import aliview.alignment.AATranslator;
+import aliview.alignment.NotUsed_AATranslator;
 import aliview.alignment.AliHistogram;
 import aliview.alignment.Alignment;
 import aliview.alignment.NucleotideHistogram;

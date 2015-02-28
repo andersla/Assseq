@@ -16,8 +16,8 @@ import aliview.NucleotideUtilities;
 import aliview.sequences.Sequence;
 import aliview.sequences.SequenceUtils;
 
-public class AATranslator{
-	private static final Logger logger = Logger.getLogger(AATranslator.class);
+public class NotUsed_AATranslator{
+	private static final Logger logger = Logger.getLogger(NotUsed_AATranslator.class);
 	CodonPositions codonPositions;
 	private Sequence sequence;
 	private GeneticCode genCode;
@@ -25,7 +25,7 @@ public class AATranslator{
 	private int cachedAminoTripletAcidPos = -1;
 	private AminoAcid cachedAminoAcid;
 	
-	public AATranslator(CodonPositions codonPositions, GeneticCode genCode) {
+	public NotUsed_AATranslator(CodonPositions codonPositions, GeneticCode genCode) {
 		this.codonPositions = codonPositions;
 		this.genCode = genCode;
 	}
