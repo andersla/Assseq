@@ -1,4 +1,4 @@
-package aliview.pane;
+package aliview.gui.pane;
 
 import org.apache.log4j.Logger;
 

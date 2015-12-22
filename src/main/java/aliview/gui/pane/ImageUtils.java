@@ -1,4 +1,4 @@
-package aliview.pane;
+package aliview.gui.pane;
 
 import java.awt.Graphics2D;
 import java.awt.Image;

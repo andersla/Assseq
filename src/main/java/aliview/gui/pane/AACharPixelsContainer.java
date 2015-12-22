@@ -1,4 +1,4 @@
-package aliview.pane;
+package aliview.gui.pane;
 
 import java.awt.Color;
 import java.awt.Font;

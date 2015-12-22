@@ -1,4 +1,4 @@
-package aliview.pane;
+package aliview.gui.pane;
 
 import org.apache.log4j.Logger;
 
@@ -44,27 +44,30 @@ public abstract class SequencePainter implements Runnable{
 		this.alignment = alignment;
 	}
 
-	public void run() {
-		drawSequence(seq, seqYPos, clipPosY, xMinSeqPos, xMaxSeqPos, seqPerPix, charWidth, charHeight, highDPIScaleFactor, clipRGB, aliPane, alignment);
+	public void run(){
+		// TODO maybe check before that sequence not is null
+		if(seq != null){
+			drawSequence(seq, seqYPos, clipPosY, xMinSeqPos, xMaxSeqPos, seqPerPix, charWidth, charHeight, highDPIScaleFactor, clipRGB, aliPane, alignment);
+		}
 	}
 	
 	public void drawSequence(Sequence seq, int seqYPos, int clipPosY, int xMin, int xMax, double seqPerPix, double charWidth, double charHeight, double highDPIScaleFactor,
 			                  RGBArray clipRGB, AlignmentPane aliPane, Alignment alignment){
 		
 		// Make sure not outside length of seq
-		int seqLength = seq.getLength();
-		int clipPosX = 0;
-		for(int x = xMin; x < xMax && x >=0 ; x ++){
-			int seqXPos = (int)((double)x * seqPerPix);
-			if(seqXPos >=0 && seqXPos < seqLength){
-				int pixelPosX = (int)(clipPosX*charWidth*highDPIScaleFactor);
-				int pixelPosY = (int)(clipPosY*charHeight*highDPIScaleFactor);
-				
-				if(pixelPosX < clipRGB.getScanWidth() && pixelPosY < clipRGB.getHeight()){
-					copyPixels(seq, clipRGB, seqXPos, seqYPos,pixelPosX, pixelPosY, aliPane, alignment);
+			int seqLength = seq.getLength();
+			int clipPosX = 0;
+			for(int x = xMin; x < xMax && x >=0 ; x ++){
+				int seqXPos = (int)((double)x * seqPerPix);
+				if(seqXPos >=0 && seqXPos < seqLength){
+					int pixelPosX = (int)(clipPosX*charWidth*highDPIScaleFactor);
+					int pixelPosY = (int)(clipPosY*charHeight*highDPIScaleFactor);
+					
+					if(pixelPosX < clipRGB.getScanWidth() && pixelPosY < clipRGB.getHeight()){
+						copyPixels(seq, clipRGB, seqXPos, seqYPos,pixelPosX, pixelPosY, aliPane, alignment);
+					}
 				}
-			}
-			clipPosX ++;
+				clipPosX ++;
 		}
 	}
 	

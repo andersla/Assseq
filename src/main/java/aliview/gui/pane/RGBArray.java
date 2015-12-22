@@ -1,4 +1,4 @@
-package aliview.pane;
+package aliview.gui.pane;
 
 public class RGBArray {
 	

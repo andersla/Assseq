@@ -1,4 +1,4 @@
-package aliview.messenges;
+package aliview.gui;
 
 import java.awt.Dialog.ModalityType;
 import java.awt.Dimension;
@@ -12,26 +12,23 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-
 import aliview.AliViewWindow;
 
 public class TextEditDialog {
 	private static final String LF = System.getProperty("line.separator");
-	public static final Message EDIT_SEQUENCE_NAME = new Message("", "Rename sequence");
+	public static final String EDIT_SEQUENCE_NAME_TEXT = "Rename sequence";
 	private static JTextField textEdit;
 	protected Integer selectedValue = -1;
 	private Point preferredPos;
-	
-
 	
 	public TextEditDialog(Point pos) {
 		this.preferredPos = pos;
 	}
 
-	public void showOKCancelTextEditor(String editString, Message message, AliViewWindow aliViewWindow) {
+	public void showOKCancelTextEditor(String editString, String title, AliViewWindow aliViewWindow) {
 		
 		final JDialog dialog = new JDialog(aliViewWindow);
-		dialog.setTitle(message.title);
+		dialog.setTitle(title);
 		dialog.setModal(true);
 		dialog.setAlwaysOnTop(true);
 		dialog.setModalityType(ModalityType.DOCUMENT_MODAL);

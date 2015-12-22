@@ -1,4 +1,4 @@
-package aliview;
+package aliview.gui;
 
 import java.awt.Point;
 import java.awt.event.AdjustmentEvent;
@@ -14,6 +14,7 @@ import java.awt.event.MouseWheelListener;
 import javax.swing.JScrollPane;
 import javax.swing.plaf.basic.BasicSplitPaneUI.BasicVerticalLayoutManager;
 
+import aliview.AliViewWindow;
 import utils.OSNativeUtils;
 
 public class ScrollPaneSyncKeyAndMouseWheelListener implements MouseWheelListener, MouseMotionListener, MouseListener, KeyListener{

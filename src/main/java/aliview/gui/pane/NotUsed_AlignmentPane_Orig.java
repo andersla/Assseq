@@ -1,4 +1,4 @@
-package aliview.pane;
+package aliview.gui.pane;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -789,7 +789,7 @@ public class NotUsed_AlignmentPane_Orig extends JPanel{
 				// no color on gap even if they are in maj.cons
 			}
 			else if(alignment.getHistogram().isMajorityRuleConsensus(x,acid.intVal)){
-				baseBackgroundColor = colorSchemeAminoAcid.getAminiAcidConsensusBackgroundColor();
+				baseBackgroundColor = colorSchemeAminoAcid.getAminoAcidConsensusBackgroundColor();
 				//baseBackgroundColor = colorSchemeAminoAcid.getAminoAcidBackgroundColor(AminoAcid.GAP);
 			}
 		}
@@ -800,7 +800,7 @@ public class NotUsed_AlignmentPane_Orig extends JPanel{
 				// no color on gap even if they are in maj.cons
 			}
 			else if(! alignment.getHistogram().isMajorityRuleConsensus(x,acid.intVal)){
-				baseBackgroundColor = colorSchemeAminoAcid.getAminiAcidConsensusBackgroundColor();
+				baseBackgroundColor = colorSchemeAminoAcid.getAminoAcidConsensusBackgroundColor();
 				//baseBackgroundColor = colorSchemeAminoAcid.getAminoAcidBackgroundColor(AminoAcid.GAP);
 			}
 		}
