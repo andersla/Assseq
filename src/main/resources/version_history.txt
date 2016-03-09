@@ -1,6 +1,6 @@
 Version history
 
-1.18-beata8
+1.18
 
 - Big rewrite of code handling selection. Improvements and more standardized mouse selection of sequences (compared to other software)
 - Fixed bug when saving alignment in Phylip format with "Save" command, padding was lost.
