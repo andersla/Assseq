@@ -6,14 +6,14 @@ import org.apache.log4j.Logger;
 import aliview.utils.ArrayUtilities;
 
 
-public class InMemorySequence extends BasicSequence{
-	private static final Logger logger = Logger.getLogger(InMemorySequence.class);
+public class InMemoryTraceSequence extends BasicTraceSequence{
+	private static final Logger logger = Logger.getLogger(InMemoryTraceSequence.class);
 
-	public InMemorySequence(String name, String basesAsString) {
+	public InMemoryTraceSequence(String name, String basesAsString) {
 		this(name, basesAsString.getBytes());
 	}
 
-	public InMemorySequence(String name, byte[] bytes) {
+	public InMemoryTraceSequence(String name, byte[] bytes, byte[] qCalls, byte[] traceA, byte[] traceG, byte[] traceC, byte[] traceT) {
 		super();
 		// replace all . with -
 		if(bytes != null){
@@ -21,9 +21,11 @@ public class InMemorySequence extends BasicSequence{
 		}
 
 		this.bases = new DefaultBases(bytes);
+		this.qCalls = 
 		this.name = name;
 
 	}
+
 
 	public void setBases(byte[] bytes) {
 		logger.info("setnewbases");

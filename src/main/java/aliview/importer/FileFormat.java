@@ -42,6 +42,8 @@ public class FileFormat {
 	public static final FileFormat NEXUS_TRANSLATED_AMINO_ACID = new FileFormat("NexusTranslated", "translated.nexus", "translated.nex");
 	public static final FileFormat FASTA_TRANSLATED_AMINO_ACID = new FileFormat("FastaTranslated", "translated.fasta", "translated.fas");
 
+	public static final FileFormat ABI = new FileFormat("ABI", "ab1", "ab1");
+
 
 	public static void main(String[] args) {
 		//FileFormat ffFileTest = new FileFormat();

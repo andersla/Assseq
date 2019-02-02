@@ -92,6 +92,25 @@ public class SequencesFactory {
 			// check file-format
 			FileFormat foundFormat = FileFormat.isFileOfAlignmentFormat(alignmentFile);
 
+			if(foundFormat == FileFormat.ABI){
+
+				try {
+					ABIImporter abiImporter = new ABIImporter(alignmentFile);
+					List<Sequence> sequences = abiImporter.importSequences();
+					model = new MemorySequenceAlignmentListModel();
+					model.setSequences(sequences);
+					model.setFileFormat(FileFormat.ABI);
+				} catch (FileNotFoundException e) {
+					importErrorMessage += "Tried import as ABI but: " + e.getMessage() + LF;
+					logger.error(importErrorMessage);
+					logger.error(e);
+				} catch (AlignmentImportException aie){
+					if(aie.getMessage().contains("Sequence to long for memory")){
+						memorySequences = false;
+					}
+				}
+			}
+			
 			if(foundFormat == FileFormat.FASTA){
 
 				try {
