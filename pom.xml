@@ -1,18 +1,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>AliView</groupId>
-  <artifactId>AliView</artifactId>
+  <groupId>Assseq</groupId>
+  <artifactId>Assseq</artifactId>
   <packaging>jar</packaging>
-  <version>1.25</version>
-  <name>AliView</name>
+  <version>0.1</version>
+  <name>Assseq</name>
   <url>http://maven.apache.org</url>
   <properties>
        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-       <project.bundle.mainclass>aliview.AliView</project.bundle.mainclass>
+       <project.bundle.mainclass>aliview.Assseq</project.bundle.mainclass>
 	   <project.organization.name>NBIS</project.organization.name>
-       <project.bundle.appname>AliView</project.bundle.appname>
+       <project.bundle.appname>Assseq</project.bundle.appname>
        <project.bundle.icon>bla</project.bundle.icon>
   </properties>
   <repositories>
@@ -84,7 +84,7 @@
                 </descriptorRefs>
                 <archive>
                    <manifest>
-                      <mainClass>aliview.AliView</mainClass>
+                      <mainClass>aliview.Assseq</mainClass>
                    </manifest>
                    <manifestEntries>
                      <SplashScreen-Image>img/splash_128x128.png</SplashScreen-Image>
@@ -108,7 +108,7 @@
 					   </descriptorRefs>
 					   <archive>
 						  <manifest>
-							 <mainClass>aliview.AliView</mainClass>
+							 <mainClass>aliview.Assseq</mainClass>
 						  </manifest>
 						  <manifestEntries>
                             <SplashScreen-Image>img/splash_128x128.png</SplashScreen-Image>
@@ -132,7 +132,7 @@
 					  </descriptorRefs>
 					  <archive>
 							<manifest>
-							  <mainClass>aliview.AliView</mainClass>
+							  <mainClass>aliview.Assseq</mainClass>
 							</manifest>
 							<manifestEntries>
                                <SplashScreen-Image>img/splash_128x128.png</SplashScreen-Image>
@@ -155,7 +155,7 @@
 						  </descriptorRefs>
 						  <archive>
 							<manifest>
-							  <mainClass>aliview.AliView</mainClass>
+							  <mainClass>aliview.Assseq</mainClass>
 							</manifest>
 							<manifestEntries>
                                <SplashScreen-Image>img/splash_128x128.png</SplashScreen-Image>
