@@ -15,8 +15,8 @@ import javax.swing.JOptionPane;
 import org.apache.log4j.Logger;
 
 import utils.DialogUtils;
-import aliview.AliView;
-import aliview.AliViewWindow;
+import aliview.Assseq;
+import aliview.AssseqWindow;
 import aliview.AminoAcid;
 import aliview.gui.AliViewJMenuBar;
 import aliview.settings.Settings;
@@ -125,12 +125,12 @@ public class Messenger {
 	}
 
 	public static void showOKOnlyMessage(Message message) {
-		showOKOnlyMessage(message, "",  AliView.getActiveWindow());
+		showOKOnlyMessage(message, "",  Assseq.getActiveWindow());
 	}
 
 
 	public static void showOKOnlyMessage(Message message, String appendMessageText) {
-		showOKOnlyMessage(message, appendMessageText,  AliView.getActiveWindow());
+		showOKOnlyMessage(message, appendMessageText,  Assseq.getActiveWindow());
 	}
 
 	public static void showOKOnlyMessage(Message message, String appendMessageText, JFrame parentFrame) {
@@ -243,7 +243,7 @@ public class Messenger {
 		return lastSelectedOption;
 	}
 
-	public static void showCountStopCodonMessage(int count, AliViewWindow aliViewWindow) {
+	public static void showCountStopCodonMessage(int count, AssseqWindow aliViewWindow) {
 		Message countMessage = new Message("Stop codons in alignment: " + count, "Stop codon count");
 		showOKOnlyMessage(countMessage, aliViewWindow);
 	}
@@ -284,7 +284,7 @@ public class Messenger {
 					"Duplicate name(s) " + prep + ": " + dupeString, 
 					"Duplicate sequence names");
 
-			boolean hideMessageNextTime = showOKOnlyMessageWithCbx(dupeMessage, hideMessage, AliView.getActiveWindow());
+			boolean hideMessageNextTime = showOKOnlyMessageWithCbx(dupeMessage, hideMessage, Assseq.getActiveWindow());
 			Settings.getHideDuplicateSeqNamesMessage().putBooleanValue(hideMessageNextTime);
 		}
 
@@ -301,7 +301,7 @@ public class Messenger {
 					"and you might need to replace them with X in your alignment.",
 					"Problem characters");
 
-			boolean hideMessageNextTime = showOKCancelMessageWithCbx(invalCharMessage, hideMessage, AliView.getActiveWindow());
+			boolean hideMessageNextTime = showOKCancelMessageWithCbx(invalCharMessage, hideMessage, Assseq.getActiveWindow());
 
 			Settings.getHideAlignmentProgramInvalidCharsInfoMessage().putBooleanValue(hideMessageNextTime);
 		}
@@ -331,7 +331,7 @@ public class Messenger {
 		if(hideMessage){
 			allowEditMode = true;
 		}else{
-			boolean hideMessageNextTime = showOKCancelMessageWithCbx(EDIT_MODE_QUESTION, hideMessage, AliView.getActiveWindow());
+			boolean hideMessageNextTime = showOKCancelMessageWithCbx(EDIT_MODE_QUESTION, hideMessage, Assseq.getActiveWindow());
 			Settings.getHideAskBeforeEditMode().putBooleanValue(hideMessageNextTime);
 			if(getLastSelectedOption() == JOptionPane.OK_OPTION){
 				allowEditMode = true;

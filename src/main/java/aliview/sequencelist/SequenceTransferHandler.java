@@ -16,8 +16,8 @@ import javax.swing.TransferHandler;
 
 import org.apache.log4j.Logger;
 
-import aliview.AliView;
-import aliview.AliViewWindow;
+import aliview.Assseq;
+import aliview.AssseqWindow;
 import aliview.sequences.Sequence;
 
 
@@ -36,9 +36,9 @@ public class SequenceTransferHandler extends TransferHandler {
 	private final DataFlavor LOCAL_OBJECT_FLAVOR = new ActivationDataFlavor(Object[].class, DataFlavor.javaJVMLocalObjectMimeType, "Array of items");
 	private Object[] transferedObjects = null;
 	private JComponent source = null;
-	private AliViewWindow aliWindow;
+	private AssseqWindow aliWindow;
 
-	public SequenceTransferHandler(AliViewWindow aliWindow) {
+	public SequenceTransferHandler(AssseqWindow aliWindow) {
 		this.aliWindow = aliWindow;
 	}
 

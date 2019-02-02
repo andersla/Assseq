@@ -11,7 +11,7 @@ import javax.swing.event.ListSelectionListener;
 
 import org.apache.log4j.Logger;
 
-import aliview.AliViewWindow;
+import aliview.AssseqWindow;
 import aliview.alignment.Alignment;
 import aliview.gui.pane.AlignmentPane;
 
@@ -19,10 +19,10 @@ public class NotUsed_AlignmentDataAndSelectionListener implements AlignmentSelec
 
 	private Logger logger = Logger.getLogger(NotUsed_AlignmentDataAndSelectionListener.class);
 	private AlignmentPane alignmentPane;
-	private AliViewWindow aliViewWindow;
+	private AssseqWindow aliViewWindow;
 	private SequenceJList aliList;
 
-	public NotUsed_AlignmentDataAndSelectionListener(AlignmentPane aliPane, AliViewWindow aliWindow, SequenceJList aliList) {
+	public NotUsed_AlignmentDataAndSelectionListener(AlignmentPane aliPane, AssseqWindow aliWindow, SequenceJList aliList) {
 		this.alignmentPane = aliPane;
 		this.aliViewWindow = aliWindow;
 		this.aliList = aliList;

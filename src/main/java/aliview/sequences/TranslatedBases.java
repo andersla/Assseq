@@ -12,7 +12,7 @@ import org.apache.log4j.Logger;
 
 import utils.nexus.CodonPos;
 import utils.nexus.CodonPositions;
-import aliview.AliView;
+import aliview.Assseq;
 import aliview.AminoAcid;
 import aliview.GeneticCode;
 import aliview.NucleotideUtilities;

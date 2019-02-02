@@ -32,7 +32,7 @@ import javax.swing.text.StyledEditorKit.BoldAction;
 
 import org.apache.log4j.Logger;
 
-import aliview.AliViewWindow;
+import aliview.AssseqWindow;
 import aliview.externalcommands.CommandItem;
 import aliview.old.MyScrollPane;
 import aliview.settings.Settings;
@@ -41,7 +41,7 @@ public class AlignerALLItemsFrame extends JFrame {
 	private static final Logger logger = Logger.getLogger(AlignerALLItemsFrame.class);
 	JPanel mainPanel;
 
-	public AlignerALLItemsFrame(final AliViewWindow aliViewWin){
+	public AlignerALLItemsFrame(final AssseqWindow aliViewWin){
 
 		getContentPane().add(new AlignerALLItemsPanel(this), BorderLayout.CENTER);
 

@@ -26,8 +26,8 @@ public class AlignmentTest {
 		Logger.getRootLogger().setLevel(Level.DEBUG);
 		URL fileUrl = new AlignmentTest().getClass().getResource("/woodsia_chloropl_excl_hybrid.fasta");
 		File fastaNucleotideFile = new File(fileUrl.getFile());
-		AliView.openAlignmentFile(fastaNucleotideFile);
-		AliViewWindow aliWin = AliView.getActiveWindow();
+		Assseq.openAlignmentFile(fastaNucleotideFile);
+		AssseqWindow aliWin = Assseq.getActiveWindow();
 		alignment = aliWin.getAlignment();
 	}
 

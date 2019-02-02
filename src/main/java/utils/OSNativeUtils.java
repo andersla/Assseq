@@ -20,7 +20,7 @@ import org.apache.log4j.Logger;
 import org.simplericity.macify.eawt.Application;
 import org.simplericity.macify.eawt.DefaultApplication;
 
-import aliview.AliView;
+import aliview.Assseq;
 
 public class OSNativeUtils {
 	private static final Logger logger = Logger.getLogger(OSNativeUtils.class);
@@ -611,7 +611,7 @@ public class OSNativeUtils {
 	 * Register through reflection and other OS wont be affected
 	 * 
 	 */
-	public static boolean registerMacAdapter(AliView aliView) {
+	public static boolean registerMacAdapter(Assseq aliView) {
 		boolean registerOK = false;
 
 		if(isMac()){

@@ -23,7 +23,7 @@ import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
 
-import aliview.AliView;
+import aliview.Assseq;
 import aliview.AminoAcid;
 import aliview.Base;
 import aliview.NucleotideUtilities;

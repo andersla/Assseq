@@ -13,18 +13,18 @@ import javax.swing.border.EmptyBorder;
 
 import org.apache.log4j.Logger;
 
-import aliview.AliViewWindow;
+import aliview.AssseqWindow;
 import aliview.gui.AppIcons;
 import utils.OSNativeUtils;
 
 public class PrimerDetailFrame extends JFrame {
 	private static final Logger logger = Logger.getLogger(PrimerDetailFrame.class);
 	JPanel mainPanel = new JPanel();
-	private AliViewWindow aliViewWindow;
+	private AssseqWindow aliViewWindow;
 	JTextArea mainTextArea;
 	private Font textFont = new Font(OSNativeUtils.getMonospacedFontName(), Font.PLAIN, 11);
 
-	public PrimerDetailFrame(AliViewWindow aliViewWin) {
+	public PrimerDetailFrame(AssseqWindow aliViewWin) {
 		this.aliViewWindow = aliViewWin;
 		mainPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		mainPanel.setBackground(Color.WHITE);

@@ -9,7 +9,7 @@ import javax.swing.ImageIcon;
 
 import org.apache.log4j.Logger;
 
-import aliview.AliViewWindow;
+import aliview.AssseqWindow;
 
 public class AppIcons {
 	private static final Logger logger = Logger.getLogger(AppIcons.class);
@@ -154,7 +154,7 @@ public class AppIcons {
 
 	private static ImageIcon createIcon(String fileName) {
 
-		URL resource = AliViewWindow.class.getResource(fileName);
+		URL resource = AssseqWindow.class.getResource(fileName);
 		if(resource != null){
 			Image image = Toolkit.getDefaultToolkit().getImage(resource);
 			return new ImageIcon(image);

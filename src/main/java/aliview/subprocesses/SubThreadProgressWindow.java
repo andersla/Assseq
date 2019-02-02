@@ -14,7 +14,7 @@ import javax.swing.SwingUtilities;
 
 import org.apache.log4j.Logger;
 
-import aliview.AliViewWindow;
+import aliview.AssseqWindow;
 import aliview.gui.AppIcons;
 
 

@@ -8,7 +8,7 @@ import javax.swing.event.ListSelectionListener;
 
 import org.apache.log4j.Logger;
 
-import aliview.AliView;
+import aliview.Assseq;
 import aliview.sequences.Sequence;
 
 public class SequenceListSelectionModel extends DefaultListSelectionModel {

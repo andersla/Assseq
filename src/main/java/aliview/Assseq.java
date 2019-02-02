@@ -52,14 +52,14 @@ import aliview.messenges.Messenger;
 import aliview.settings.Settings;
 import aliview.test.Test;
 
-public class AliView implements ApplicationListener{
+public class Assseq implements ApplicationListener{
 
 	private static final String LF = System.getProperty("line.separator");
 	private static final AliViewJMenuBarFactory menuBarFactory = new AliViewJMenuBarFactory();
-	private static AliView aliView;
-	private static ArrayList<AliViewWindow> aliViewWindows = new ArrayList<AliViewWindow>();
-	private static AliViewWindow activeWindow = null;
-	private static final Logger logger = Logger.getLogger(AliView.class);
+	private static Assseq aliView;
+	private static ArrayList<AssseqWindow> aliViewWindows = new ArrayList<AssseqWindow>();
+	private static AssseqWindow activeWindow = null;
+	private static final Logger logger = Logger.getLogger(Assseq.class);
 	private static File savedInitialArgumentAlignmentForMac = null;
 	private static boolean debugMode = false;
 
@@ -80,7 +80,7 @@ public class AliView implements ApplicationListener{
 
 
 		//logger.info("version " + AliView.getVersion());
-		long time = AliView.getTime(AliView.class);
+		long time = Assseq.getTime(Assseq.class);
 		logger.info("version time " + new Date(time));
 
 		System.out.println("Time to here in ms = " + ( System.currentTimeMillis() - startTime));
@@ -150,10 +150,10 @@ public class AliView implements ApplicationListener{
 
 			// set debug mode
 			if(hasDebugArg || (debugEnv != null)){
-				AliView.setDebug(true);
+				Assseq.setDebug(true);
 			}
 			else{
-				AliView.setDebug(false);
+				Assseq.setDebug(false);
 			}
 
 
@@ -284,9 +284,9 @@ public class AliView implements ApplicationListener{
 				alignmentFile = null;
 			}
 
-			aliView = new AliView();
+			aliView = new Assseq();
 
-			if(AliView.isDebugMode() && alignmentFile == null){
+			if(Assseq.isDebugMode() && alignmentFile == null){
 				//		alignmentFile = new File("/home/anders/projekt/ormbunkar/analys/sekv_analysis/aligned-WoodsiatrnGR-mafft.fasta.nexus");
 				//File alignmentFile = new File("/home/anders/projekt/ormbunkar/analys/test_seqconcat/test_seqconcat.nexus");
 				//File alignmentFile = new File("/home/anders/projekt/ormbunkar/cytotree/sequences/rbcl_all_ferns.tiny.xml.fasta");
@@ -385,10 +385,10 @@ public class AliView implements ApplicationListener{
 
 			// for all non mac systems start here
 			if(! OSNativeUtils.isMac()){	
-				AliView.createNewAliViewWindow(alignmentFile);
+				Assseq.createNewAliViewWindow(alignmentFile);
 				// Nowadays mac is started same way
 			}else if(OSNativeUtils.isMac()){	
-				AliView.createNewAliViewWindow(alignmentFile);
+				Assseq.createNewAliViewWindow(alignmentFile);
 			}
 
 			// Create Application Adapter (only needed for OsX and register this AliView as listener of Application events (interface below)
@@ -438,7 +438,7 @@ public class AliView implements ApplicationListener{
 	/**
 	 * Create the application.
 	 */
-	public AliView() {
+	public Assseq() {
 	}
 
 
@@ -515,7 +515,7 @@ public class AliView implements ApplicationListener{
 
 	private static boolean hasNonEmptyWindows() {
 		boolean hasNonEmptyWin = false;
-		for(AliViewWindow aliWin: aliViewWindows){
+		for(AssseqWindow aliWin: aliViewWindows){
 			if(aliWin != null && !aliWin.isEmpty()){
 				hasNonEmptyWin = true;
 			}
@@ -528,7 +528,7 @@ public class AliView implements ApplicationListener{
 		createNewAliViewWindow(null);
 	}
 
-	public static AliViewWindow getActiveWindow(){
+	public static AssseqWindow getActiveWindow(){
 		return activeWindow;
 	}
 
@@ -536,7 +536,7 @@ public class AliView implements ApplicationListener{
 
 		try {
 
-			AliViewWindow newWin = new AliViewWindow(alignmentFile,menuBarFactory);
+			AssseqWindow newWin = new AssseqWindow(alignmentFile,menuBarFactory);
 
 			newWin.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			newWin.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -545,18 +545,18 @@ public class AliView implements ApplicationListener{
 			newWin.addWindowListener(new WindowAdapter() {
 
 				public void windowActivated(java.awt.event.WindowEvent e) {
-					AliViewWindow thisWin = (AliViewWindow) e.getWindow();
+					AssseqWindow thisWin = (AssseqWindow) e.getWindow();
 					activeWindow = thisWin;
 					logger.info("window activated");
 				}
 
 				public void windowClosing(WindowEvent e) {
-					AliViewWindow thisWin = (AliViewWindow) e.getWindow();
-					AliView.closeWindow(thisWin);
+					AssseqWindow thisWin = (AssseqWindow) e.getWindow();
+					Assseq.closeWindow(thisWin);
 				}
 
 				public void windowOpened(WindowEvent e) {
-					AliViewWindow thisWin = (AliViewWindow) e.getWindow();
+					AssseqWindow thisWin = (AssseqWindow) e.getWindow();
 
 					// Show dialog if sequence type was not detected
 					if(thisWin.getAlignment() != null && !thisWin.getAlignment().isEmptyAlignment() &&  thisWin.getAlignment().isUnknownAlignment()){
@@ -604,7 +604,7 @@ public class AliView implements ApplicationListener{
 
 	}
 
-	public static void closeWindow(AliViewWindow thisWin) {
+	public static void closeWindow(AssseqWindow thisWin) {
 		boolean isCloseOK = thisWin.requestWindowClose();
 
 		if(isCloseOK){
@@ -612,7 +612,7 @@ public class AliView implements ApplicationListener{
 			aliViewWindows.remove(thisWin);
 			// if this was last then quit
 			if(aliViewWindows.size() == 0){
-				AliView.quitProgram();
+				Assseq.quitProgram();
 			}
 
 		}
@@ -637,7 +637,7 @@ public class AliView implements ApplicationListener{
 		} 
 	}
 
-	private static void placeWithinDesktop(AliViewWindow newWin) {
+	private static void placeWithinDesktop(AssseqWindow newWin) {
 
 		logger.debug("Inside placeWithinDesktop");
 
@@ -661,7 +661,7 @@ public class AliView implements ApplicationListener{
 		// close all windows (ask if it is OK)
 		// reverse order since that is order you windows opened
 		for(int n = aliViewWindows.size() - 1; n >= 0; n--){
-			AliViewWindow window = aliViewWindows.get(n);		
+			AssseqWindow window = aliViewWindows.get(n);		
 			boolean isCloseOK = window.requestWindowClose();
 			if(isCloseOK){
 				window.dispose();
@@ -690,7 +690,7 @@ public class AliView implements ApplicationListener{
 
 	public static String getVersion() {
 		Properties versionProp = new Properties(); 
-		InputStream in = AliView.class.getResourceAsStream("/version.properties");
+		InputStream in = Assseq.class.getResourceAsStream("/version.properties");
 		String version = "";
 		try {
 			versionProp.load(in);
@@ -805,15 +805,15 @@ public class AliView implements ApplicationListener{
 	 */
 
 	public static void doMacPrintFile(){
-		AliView.activeWindow.printAlignment();
+		Assseq.activeWindow.printAlignment();
 	}
 
 	public static void doMacPreferences(){
-		AliView.activeWindow.openPreferencesGeneral();
+		Assseq.activeWindow.openPreferencesGeneral();
 	}
 
 	public static void doMacOpenFile(File aFile){
-		AliView.openAlignmentFile(aFile);
+		Assseq.openAlignmentFile(aFile);
 	}
 
 	public static void doMacOpenFiles(List<File> oFiles){
@@ -823,12 +823,12 @@ public class AliView implements ApplicationListener{
 	}
 
 	public static boolean doMacQuit(){
-		boolean isNotInterruptedByUser = AliView.quitProgram();
+		boolean isNotInterruptedByUser = Assseq.quitProgram();
 		return isNotInterruptedByUser;
 	}
 
 	public static void doMacAbout() {
-		AliView.activeWindow.showAbout();
+		Assseq.activeWindow.showAbout();
 	}
 
 }

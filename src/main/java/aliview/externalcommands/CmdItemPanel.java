@@ -27,7 +27,7 @@ import javax.swing.event.ChangeListener;
 
 import utils.FileUtilities;
 
-import aliview.AliViewWindow;
+import aliview.AssseqWindow;
 import aliview.externalcommands.CommandItem;
 import aliview.settings.Settings;
 import javax.swing.JCheckBox;

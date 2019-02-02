@@ -22,7 +22,7 @@ import javax.swing.event.ChangeListener;
 
 import org.apache.log4j.Logger;
 
-import aliview.AliViewWindow;
+import aliview.AssseqWindow;
 import aliview.externalcommands.CommandItem;
 
 public class AlignerItemPanel extends JPanel{
@@ -30,7 +30,7 @@ public class AlignerItemPanel extends JPanel{
 	private static final String LF = System.getProperty("line.separator");
 	private JRadioButton radioIsActivated;
 
-	public AlignerItemPanel(final CommandItem alignItem, final AliViewWindow aliWin){
+	public AlignerItemPanel(final CommandItem alignItem, final AssseqWindow aliWin){
 
 
 

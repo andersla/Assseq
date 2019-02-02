@@ -14,7 +14,7 @@ import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.event.ListDataEvent;
 
-import aliview.AliViewWindow;
+import aliview.AssseqWindow;
 import aliview.GeneticCode;
 import aliview.alignment.Alignment;
 import aliview.alignment.AlignmentEvent;
@@ -29,7 +29,7 @@ public class TranslationToolPanel extends JPanel implements AlignmentListener, A
 	private JComboBox readingFrameBox;
 	private JComboBox genCodeBox;
 
-	public TranslationToolPanel(final AliViewWindow aliViewWindow) {
+	public TranslationToolPanel(final AssseqWindow aliViewWindow) {
 
 		this.setVisible(false);
 		this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));

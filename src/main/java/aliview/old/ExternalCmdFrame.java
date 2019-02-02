@@ -31,7 +31,7 @@ import javax.swing.table.TableColumn;
 
 import org.apache.log4j.Logger;
 
-import aliview.AliViewWindow;
+import aliview.AssseqWindow;
 import aliview.externalcommands.CmdItemPanel;
 import aliview.externalcommands.CommandItem;
 import aliview.settings.Settings;
@@ -40,7 +40,7 @@ public class ExternalCmdFrame extends JFrame {
 	private static final Logger logger = Logger.getLogger(ExternalCmdFrame.class);
 	JPanel mainPanel;
 
-	public ExternalCmdFrame(final AliViewWindow aliViewWin){
+	public ExternalCmdFrame(final AssseqWindow aliViewWin){
 		final ExternalCmdFrame commandFrame = this;
 
 		mainPanel = new JPanel();

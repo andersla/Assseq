@@ -13,7 +13,7 @@ import javax.swing.event.ListDataListener;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import aliview.AliView;
+import aliview.Assseq;
 import aliview.alignment.AAHistogram;
 import aliview.alignment.AliHistogram;
 import aliview.alignment.NucleotideHistogram;

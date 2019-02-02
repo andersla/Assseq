@@ -40,8 +40,8 @@ import javax.swing.plaf.basic.BasicListUI;
 import org.apache.log4j.Logger;
 
 import utils.OSNativeUtils;
-import aliview.AliView;
-import aliview.AliViewWindow;
+import aliview.Assseq;
+import aliview.AssseqWindow;
 import aliview.UndoControler;
 import aliview.gui.pane.NotUsed_AlignmentPane_Orig;
 import aliview.sequences.Sequence;
@@ -63,7 +63,7 @@ public class SequenceJList extends javax.swing.JList implements Autoscroll{
 	private JScrollPane listScrollPane;
 
 
-	public SequenceJList(AlignmentListModel model, double charHeight, AliViewWindow aliWindow) {
+	public SequenceJList(AlignmentListModel model, double charHeight, AssseqWindow aliWindow) {
 		super(model);
 		//this.addMouseMotionListener(new SequenceListMouseListener());
 		//this.getParent().addMouseMotionListener(new SequenceListMouseListener());

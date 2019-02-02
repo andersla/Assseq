@@ -194,13 +194,13 @@ import aliview.utils.FileDrop;
 import aliview.utils.Utils;
 import aliview.utils.FileDrop.Listener;
 
-public class AliViewWindow extends JFrame implements UndoControler, AlignmentListener, AlignmentSelectionListener, AlignmentDataListener, Printable{
+public class AssseqWindow extends JFrame implements UndoControler, AlignmentListener, AlignmentSelectionListener, AlignmentDataListener, Printable{
 
 	private static final String LF = System.getProperty("line.separator");
-	private static final Logger logger = Logger.getLogger(AliViewWindow.class);
+	private static final Logger logger = Logger.getLogger(AssseqWindow.class);
 	private static final SequencesFactory seqFactory = new SequencesFactory();
-	private AliViewWindow aliViewWindow;
-	private Preferences prefs = Preferences.userNodeForPackage(AliViewWindow.class);
+	private AssseqWindow aliViewWindow;
+	private Preferences prefs = Preferences.userNodeForPackage(AssseqWindow.class);
 	private static final Rectangle DEFAULT_WIN_GEOMETRY = new Rectangle(20,20,600,400);
 	private static final int DEFAULT_WIN_EXTENDED_STATE = Frame.NORMAL;
 	protected JViewport viewport;
@@ -255,7 +255,7 @@ public class AliViewWindow extends JFrame implements UndoControler, AlignmentLis
 	}
 
 
-	public AliViewWindow(File alignmentFile,AliViewJMenuBarFactory menuBarFactory) {
+	public AssseqWindow(File alignmentFile,AliViewJMenuBarFactory menuBarFactory) {
 		this.aliViewWindow = this;
 		this.menuBarFactory = menuBarFactory;
 
@@ -312,7 +312,7 @@ public class AliViewWindow extends JFrame implements UndoControler, AlignmentLis
 		// Set close window accelerator
 		Action closeWinAction = new AbstractAction() {
 			public void actionPerformed(ActionEvent e) {
-				AliView.closeWindow(aliViewWindow);
+				Assseq.closeWindow(aliViewWindow);
 			}
 		};
 		this.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(OSNativeUtils.getCloseWinKeyAccelerator(), "CloseWin");
@@ -396,7 +396,7 @@ public class AliViewWindow extends JFrame implements UndoControler, AlignmentLis
 			}
 			for(File droppedFile: files){
 				logger.info("file dropped");
-				AliView.openAlignmentFile(droppedFile);
+				Assseq.openAlignmentFile(droppedFile);
 			}
 		}
 
@@ -728,7 +728,7 @@ public class AliViewWindow extends JFrame implements UndoControler, AlignmentLis
 	 */
 	public void reverseComplementClipboard(){
 
-		String clipData = AliViewWindow.getClipboard();
+		String clipData = AssseqWindow.getClipboard();
 
 		if(clipData == null){
 			return;
@@ -786,14 +786,14 @@ public class AliViewWindow extends JFrame implements UndoControler, AlignmentLis
 	public void updateWindowTitle() {
 		AlignmentFile aliFile = alignment.getAlignmentFile();
 		if(aliFile == null || aliFile.getName().length() == 0){
-			this.setTitle("AliView");
+			this.setTitle("Assseq");
 		}else{
 			// Add a symbol if unsaved
 			if(hasUnsavedUndoableEdits()){
-				this.setTitle("AliView - " + "*" + aliFile.getNameWithoutTempPrefix());
+				this.setTitle("Assseq - " + "*" + aliFile.getNameWithoutTempPrefix());
 			}
 			else{
-				this.setTitle("AliView - " + aliFile.getNameWithoutTempPrefix());
+				this.setTitle("Assseq - " + aliFile.getNameWithoutTempPrefix());
 			}
 		}
 	}
@@ -4361,14 +4361,14 @@ public class AliViewWindow extends JFrame implements UndoControler, AlignmentLis
 	}
 
 	public void showAbout() {
-		String version = AliView.getVersion();
+		String version = Assseq.getVersion();
 		logger.info("version=" + version);
 		String message = "AliView version: " + version;
 		JOptionPane.showMessageDialog(aliViewWindow, message, "About", JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	public void checkNewVersion() {
-		String version = AliView.getVersion();
+		String version = Assseq.getVersion();
 		HelpUtils.displayVersionDownload(version);
 	}
 
@@ -4429,7 +4429,7 @@ public class AliViewWindow extends JFrame implements UndoControler, AlignmentLis
 				File fastaGenResultFile = new File(selectedFile.getParentFile(), selectedFile.getName() + "_genotype" + "." + FileFormat.FASTA.getSuffix());
 				Phenotype2Genootype gen2phen = new Phenotype2Genootype();
 				gen2phen.createGenotypeFasta(selectedFile, fastaGenResultFile);
-				AliView.openAlignmentFile(fastaGenResultFile);		
+				Assseq.openAlignmentFile(fastaGenResultFile);		
 				//Settings.putLoadAlignmentDirectory(selectedFile.getParent());
 			} catch (Exception e) {
 				e.printStackTrace();

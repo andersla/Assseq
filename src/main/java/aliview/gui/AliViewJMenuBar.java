@@ -35,8 +35,8 @@ import org.apache.log4j.Logger;
 import utils.OSNativeUtils;
 import utils.nexus.CharSet;
 import utils.nexus.CharSets;
-import aliview.AliView;
-import aliview.AliViewWindow;
+import aliview.Assseq;
+import aliview.AssseqWindow;
 import aliview.GeneticCode;
 import aliview.alignment.Alignment;
 import aliview.alignment.AlignmentEvent;
@@ -58,7 +58,7 @@ import aliview.settings.SettingsListener;
 
 public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, AlignmentDataListener, AlignmentSelectionListener, SettingsListener{
 	private static final Logger logger = Logger.getLogger(AliViewJMenuBar.class);
-	private AliViewWindow aliViewWindow;
+	private AssseqWindow aliViewWindow;
 	private ArrayList<AbstractButton> editFunctions = new ArrayList<AbstractButton>();
 	private ArrayList<AbstractButton> alwaysAvailableFunctions = new ArrayList<AbstractButton>();
 	private ArrayList<AbstractButton> loadedAlignmentFunctions = new ArrayList<AbstractButton>();
@@ -109,7 +109,7 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 	 * 
 	 * 
 	 */
-	public AliViewJMenuBar(AliViewWindow aliViewWin){
+	public AliViewJMenuBar(AssseqWindow aliViewWin){
 		super();
 		aliViewWindow = aliViewWin;
 
@@ -122,7 +122,7 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 		JMenuItem mntmNew = new JMenuItem("New");
 		mntmNew.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				AliView.createNewWindow();
+				Assseq.createNewWindow();
 			}
 
 		});
@@ -134,7 +134,7 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 		JMenuItem mntmOpenFile = new JMenuItem("Open File");
 		mntmOpenFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				AliView.openAlignmentFileViaChooser(aliViewWindow.getParent());
+				Assseq.openAlignmentFileViaChooser(aliViewWindow.getParent());
 			}
 
 		});
@@ -431,7 +431,7 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 			JMenuItem mntmExit = new JMenuItem("Exit");
 			mntmExit.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					AliView.quitProgram();
+					Assseq.quitProgram();
 				}
 			});
 			mntmExit.setIcon(AppIcons.getQuitIcon());
@@ -1744,7 +1744,7 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 			JMenuItem nextItem = new JMenuItem(nextFile.getAbsolutePath());
 			nextItem.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					AliView.openAlignmentFile(nextFile);
+					Assseq.openAlignmentFile(nextFile);
 				}
 
 			});

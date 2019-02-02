@@ -18,7 +18,7 @@ import javax.swing.JTextField;
 
 import org.apache.commons.lang.StringUtils;
 
-import aliview.AliViewWindow;
+import aliview.AssseqWindow;
 import aliview.aligner.MuscleWrapper;
 import aliview.importer.FileFormat;
 

@@ -13,7 +13,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import aliview.AliView;
+import aliview.Assseq;
 import aliview.AminoAcid;
 import aliview.NucleotideUtilities;
 import aliview.sequencelist.AlignmentListModel;

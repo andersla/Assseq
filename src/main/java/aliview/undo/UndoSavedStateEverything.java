@@ -2,7 +2,7 @@ package aliview.undo;
 
 import java.util.List;
 
-import aliview.AliViewWindow;
+import aliview.AssseqWindow;
 import aliview.alignment.AlignmentMeta;
 import aliview.sequencelist.AlignmentListModel;
 import aliview.sequences.Sequence;

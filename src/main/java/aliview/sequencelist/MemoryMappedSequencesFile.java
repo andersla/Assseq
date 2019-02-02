@@ -34,8 +34,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import utils.DialogUtils;
-import aliview.AliView;
-import aliview.AliViewWindow;
+import aliview.Assseq;
+import aliview.AssseqWindow;
 import aliview.externalcommands.ExternalCommandExecutor;
 import aliview.importer.AlignmentImportException;
 import aliview.importer.ClustalFileIndexer;
@@ -180,9 +180,9 @@ public class MemoryMappedSequencesFile{
 		progressWin.setTitle("Background indexing");
 		progressWin.setInitialMessage("Indexing file: " + 0 + "/" + "number of sequences");
 		progressWin.show();
-		progressWin.centerLocationToThisComponentOrScreen(AliView.getActiveWindow());
+		progressWin.centerLocationToThisComponentOrScreen(Assseq.getActiveWindow());
 		//progressWin.setTopRightRelativeThisComponent(AliView.getActiveWindow());
-		progressWin.setBottomRightRelativeThisComponent(AliView.getActiveWindow());
+		progressWin.setBottomRightRelativeThisComponent(Assseq.getActiveWindow());
 
 
 		try{	

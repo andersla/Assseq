@@ -9,8 +9,8 @@ import javax.swing.JList;
 
 import org.apache.log4j.Logger;
 
-import aliview.AliView;
-import aliview.AliViewWindow;
+import aliview.Assseq;
+import aliview.AssseqWindow;
 
 /*
  * 
@@ -31,10 +31,10 @@ public class SequenceListMouseListener implements MouseListener, MouseMotionList
 	private int lastReleaseIndex;
 	private long minReleaseInterval = 500;
 	private long maxReleaseInterval = 2000;
-	private AliViewWindow aliWin;
+	private AssseqWindow aliWin;
 
 
-	public SequenceListMouseListener(AliViewWindow aliWin) {
+	public SequenceListMouseListener(AssseqWindow aliWin) {
 		super();
 		this.aliWin = aliWin;
 	}

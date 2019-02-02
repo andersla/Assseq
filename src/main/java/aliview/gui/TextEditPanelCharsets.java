@@ -14,7 +14,7 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 
-import aliview.AliViewWindow;
+import aliview.AssseqWindow;
 import aliview.HelpUtils;
 import aliview.alignment.Alignment;
 import aliview.alignment.AlignmentMeta;
@@ -43,9 +43,9 @@ public class TextEditPanelCharsets extends JPanel{
 	private JFrame parentFrame;
 	private JTextArea editTextArea;
 	private CharSets originalCharsets;
-	private AliViewWindow aliWin;
+	private AssseqWindow aliWin;
 
-	public TextEditPanelCharsets(JFrame parFrame, AliViewWindow aliWindow) {
+	public TextEditPanelCharsets(JFrame parFrame, AssseqWindow aliWindow) {
 		this.parentFrame = parFrame;
 		this.setBorder(new EmptyBorder(10, 10, 10, 10));
 		GridBagLayout gridBagLayout = new GridBagLayout();
@@ -157,7 +157,7 @@ public class TextEditPanelCharsets extends JPanel{
 		setAlignment(aliWindow);
 	}
 
-	private void setAlignment(AliViewWindow aliWin) {
+	private void setAlignment(AssseqWindow aliWin) {
 		this.aliWin = aliWin;
 		this.originalCharsets = aliWin.getAlignment().getAlignmentMeta().getCharsets();
 		String charsetsBlock = NexusUtilities.getCharsetsBlockWithoutNexus(originalCharsets);

@@ -14,14 +14,14 @@ import java.awt.event.MouseWheelListener;
 import javax.swing.JScrollPane;
 import javax.swing.plaf.basic.BasicSplitPaneUI.BasicVerticalLayoutManager;
 
-import aliview.AliViewWindow;
+import aliview.AssseqWindow;
 import utils.OSNativeUtils;
 
 public class ScrollPaneSyncKeyAndMouseWheelListener implements MouseWheelListener, MouseMotionListener, MouseListener, KeyListener{
 
 	private JScrollPane source;
 	private JScrollPane dest;
-	private AliViewWindow aliViewWindow;
+	private AssseqWindow aliViewWindow;
 
 	public ScrollPaneSyncKeyAndMouseWheelListener(JScrollPane source, JScrollPane dest){ 
 		this.source = source;

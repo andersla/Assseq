@@ -11,16 +11,16 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 
-import aliview.AliViewWindow;
+import aliview.AssseqWindow;
 
 
 public class AlignmentPopupMenu extends JPopupMenu implements MouseListener {
 
-	private AliViewWindow aliViewWin;
+	private AssseqWindow aliViewWin;
 	private AliViewJMenuBar aliViewMenuBar;
 	private MouseEvent mouseActivationEvent;
 
-	public AlignmentPopupMenu(final AliViewWindow aliViewWin, final AliViewJMenuBar aliViewMenuBar){
+	public AlignmentPopupMenu(final AssseqWindow aliViewWin, final AliViewJMenuBar aliViewMenuBar){
 		this.aliViewWin = aliViewWin;
 		this.aliViewMenuBar = aliViewMenuBar;
 

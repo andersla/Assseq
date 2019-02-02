@@ -13,7 +13,7 @@ import utils.nexus.CodonPositions;
 import utils.nexus.Excludes;
 import utils.nexus.NexusAlignmentImportException;
 import utils.nexus.NexusUtilities;
-import aliview.AliView;
+import aliview.Assseq;
 import aliview.GeneticCode;
 import aliview.MemoryUtils;
 import aliview.alignment.Alignment;

@@ -14,7 +14,7 @@ import jebl.evolution.sequences.SequenceType;
 
 import org.apache.log4j.Logger;
 
-import aliview.AliView;
+import aliview.Assseq;
 import aliview.MemoryUtils;
 import aliview.sequencelist.FileSequenceAlignmentListModel;
 import aliview.sequencelist.MemorySequenceAlignmentListModel;

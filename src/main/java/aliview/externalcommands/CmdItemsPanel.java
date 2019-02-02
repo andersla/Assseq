@@ -35,7 +35,7 @@ import javax.swing.text.StyledEditorKit.BoldAction;
 
 import org.apache.log4j.Logger;
 
-import aliview.AliViewWindow;
+import aliview.AssseqWindow;
 import aliview.HelpUtils;
 import aliview.externalcommands.CommandItem;
 import aliview.old.MyScrollPane;

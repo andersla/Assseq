@@ -33,7 +33,7 @@ import org.apache.log4j.Logger;
 import utils.OSNativeUtils;
 import utils.nexus.CharSet;
 import utils.nexus.CharSets;
-import aliview.AliView;
+import aliview.Assseq;
 import aliview.AminoAcid;
 import aliview.Base;
 import aliview.NucleotideUtilities;
@@ -576,7 +576,7 @@ public class AlignmentPane extends JPanel{
 	public void paintAlignment(Graphics g){
 		drawCounter ++;
 		long startTime = System.currentTimeMillis();	
-		if(AliView.isDebugMode() && drawCounter % DRAWCOUNT_LOF_INTERVAL == 0){
+		if(Assseq.isDebugMode() && drawCounter % DRAWCOUNT_LOF_INTERVAL == 0){
 			logger.info("Inside paintAlignment: Time from last endTim " + (startTime - endTime) + " milliseconds");
 			System.out.println("Inside paintAlignment: Time from last endTim " + (startTime - endTime) + " milliseconds");
 		}

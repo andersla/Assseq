@@ -12,7 +12,7 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import aliview.AliViewWindow;
+import aliview.AssseqWindow;
 
 public class TextEditDialog {
 	private static final String LF = System.getProperty("line.separator");
@@ -29,7 +29,7 @@ public class TextEditDialog {
 		this.preferredPos = pos;
 	}
 
-	public void showOKCancelTextEditor(String editString, String title, AliViewWindow aliViewWindow) {
+	public void showOKCancelTextEditor(String editString, String title, AssseqWindow aliViewWindow) {
 
 		final JDialog dialog = new JDialog(aliViewWindow);
 		dialog.setTitle(title);
@@ -85,7 +85,7 @@ public class TextEditDialog {
 		dialog.setVisible(true);
 	}
 
-	private void makeSureWithinBounds(JDialog dialog, AliViewWindow aliViewWindow) {
+	private void makeSureWithinBounds(JDialog dialog, AssseqWindow aliViewWindow) {
 		Rectangle smaller = dialog.getBounds();
 		Rectangle larger = aliViewWindow.getBounds();
 

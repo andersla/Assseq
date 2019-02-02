@@ -10,7 +10,7 @@ import java.util.prefs.Preferences;
 import org.apache.log4j.Logger;
 
 import utils.OSNativeUtils;
-import aliview.AliViewWindow;
+import aliview.AssseqWindow;
 import aliview.aligner.AlignemtItem;
 import aliview.aligner.MuscleWrapper;
 import aliview.alignment.AlignmentEvent;

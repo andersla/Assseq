@@ -12,8 +12,8 @@ import javax.swing.JList;
 import org.apache.log4j.Logger;
 
 import utils.OSNativeUtils;
-import aliview.AliView;
-import aliview.AliViewWindow;
+import aliview.Assseq;
+import aliview.AssseqWindow;
 import aliview.alignment.Alignment;
 import aliview.settings.Settings;
 
@@ -25,10 +25,10 @@ import aliview.settings.Settings;
 public class SequenceListMouseWheelListener implements MouseWheelListener{
 	private static final Logger logger = Logger.getLogger(SequenceListMouseWheelListener.class);
 
-	private AliViewWindow aliViewWin;
+	private AssseqWindow aliViewWin;
 
 
-	public SequenceListMouseWheelListener(AliViewWindow aliViewWindow) {
+	public SequenceListMouseWheelListener(AssseqWindow aliViewWindow) {
 		this.aliViewWin = aliViewWindow;
 	}
 
@@ -37,10 +37,10 @@ public class SequenceListMouseWheelListener implements MouseWheelListener{
 		// Zoom in out if ctrl is pressed
 		if(e.getModifiersEx() ==  OSNativeUtils.getMouseWheelZoomModifierMask()){
 			if(e.getWheelRotation() > 0){
-				AliView.getActiveWindow().zoomOutAt(e.getPoint());
+				Assseq.getActiveWindow().zoomOutAt(e.getPoint());
 			}
 			else if(e.getWheelRotation() < 0){		
-				AliView.getActiveWindow().zoomInAt(e.getPoint());
+				Assseq.getActiveWindow().zoomInAt(e.getPoint());
 			}
 
 			return;

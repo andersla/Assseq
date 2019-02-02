@@ -11,7 +11,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import aliview.AliView;
+import aliview.Assseq;
 
 /*
  * Heavily inspired by org.openstreetmap.josm.tools.PlatformHookOsx.java from JOSM project
@@ -73,7 +73,7 @@ public class OSXHandlerJava9 implements InvocationHandler {
 				try {
 					Object oFiles = args[0].getClass().getMethod("getFiles").invoke(args[0]);
 					if (oFiles instanceof List) {
-						AliView.doMacOpenFiles((List<File>) oFiles);
+						Assseq.doMacOpenFiles((List<File>) oFiles);
 
 					}
 				} catch (Exception ex) {
@@ -83,7 +83,7 @@ public class OSXHandlerJava9 implements InvocationHandler {
 		}
 		else if("handleQuitRequestWith".equalsIgnoreCase(methodName)){
 			logger.info("Handle handleQuitRequestWith");
-			boolean isNotInterruptedByUser = AliView.doMacQuit();
+			boolean isNotInterruptedByUser = Assseq.doMacQuit();
 
 			// I don't know if I really need this code section since AliView.doMacQuit() anyway will do an exit.
 			if (args[1] != null) {
@@ -98,12 +98,12 @@ public class OSXHandlerJava9 implements InvocationHandler {
 		}
 		else if("handleAbout".equalsIgnoreCase(methodName)){
 			logger.info("Handle handleAbout");
-			AliView.doMacAbout();
+			Assseq.doMacAbout();
 		}
 
 		else if("handlePreferences".equalsIgnoreCase(methodName)){
 			logger.info("Handle handlePreferences");
-			AliView.doMacPreferences();
+			Assseq.doMacPreferences();
 		}
 
 		else{

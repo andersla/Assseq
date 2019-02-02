@@ -2,7 +2,7 @@ package aliview.gui;
 
 import org.apache.log4j.Logger;
 
-import aliview.AliViewWindow;
+import aliview.AssseqWindow;
 
 
 /**
@@ -19,7 +19,7 @@ public class AliViewJMenuBarFactory{
 	public AliViewJMenuBarFactory() {		
 	}
 
-	public AliViewJMenuBar create(AliViewWindow aliViewWin){
+	public AliViewJMenuBar create(AssseqWindow aliViewWin){
 		return new AliViewJMenuBar(aliViewWin);
 	}
 }

@@ -18,7 +18,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import aliview.AliView;
+import aliview.Assseq;
 import aliview.aligner.Aligner;
 import aliview.aligner.MuscleWrapper;
 import aliview.subprocesses.SubProcessWindow;
@@ -55,7 +55,7 @@ public class ExternalCommandExecutor {
 				public void run(){
 
 					if(commandLine[0].equals("ALIVIEW_OPEN")){	
-						AliView.openAlignmentFile(new File(commandLine[1]));
+						Assseq.openAlignmentFile(new File(commandLine[1]));
 					}
 					else{
 						subProcessWin.appendOutput("Failed: - Non recognized command: " + commandLine[0]);

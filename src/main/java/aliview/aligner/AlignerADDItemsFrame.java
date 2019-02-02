@@ -30,7 +30,7 @@ import javax.swing.table.TableColumn;
 
 import org.apache.log4j.Logger;
 
-import aliview.AliViewWindow;
+import aliview.AssseqWindow;
 import aliview.externalcommands.CommandItem;
 import aliview.old.MyScrollPane;
 import aliview.settings.Settings;
@@ -39,7 +39,7 @@ public class AlignerADDItemsFrame extends JFrame {
 	private static final Logger logger = Logger.getLogger(AlignerADDItemsFrame.class);
 	JPanel mainPanel;
 
-	public AlignerADDItemsFrame(final AliViewWindow aliViewWin){
+	public AlignerADDItemsFrame(final AssseqWindow aliViewWin){
 		final AlignerADDItemsFrame alignItemsFrame = this;
 
 

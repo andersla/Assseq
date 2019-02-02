@@ -20,19 +20,19 @@ import javax.swing.table.TableColumn;
 
 import org.apache.log4j.Logger;
 
-import aliview.AliViewWindow;
+import aliview.AssseqWindow;
 import aliview.gui.AppIcons;
 
 public class PrimerResultsFrame extends JFrame {
 	private static final Logger logger = Logger.getLogger(PrimerResultsFrame.class);
 	private static final int MAX_NUMBER_OF_PRIMERS_REPORTED = 1000;
 	JPanel mainPanel = new JPanel();
-	private final AliViewWindow aliViewWindow;
+	private final AssseqWindow aliViewWindow;
 	JTable mainTable;
 	PrimerDetailFrame primerDetailFrame;
 	private ArrayList<Primer> primerResult;
 
-	public PrimerResultsFrame(ArrayList<Primer> primRes,AliViewWindow aliViewWin){
+	public PrimerResultsFrame(ArrayList<Primer> primRes,AssseqWindow aliViewWin){
 		this.aliViewWindow = aliViewWin;
 		this.primerResult = primRes;
 

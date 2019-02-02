@@ -17,13 +17,13 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 
-import aliview.AliViewWindow;
+import aliview.AssseqWindow;
 import aliview.externalcommands.CommandItem;
 
 public class CommandItemPanel extends JPanel{
 	private static final String LF = System.getProperty("line.separator");	
 
-	public CommandItemPanel(final CommandItem cmdItem, final AliViewWindow aliWin){
+	public CommandItemPanel(final CommandItem cmdItem, final AssseqWindow aliWin){
 
 		JTextField txtCommandName = new JTextField(cmdItem.getName(), 15);
 		txtCommandName.setMaximumSize(new Dimension(130, 25));

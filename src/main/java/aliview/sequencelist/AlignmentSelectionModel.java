@@ -21,7 +21,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import aliview.AliView;
+import aliview.Assseq;
 import aliview.alignment.AlignmentMeta;
 import aliview.sequences.Sequence;
 import aliview.sequencelist.Interval;
@@ -737,8 +737,8 @@ public class AlignmentSelectionModel{
 		// delegateLSM.fireValueChanged(rect.y, rect.y + rect.height, isAdjusting);
 
 
-		if(AliView.getActiveWindow() != null){
-			logger.info("Time from last endTim " + (System.currentTimeMillis() - AliView.getActiveWindow().getLastPaneEndTime()) + " milliseconds");
+		if(Assseq.getActiveWindow() != null){
+			logger.info("Time from last endTim " + (System.currentTimeMillis() - Assseq.getActiveWindow().getLastPaneEndTime()) + " milliseconds");
 		}
 
 	}

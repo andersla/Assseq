@@ -18,16 +18,16 @@ import javax.swing.JTextArea;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
-import aliview.AliViewWindow;
+import aliview.AssseqWindow;
 import aliview.settings.Settings;
 
 public class MessageLogFrame extends JFrame{
 	private static final Logger logger = Logger.getLogger(MessageLogFrame.class);
 	private static final String LF = System.getProperty("line.separator");
 	private JTextArea messageArea;
-	private AliViewWindow aliViewWindow;
+	private AssseqWindow aliViewWindow;
 
-	public MessageLogFrame(AliViewWindow aliViewWin) {
+	public MessageLogFrame(AssseqWindow aliViewWin) {
 		this.aliViewWindow = aliViewWin;
 		messageArea = new JTextArea();
 
