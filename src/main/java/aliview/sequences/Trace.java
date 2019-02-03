@@ -10,15 +10,16 @@ import aliview.utils.ArrayUtilities;
 public class Trace {
 	private static final Logger logger = Logger.getLogger(Trace.class);
 	private static final String TEXT_FILE_BYTE_ENCODING = "ASCII";
-	byte[] backend;
+	int[] backend;
+	int NO_TRACE_VAL = 0;
 
-	public Trace(byte[] bytes) {
-		this.backend = bytes;
+	public Trace(int[] vals) {
+		this.backend = vals;
 	}
 
-	public void insertAt(int n, byte[] newBytes) {
+	public void insertAt(int n, int[] newVals) {
 		assureSize(n - 1);
-		byte[] newArray = ArrayUtilities.insertAt(backend, n, newBytes);
+		int[] newArray = ArrayUtilities.insertAt(backend, n, newVals);
 		backend = newArray;
 	}
 	
@@ -31,8 +32,8 @@ public class Trace {
 	private void resize(int n) {
 		logger.info("resize=" + n);
 		int additionalCount = n - backend.length;
-		byte[] additional = new byte[additionalCount];
-		Arrays.fill(additional, SequenceUtils.GAP_SYMBOL);
+		int[] additional = new int[additionalCount];
+		Arrays.fill(additional, NO_TRACE_VAL);
 		backend = ArrayUtils.addAll(backend, additional);
 		logger.info("backend.length=" + backend.length);
 	}

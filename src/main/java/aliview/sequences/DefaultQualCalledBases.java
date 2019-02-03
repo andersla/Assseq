@@ -12,26 +12,27 @@ import org.apache.log4j.Logger;
 import aliview.NucleotideUtilities;
 import aliview.utils.ArrayUtilities;
 
-public class DefaultBases implements Bases {
-	private static final Logger logger = Logger.getLogger(DefaultBases.class);
+public class DefaultQualCalledBases implements Bases {
+	private static final Logger logger = Logger.getLogger(DefaultQualCalledBases.class);
 	private static final String TEXT_FILE_BYTE_ENCODING = "ASCII";
 	byte[] backend;
+	byte[] qualCalls;
+	byte NONE_QUALCALL = 0;
 
-	public DefaultBases(byte[] bytes) {
+	public DefaultQualCalledBases(byte[] bytes, byte[] qualCalls) {
 		this.backend = bytes;
+		this.qualCalls = qualCalls;
 	}
 
-	public DefaultBases getCopy(){
-		return new DefaultBases(ArrayUtils.clone(backend));
+	public DefaultQualCalledBases getCopy(){
+		return new DefaultQualCalledBases(ArrayUtils.clone(backend), ArrayUtils.clone(qualCalls));
 	}
 
 	public int getLength(){
-		// or translated
 		return backend.length;
 	}
 
 	public byte get(int n) {
-		// or translated
 		return backend[n];
 	}
 
@@ -41,7 +42,6 @@ public class DefaultBases implements Bases {
 	}
 
 	public byte[] toByteArray() {
-		// or translated
 		return backend;
 	}
 
@@ -71,31 +71,42 @@ public class DefaultBases implements Bases {
 	public void set(int n, byte newBase) {
 		assureSize(n);
 		backend[n] = newBase;
+
+		logger.warn("Not perfectly implemented");
+		qualCalls[n] = NONE_QUALCALL;
+		
 	}
 
 	private void assureSize(int n) {
-		//		logger.info("backend.length" + backend.length);
-		//		logger.info("n" + n);
 		if(n >= backend.length){
 			resize(n + 1);
 		}
 	}
 
 	private void resize(int n) {
-		logger.info("resize=" + n);
+		logger.debug("resize=" + n);
 		int additionalCount = n - backend.length;
+		
+		// Backend
 		byte[] additional = new byte[additionalCount];
 		Arrays.fill(additional, SequenceUtils.GAP_SYMBOL);
 		backend = ArrayUtils.addAll(backend, additional);
-		logger.info("backend.length=" + backend.length);
+		
+		// Qualcalls
+		byte[] additionalQual = new byte[additionalCount];
+		Arrays.fill(additionalQual, NONE_QUALCALL);
+		qualCalls = ArrayUtils.addAll(qualCalls, additionalQual);
+		
+		logger.debug("backend.length=" + backend.length);		
 	}
 
-	// convenience
 	public void append(byte[] newBytes) {
-		//		logger.info("backend.length" + backend.length);
-		//		logger.info("newBytes.length" + newBytes.length);
 		backend = ArrayUtils.addAll(backend, newBytes);
-		//		logger.info("backend.length" + backend.length);
+		
+		// QualCalls
+		byte[] additionalQual = new byte[newBytes.length];
+		Arrays.fill(additionalQual, NONE_QUALCALL);
+		qualCalls = ArrayUtils.addAll(qualCalls, additionalQual);
 	}
 
 	public void moveBaseLeft(int n) {
@@ -108,38 +119,57 @@ public class DefaultBases implements Bases {
 
 
 	public void insertAt(int n, byte[] newBytes) {
-		assureSize(n - 1);
-		//		logger.info("newBytes.length" + newBytes.length);
-		//		logger.info("backend.length" + backend.length);
+		assureSize(n - 1);	
 		byte[] newArray = ArrayUtilities.insertAt(backend, n, newBytes);
-		//		logger.info("newArray.length" + newArray.length);
 		backend = newArray;
+		
+		// QualCalls
+		byte[] additionalQual = new byte[newBytes.length];
+		Arrays.fill(additionalQual, NONE_QUALCALL);
+		byte[] newQual = ArrayUtilities.insertAt(qualCalls, n, additionalQual);
+		qualCalls = newQual;
+		
 	}
 
 	public void replace(int startReplaceIndex, int stopReplaceIndex, byte[] insertBases) {
-		// or translated
-
-		// translate start stop and insert
-
 
 		int newLength = backend.length - (stopReplaceIndex + 1 - startReplaceIndex) + insertBases.length;
 
 		// TODO could check if length is less - then just clear and insert
-		byte[] newBases = new byte[newLength];
+		byte[] newBackend = new byte[newLength];
 
 		// copy first untouched part of sequence
-		System.arraycopy(backend, 0, newBases, 0, startReplaceIndex);
+		System.arraycopy(backend, 0, newBackend, 0, startReplaceIndex);
 
 		// copy insert bases
-		System.arraycopy(insertBases, 0, newBases, startReplaceIndex, insertBases.length);
+		System.arraycopy(insertBases, 0, newBackend, startReplaceIndex, insertBases.length);
 
 		// copy last untouched part of sequence - if there is one
 		if(stopReplaceIndex < backend.length - 1){
-			System.arraycopy(backend, stopReplaceIndex + 1, newBases, startReplaceIndex + insertBases.length, backend.length - (stopReplaceIndex + 1));
+			System.arraycopy(backend, stopReplaceIndex + 1, newBackend, startReplaceIndex + insertBases.length, backend.length - (stopReplaceIndex + 1));
 		}
 
-		backend = newBases;
+		backend = newBackend;
+		
+		// QualCalls
+		byte[] newCalls = new byte[newLength];
+		
+		// Create empty new ones
+		byte[] insertQual = new byte[insertBases.length];
+		Arrays.fill(insertQual, NONE_QUALCALL);
 
+		// copy first untouched part of sequence
+		System.arraycopy(qualCalls, 0, newCalls, 0, startReplaceIndex);
+		
+		// copy insert bases
+		System.arraycopy(insertQual, 0, newCalls, startReplaceIndex, insertQual.length);
+
+		// copy last untouched part of sequence - if there is one
+		if(stopReplaceIndex < backend.length - 1){
+			System.arraycopy(qualCalls, stopReplaceIndex + 1, newCalls, startReplaceIndex + insertQual.length, qualCalls.length - (stopReplaceIndex + 1));
+		}
+		
+		qualCalls = newCalls;
 	}
 
 	public void deleteAll(byte target) {
@@ -165,6 +195,9 @@ public class DefaultBases implements Bases {
 			}
 			backend = newBackend;
 		}
+		
+		logger.warn("Not fixed for qual-called bases");
+		qualCalls = new byte[backend.length];
 
 	}
 
@@ -210,17 +243,23 @@ public class DefaultBases implements Bases {
 		}
 
 		backend = newBases;
-
+		
+		logger.warn("Not fixed for qual-called bases");
+		qualCalls = new byte[backend.length];
+		
 	}
 
 	// ?????
 	public void complement() {
-		NucleotideUtilities.complement(backend);		
+		NucleotideUtilities.complement(backend);
+		
+		// Nothing to do for qualCalls
 	}
 
 	// ?????
 	public void reverse() {
-		ArrayUtils.reverse(backend);	
+		ArrayUtils.reverse(backend);
+		ArrayUtils.reverse(qualCalls);
 	}
 
 	// convenience method

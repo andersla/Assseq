@@ -132,8 +132,10 @@ public class FileFormat {
 					foundFormat = FileFormat.MSF;
 				}else if(PhylipImporter.isStringValidFirstLine(firstLine)){
 					foundFormat = FileFormat.PHYLIP;
+			    }else if(ABIImporter.isStringValidFirstLine(firstLine)){
+				    foundFormat = FileFormat.ABI;
 				}
-
+				
 			}
 
 			long endTime = System.currentTimeMillis();

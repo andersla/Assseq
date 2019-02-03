@@ -2,14 +2,26 @@ package aliview.importer;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.biojava.nbio.core.exceptions.CompoundNotFoundException;
+import org.biojava.nbio.core.sequence.compound.NucleotideCompound;
+import org.biojava.nbio.core.sequence.io.ABITrace;
+import org.biojava.nbio.core.sequence.template.AbstractSequence;
 
+import aliview.sequences.ABISequence;
+import aliview.sequences.Bases;
+import aliview.sequences.BasicTraceSequence;
+import aliview.sequences.DefaultQualCalledBases;
 import aliview.sequences.FastFastaSequence;
 import aliview.sequences.Sequence;
+import aliview.sequences.Trace;
+import aliview.sequences.Traces;
 
 
 public class ABIImporter {
@@ -21,81 +33,80 @@ public class ABIImporter {
 		this.inputFile = inputFile;
 	}
 
-	public List<Sequence> importSequences() throws AlignmentImportException {
+	public List<Sequence> importSequences() throws AlignmentImportException, FileNotFoundException {
 
 		long startTime = System.currentTimeMillis();
 		ArrayList<Sequence> sequences = new ArrayList<Sequence>();
+
 		try {
-			StringBuilder sequence = new StringBuilder();
-			BufferedReader r = new BufferedReader(this.reader);
-			String line;
-			String name = null;
-			int nLine = 0;
-			while ((line = r.readLine()) != null) {
 
-				line = line.trim();
+			ABITrace abiTrace = new ABITrace(inputFile);
 
-				if(nLine == 0){
-					// if not fasta file then break
-					if(line.length() > 0 && line.charAt(0) != '>'){
-						// no fasta
-						throw new AlignmentImportException("Fasta file should start with > character");
-					}
-				}
+			Trace traceA = new Trace(abiTrace.getTrace("A"));
+			Trace traceC = new Trace(abiTrace.getTrace("C"));
+			Trace traceG = new Trace(abiTrace.getTrace("G"));
+			Trace traceT = new Trace(abiTrace.getTrace("T"));
+			int[] baseCalls = abiTrace.getBasecalls();
+			Traces traces = new Traces(traceA, traceG, traceC, traceT, baseCalls);
 
-				if(line.length() > 0){
+			int[] qualCalls = abiTrace.getQcalls();
+			byte[] byteQualCalls = intArray2ByteArray(qualCalls);
 
-					if(line.charAt(0) == '>'){
+			byte[] bases = getSequenceFromABI(abiTrace);
+			Bases basesAndCalls = new DefaultQualCalledBases(bases, byteQualCalls);
 
-						// if there is one sequence in buffer already create that one before starting a new one
-						if(name != null && name.length() > 0){
-							//char[] bases = new char[sequence.length()];
-							//sequence.getChars(0, sequence.length() -1, bases, 0);
+			ABISequence sequence  = new ABISequence(inputFile.getName(), basesAndCalls, traces);
 
-							//char[] bases = sequence.toString().toCharArray();
+			sequences.add(sequence);
 
-							// remove blank in string todo this could maybe be done quicker
-							// in some fasta files there are blanks (ncbi format)
-							String seqAsString = sequence.toString();
-							seqAsString = seqAsString.replaceAll(" ","");
-							sequences.add(new FastFastaSequence(name, seqAsString));
-							this.longestSequenceLength = Math.max(this.longestSequenceLength, seqAsString.length());
-							sequence = new StringBuilder();
-							name = null;
-						}	
-						name = line;
-					}
-					else{
-						sequence.append(line);
-					}
-
-				}
-				nLine ++;
-			}
-
-			// add last sequence
-			if(name != null && name.length() > 0){
-
-				String seqAsString = sequence.toString();
-				seqAsString = seqAsString.replaceAll(" ","");
-				sequences.add(new FastFastaSequence(name, seqAsString));
-				this.longestSequenceLength = Math.max(this.longestSequenceLength, seqAsString.length());
-				name = null;
-			}	
-
+			longestSequenceLength = sequence.getLength();
 
 		} catch (Exception e) {
 			logger.error(e);
 			// TODO Auto-generated catch block
 			throw new AlignmentImportException("could not import as fasta file because: " + e.getMessage());
 		}
+
 		long endTime = System.currentTimeMillis();
 		System.out.println("reading sequences took " + (endTime - startTime) + " milliseconds");
 
 		return sequences;
 	}
 
+	private byte[] intArray2ByteArray(int[] input) {
+		byte[] output = new byte[input.length];
+		for(int n = 0; n < output.length; n++) {
+			output[n] = (byte)input[n];
+		}
+		return output;
+	}
+
+	private byte[] getSequenceFromABI(ABITrace abiTrace) throws CompoundNotFoundException{
+
+		AbstractSequence<NucleotideCompound> sequence = abiTrace.getSequence();
+		java.util.Iterator<NucleotideCompound> iter = sequence.iterator();
+		StringBuilder seq = new StringBuilder();
+		while(iter.hasNext()){
+			NucleotideCompound compound = iter.next();
+			seq.append(compound.getBase());
+		}
+		String sequenceString = seq.toString();
+
+		byte[] seqAsBytes = sequenceString.getBytes();
+
+		return seqAsBytes;
+	}
+
 	public int getLongestSequenceLength() {
 		return longestSequenceLength;
 	}
+
+    public static boolean isStringValidFirstLine(String firstLine) {
+		if(StringUtils.startsWith(firstLine, "ABI")){
+			return true;
+		}else{
+			return false;
+		}
+	}
+
 }

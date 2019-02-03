@@ -43,9 +43,10 @@ public class BasicTraceSequence implements Sequence, Comparable<Sequence> {
 		selectionModel = new DefaultSequenceSelectionModel();
 	}
 
-	public BasicTraceSequence(Bases bases) {
+	public BasicTraceSequence(Bases bases, Traces traces) {
 		this();
 		this.bases = bases;
+		this.traces = traces;
 	}
 
 	public BasicTraceSequence(BasicTraceSequence template) {

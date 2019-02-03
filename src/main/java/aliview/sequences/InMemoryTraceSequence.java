@@ -9,31 +9,9 @@ import aliview.utils.ArrayUtilities;
 public class InMemoryTraceSequence extends BasicTraceSequence{
 	private static final Logger logger = Logger.getLogger(InMemoryTraceSequence.class);
 
-	public InMemoryTraceSequence(String name, String basesAsString) {
-		this(name, basesAsString.getBytes());
-	}
-
-	public InMemoryTraceSequence(String name, byte[] bytes, byte[] qCalls, byte[] traceA, byte[] traceG, byte[] traceC, byte[] traceT) {
-		super();
-		// replace all . with -
-		if(bytes != null){
-			ArrayUtilities.replaceAll(bytes, (byte) '.', (byte) '-');
-		}
-
-		this.bases = new DefaultBases(bytes);
-		this.qCalls = 
+	public InMemoryTraceSequence(String name, Bases bases, Traces traces) {
+		super(bases, traces);
 		this.name = name;
-
-	}
-
-
-	public void setBases(byte[] bytes) {
-		logger.info("setnewbases");
-		this.bases = new DefaultBases(bytes);
-		translatedBases = null;
-		if(selectionModel == null){
-			createNewSelectionModel();
-		}
 	}
 	
 }

@@ -9,13 +9,15 @@ public class Traces {
 	private Trace traceG;
 	private Trace traceC;
 	private Trace traceT;
+	private int[] baseCalls;
 	
-	public Traces(Trace traceA, Trace traceG, Trace traceC, Trace traceT) {
+	public Traces(Trace traceA, Trace traceG, Trace traceC, Trace traceT, int[] baseCalls) {
 		super();
 		this.traceA = traceA;
 		this.traceG = traceG;
 		this.traceC = traceC;
 		this.traceT = traceT;
+		this.baseCalls = baseCalls;
 	}
 	
 	public Trace getTraceA() {
@@ -43,15 +45,12 @@ public class Traces {
 		this.traceT = traceT;
 	}
 
-	public void insertAt(int n, byte[] newBytes) {
-		traceA.insertAt(n, newBytes);
-		traceG.insertAt(n, newBytes);
-		traceC.insertAt(n, newBytes);
-		traceT.insertAt(n, newBytes);
+	public void insertAt(int n, int[] newInts) {
+		logger.warn("Not implemented yet");
 	}
 	
 	// convenience
-	public void insertAt(int n, byte newByte) {
-		insertAt(n, new byte[]{newByte});
+	public void insertAt(int n, int newInt) {
+		insertAt(n, new int[]{newInt});
 	}
 }

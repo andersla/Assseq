@@ -405,6 +405,7 @@ public class Assseq implements ApplicationListener{
 
 
 		// set debug mode
+		setDebug(true);
 		if(isDebugMode()){
 			Logger.getRootLogger().setLevel(Level.ALL);
 		}
