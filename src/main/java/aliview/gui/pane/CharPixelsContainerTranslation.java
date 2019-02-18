@@ -14,8 +14,8 @@ import aliview.color.ColorScheme;
 import aliview.sequencelist.AlignmentListModel;
 
 
-public class TranslationCharPixelsContainer {
-	private static final Logger logger = Logger.getLogger(TranslationCharPixelsContainer.class);
+public class CharPixelsContainerTranslation {
+	private static final Logger logger = Logger.getLogger(CharPixelsContainerTranslation.class);
 	private CharPixelsContainer[] allAAContainers;
 
 	public RGBArray getRGBArray(AminoAcid aa, byte residue){
@@ -23,8 +23,8 @@ public class TranslationCharPixelsContainer {
 	}
 
 
-	public static TranslationCharPixelsContainer createDefaultTranslationPixelsContainer(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
-		TranslationCharPixelsContainer transContainer = new TranslationCharPixelsContainer();
+	public static CharPixelsContainerTranslation createDefaultTranslationPixelsContainer(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
+		CharPixelsContainerTranslation transContainer = new CharPixelsContainerTranslation();
 		transContainer.allAAContainers = new CharPixelsContainer[AminoAcid.HIGEST_AA_INT_VAL + 1];
 		for(AminoAcid containerAcid: AminoAcid.GROUP_ALL){
 			CharPixelsContainer container = new CharPixelsContainer();
@@ -39,8 +39,8 @@ public class TranslationCharPixelsContainer {
 		return transContainer;
 	}
 
-	public static TranslationCharPixelsContainer createSelectedTranslationPixelsContainer(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
-		TranslationCharPixelsContainer transContainer = new TranslationCharPixelsContainer();
+	public static CharPixelsContainerTranslation createSelectedTranslationPixelsContainer(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
+		CharPixelsContainerTranslation transContainer = new CharPixelsContainerTranslation();
 		transContainer.allAAContainers = new CharPixelsContainer[AminoAcid.HIGEST_AA_INT_VAL + 1];
 		for(AminoAcid containerAcid: AminoAcid.GROUP_ALL){
 			CharPixelsContainer container = new CharPixelsContainer();
@@ -56,8 +56,8 @@ public class TranslationCharPixelsContainer {
 		return transContainer;
 	}
 
-	public static TranslationCharPixelsContainer createLetterTranslationPixelsContainer(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
-		TranslationCharPixelsContainer transContainer = new TranslationCharPixelsContainer();
+	public static CharPixelsContainerTranslation createLetterTranslationPixelsContainer(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
+		CharPixelsContainerTranslation transContainer = new CharPixelsContainerTranslation();
 		transContainer.allAAContainers = new CharPixelsContainer[AminoAcid.HIGEST_AA_INT_VAL + 1];
 		for(AminoAcid containerAcid: AminoAcid.GROUP_ALL){
 			CharPixelsContainer container = new CharPixelsContainer();
@@ -71,8 +71,8 @@ public class TranslationCharPixelsContainer {
 		return transContainer;
 	}
 
-	public static TranslationCharPixelsContainer createSelectedLetterTranslationPixelsContainer(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
-		TranslationCharPixelsContainer transContainer = new TranslationCharPixelsContainer();
+	public static CharPixelsContainerTranslation createSelectedLetterTranslationPixelsContainer(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
+		CharPixelsContainerTranslation transContainer = new CharPixelsContainerTranslation();
 		transContainer.allAAContainers = new CharPixelsContainer[AminoAcid.HIGEST_AA_INT_VAL + 1];
 		for(AminoAcid containerAcid: AminoAcid.GROUP_ALL){
 			CharPixelsContainer container = new CharPixelsContainer();
@@ -89,8 +89,8 @@ public class TranslationCharPixelsContainer {
 	////////////////////////
 
 
-	public static TranslationCharPixelsContainer createDefaultTranslationAndNucPixelsContainer(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
-		TranslationCharPixelsContainer transContainer = new TranslationCharPixelsContainer();
+	public static CharPixelsContainerTranslation createDefaultTranslationAndNucPixelsContainer(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
+		CharPixelsContainerTranslation transContainer = new CharPixelsContainerTranslation();
 		transContainer.allAAContainers = new CharPixelsContainer[AminoAcid.HIGEST_AA_INT_VAL + 1];
 		for(AminoAcid containerAcid: AminoAcid.GROUP_ALL){
 			CharPixelsContainer container = new CharPixelsContainer();
@@ -107,8 +107,8 @@ public class TranslationCharPixelsContainer {
 		return transContainer;
 	}
 
-	public static TranslationCharPixelsContainer createDefaultTranslationAndNucPixelsContainerNoAALetter(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
-		TranslationCharPixelsContainer transContainer = new TranslationCharPixelsContainer();
+	public static CharPixelsContainerTranslation createDefaultTranslationAndNucPixelsContainerNoAALetter(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
+		CharPixelsContainerTranslation transContainer = new CharPixelsContainerTranslation();
 		transContainer.allAAContainers = new CharPixelsContainer[AminoAcid.HIGEST_AA_INT_VAL + 1];
 		for(AminoAcid containerAcid: AminoAcid.GROUP_ALL){
 			CharPixelsContainer container = new CharPixelsContainer();
@@ -125,8 +125,8 @@ public class TranslationCharPixelsContainer {
 		return transContainer;
 	}
 
-	public static TranslationCharPixelsContainer createSelectedTranslationAndNucPixelsContainer(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
-		TranslationCharPixelsContainer transContainer = new TranslationCharPixelsContainer();
+	public static CharPixelsContainerTranslation createSelectedTranslationAndNucPixelsContainer(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
+		CharPixelsContainerTranslation transContainer = new CharPixelsContainerTranslation();
 		transContainer.allAAContainers = new CharPixelsContainer[AminoAcid.HIGEST_AA_INT_VAL + 1];
 		for(AminoAcid containerAcid: AminoAcid.GROUP_ALL){
 			CharPixelsContainer container = new CharPixelsContainer();
@@ -143,8 +143,8 @@ public class TranslationCharPixelsContainer {
 		return transContainer;
 	}
 
-	public static TranslationCharPixelsContainer createSelectedTranslationAndNucPixelsContainerNoAALetter(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
-		TranslationCharPixelsContainer transContainer = new TranslationCharPixelsContainer();
+	public static CharPixelsContainerTranslation createSelectedTranslationAndNucPixelsContainerNoAALetter(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
+		CharPixelsContainerTranslation transContainer = new CharPixelsContainerTranslation();
 		transContainer.allAAContainers = new CharPixelsContainer[AminoAcid.HIGEST_AA_INT_VAL + 1];
 		for(AminoAcid containerAcid: AminoAcid.GROUP_ALL){
 			CharPixelsContainer container = new CharPixelsContainer();
@@ -162,8 +162,8 @@ public class TranslationCharPixelsContainer {
 	}
 
 
-	public static TranslationCharPixelsContainer createDominantNucTranslationAndNucPixelsContainer(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
-		TranslationCharPixelsContainer transContainer = new TranslationCharPixelsContainer();
+	public static CharPixelsContainerTranslation createDominantNucTranslationAndNucPixelsContainer(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
+		CharPixelsContainerTranslation transContainer = new CharPixelsContainerTranslation();
 		transContainer.allAAContainers = new CharPixelsContainer[AminoAcid.HIGEST_AA_INT_VAL + 1];
 		for(AminoAcid containerAcid: AminoAcid.GROUP_ALL){
 			CharPixelsContainer container = new CharPixelsContainer();
@@ -180,8 +180,8 @@ public class TranslationCharPixelsContainer {
 		return transContainer;
 	}
 
-	public static TranslationCharPixelsContainer createDominantNucTranslationAndNucPixelsContainerNoAALetter(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
-		TranslationCharPixelsContainer transContainer = new TranslationCharPixelsContainer();
+	public static CharPixelsContainerTranslation createDominantNucTranslationAndNucPixelsContainerNoAALetter(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
+		CharPixelsContainerTranslation transContainer = new CharPixelsContainerTranslation();
 		transContainer.allAAContainers = new CharPixelsContainer[AminoAcid.HIGEST_AA_INT_VAL + 1];
 		for(AminoAcid containerAcid: AminoAcid.GROUP_ALL){
 			CharPixelsContainer container = new CharPixelsContainer();
@@ -198,8 +198,8 @@ public class TranslationCharPixelsContainer {
 		return transContainer;
 	}
 
-	public static TranslationCharPixelsContainer createSelectedDominantNucTranslationAndNucPixelsContainer(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
-		TranslationCharPixelsContainer transContainer = new TranslationCharPixelsContainer();
+	public static CharPixelsContainerTranslation createSelectedDominantNucTranslationAndNucPixelsContainer(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
+		CharPixelsContainerTranslation transContainer = new CharPixelsContainerTranslation();
 		transContainer.allAAContainers = new CharPixelsContainer[AminoAcid.HIGEST_AA_INT_VAL + 1];
 		for(AminoAcid containerAcid: AminoAcid.GROUP_ALL){
 			CharPixelsContainer container = new CharPixelsContainer();
@@ -217,8 +217,8 @@ public class TranslationCharPixelsContainer {
 
 	}
 
-	public static TranslationCharPixelsContainer createSelectedDominantNucTranslationAndNucPixelsContainerNoAALetter(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
-		TranslationCharPixelsContainer transContainer = new TranslationCharPixelsContainer();
+	public static CharPixelsContainerTranslation createSelectedDominantNucTranslationAndNucPixelsContainerNoAALetter(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
+		CharPixelsContainerTranslation transContainer = new CharPixelsContainerTranslation();
 		transContainer.allAAContainers = new CharPixelsContainer[AminoAcid.HIGEST_AA_INT_VAL + 1];
 		for(AminoAcid containerAcid: AminoAcid.GROUP_ALL){
 			CharPixelsContainer container = new CharPixelsContainer();

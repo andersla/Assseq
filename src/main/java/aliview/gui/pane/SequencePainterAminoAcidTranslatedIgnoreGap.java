@@ -34,8 +34,8 @@ public class SequencePainterAminoAcidTranslatedIgnoreGap extends SequencePainter
 		byte residue = seq.getBaseAtPos(seqXPos);
 
 
-		TranslationCharPixelsContainer pixContainerToUse = aliPane.charPixTranslationDefault;
-		TranslationCharPixelsContainer pixLetterContainerToUse = aliPane.charPixTranslationLetter;
+		CharPixelsContainerTranslation pixContainerToUse = aliPane.charPixTranslationDefault;
+		CharPixelsContainerTranslation pixLetterContainerToUse = aliPane.charPixTranslationLetter;
 
 		// adjust colors if selected and temp selection
 		// We have to calculate within this way - because rect.contains(Point) is always returning false on a 0-width or 0 height Rectangle

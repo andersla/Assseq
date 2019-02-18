@@ -55,7 +55,7 @@ public class SequencePainterNucleotideTranslatedShowNucAndAcid extends SequenceP
 			isSecondPos = true;
 		}
 
-		TranslationCharPixelsContainer pixContainerToUse = aliPane.charPixTranslationAndNucDefault;
+		CharPixelsContainerTranslation pixContainerToUse = aliPane.charPixTranslationAndNucDefault;
 		if(! aliPane.isDrawAminoAcidCode()){
 			if(isSecondPos){
 				if(isSelected){

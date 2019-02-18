@@ -28,9 +28,9 @@ public class SequencePainterAminoAcidTranslated extends SequencePainter {
 
 		// set defaults
 		//AminoAcid acid =  aaTransSeq.getAminoAcidAtNucleotidePos(x);
-		TranslationCharPixelsContainer pixContainerToUse = aliPane.charPixTranslationDefault;
-		TranslationCharPixelsContainer pixLetterContainerToUse = aliPane.charPixTranslationLetter;
-		TranslationCharPixelsContainer pixLetterContainerToUseNoAALetter = aliPane.charPixTranslationDefault;
+		CharPixelsContainerTranslation pixContainerToUse = aliPane.charPixTranslationDefault;
+		CharPixelsContainerTranslation pixLetterContainerToUse = aliPane.charPixTranslationLetter;
+		CharPixelsContainerTranslation pixLetterContainerToUseNoAALetter = aliPane.charPixTranslationDefault;
 
 
 		// adjust colors if selected and temp selection

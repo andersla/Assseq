@@ -34,7 +34,7 @@ public class SequencePainterAminoAcid extends SequencePainter {
 		}
 
 		// set defaults
-		AACharPixelsContainer pixContainerToUse = aliPane.charPixDefaultAA;
+		CharPixelsContainerAA pixContainerToUse = aliPane.charPixDefaultAA;
 		byte byteToDraw = residue;
 		AminoAcid acid = AminoAcid.getAminoAcidFromByte(residue);
 

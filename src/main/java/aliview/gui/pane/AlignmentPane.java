@@ -97,21 +97,21 @@ public class AlignmentPane extends JPanel{
 	CharPixelsContainer charPixDefaultNuc;
 	CharPixelsContainer charPixSelectedNuc;
 	CharPixelsContainer charPixConsensusNuc;
-	AACharPixelsContainer charPixDefaultAA;
-	AACharPixelsContainer charPixSelectedAA;
-	AACharPixelsContainer charPixConsensusAA;
-	TranslationCharPixelsContainer charPixTranslationDefault;
-	TranslationCharPixelsContainer charPixTranslationSelected;
-	TranslationCharPixelsContainer charPixTranslationLetter;
-	TranslationCharPixelsContainer charPixTranslationSelectedLetter;
-	TranslationCharPixelsContainer charPixTranslationAndNucDefault;
-	TranslationCharPixelsContainer charPixTranslationAndNucSelected;
-	TranslationCharPixelsContainer charPixTranslationAndNucDefaultNoAALetter;
-	TranslationCharPixelsContainer charPixTranslationAndNucSelectedNoAALetter;
-	TranslationCharPixelsContainer charPixTranslationAndNucDominantNuc;
-	TranslationCharPixelsContainer charPixTranslationAndNucDominantNucNoAALetter;
-	TranslationCharPixelsContainer charPixTranslationAndNucDominantNucSelected;
-	TranslationCharPixelsContainer charPixTranslationAndNucDominantNucNoAALetterSelected;
+	CharPixelsContainerAA charPixDefaultAA;
+	CharPixelsContainerAA charPixSelectedAA;
+	CharPixelsContainerAA charPixConsensusAA;
+	CharPixelsContainerTranslation charPixTranslationDefault;
+	CharPixelsContainerTranslation charPixTranslationSelected;
+	CharPixelsContainerTranslation charPixTranslationLetter;
+	CharPixelsContainerTranslation charPixTranslationSelectedLetter;
+	CharPixelsContainerTranslation charPixTranslationAndNucDefault;
+	CharPixelsContainerTranslation charPixTranslationAndNucSelected;
+	CharPixelsContainerTranslation charPixTranslationAndNucDefaultNoAALetter;
+	CharPixelsContainerTranslation charPixTranslationAndNucSelectedNoAALetter;
+	CharPixelsContainerTranslation charPixTranslationAndNucDominantNuc;
+	CharPixelsContainerTranslation charPixTranslationAndNucDominantNucNoAALetter;
+	CharPixelsContainerTranslation charPixTranslationAndNucDominantNucSelected;
+	CharPixelsContainerTranslation charPixTranslationAndNucDominantNucNoAALetterSelected;
 	private double smallCharsSizeNumber = 0;
 	private int CHARSET_LINE_HEIGHT = 5;
 
@@ -279,84 +279,84 @@ public class AlignmentPane extends JPanel{
 
 		// Nucleotides
 
-		charPixDefaultNuc = CharPixelsContainer.createDefaultNucleotideContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
-		charPixSelectedNuc = CharPixelsContainer.createSelectedNucleotideContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
-		charPixConsensusNuc = CharPixelsContainer.createConsensusNucleotideContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
+		charPixDefaultNuc = ContainerFactory.createDefaultNucleotideContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
+		charPixSelectedNuc = ContainerFactory.createSelectedNucleotideContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
+		charPixConsensusNuc = ContainerFactory.createConsensusNucleotideContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
 
 		// Translated
 
-		charPixTranslationDefault = TranslationCharPixelsContainer.createDefaultTranslationPixelsContainer(charFont, charMaxSizeToDraw,
+		charPixTranslationDefault = CharPixelsContainerTranslation.createDefaultTranslationPixelsContainer(charFont, charMaxSizeToDraw,
 				charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
 
-		charPixTranslationSelected = TranslationCharPixelsContainer.createSelectedTranslationPixelsContainer(charFont, charMaxSizeToDraw,
+		charPixTranslationSelected = CharPixelsContainerTranslation.createSelectedTranslationPixelsContainer(charFont, charMaxSizeToDraw,
 				charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
 
-		charPixTranslationLetter = TranslationCharPixelsContainer.createLetterTranslationPixelsContainer(charFont, charMaxSizeToDraw,
+		charPixTranslationLetter = CharPixelsContainerTranslation.createLetterTranslationPixelsContainer(charFont, charMaxSizeToDraw,
 				charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
 
-		charPixTranslationSelectedLetter = TranslationCharPixelsContainer.createSelectedLetterTranslationPixelsContainer(charFont, charMaxSizeToDraw,
+		charPixTranslationSelectedLetter = CharPixelsContainerTranslation.createSelectedLetterTranslationPixelsContainer(charFont, charMaxSizeToDraw,
 				charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
 
 
 
 		// Translated and nuc at same time
 
-		charPixTranslationAndNucDefault = TranslationCharPixelsContainer.createDefaultTranslationAndNucPixelsContainer(charFont, charMaxSizeToDraw,
+		charPixTranslationAndNucDefault = CharPixelsContainerTranslation.createDefaultTranslationAndNucPixelsContainer(charFont, charMaxSizeToDraw,
 				charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
 
-		charPixTranslationAndNucDefaultNoAALetter = TranslationCharPixelsContainer.createDefaultTranslationAndNucPixelsContainerNoAALetter(charFont, charMaxSizeToDraw,
+		charPixTranslationAndNucDefaultNoAALetter = CharPixelsContainerTranslation.createDefaultTranslationAndNucPixelsContainerNoAALetter(charFont, charMaxSizeToDraw,
 				charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
 
-		charPixTranslationAndNucSelected = TranslationCharPixelsContainer.createSelectedTranslationAndNucPixelsContainer(charFont, charMaxSizeToDraw,
+		charPixTranslationAndNucSelected = CharPixelsContainerTranslation.createSelectedTranslationAndNucPixelsContainer(charFont, charMaxSizeToDraw,
 				charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
 
-		charPixTranslationAndNucSelectedNoAALetter = TranslationCharPixelsContainer.createSelectedTranslationAndNucPixelsContainerNoAALetter(charFont, charMaxSizeToDraw,
+		charPixTranslationAndNucSelectedNoAALetter = CharPixelsContainerTranslation.createSelectedTranslationAndNucPixelsContainerNoAALetter(charFont, charMaxSizeToDraw,
 				charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
 
-		charPixTranslationAndNucDominantNuc = TranslationCharPixelsContainer.createDominantNucTranslationAndNucPixelsContainer(charFont, charMaxSizeToDraw,
+		charPixTranslationAndNucDominantNuc = CharPixelsContainerTranslation.createDominantNucTranslationAndNucPixelsContainer(charFont, charMaxSizeToDraw,
 				charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
 
-		charPixTranslationAndNucDominantNucNoAALetter = TranslationCharPixelsContainer.createDominantNucTranslationAndNucPixelsContainerNoAALetter(charFont, charMaxSizeToDraw,
+		charPixTranslationAndNucDominantNucNoAALetter = CharPixelsContainerTranslation.createDominantNucTranslationAndNucPixelsContainerNoAALetter(charFont, charMaxSizeToDraw,
 				charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
 
-		charPixTranslationAndNucDominantNucSelected = TranslationCharPixelsContainer.createSelectedDominantNucTranslationAndNucPixelsContainer(charFont, charMaxSizeToDraw,
+		charPixTranslationAndNucDominantNucSelected = CharPixelsContainerTranslation.createSelectedDominantNucTranslationAndNucPixelsContainer(charFont, charMaxSizeToDraw,
 				charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
 
-		charPixTranslationAndNucDominantNucNoAALetterSelected = TranslationCharPixelsContainer.createSelectedDominantNucTranslationAndNucPixelsContainerNoAALetter(charFont, charMaxSizeToDraw,
+		charPixTranslationAndNucDominantNucNoAALetterSelected = CharPixelsContainerTranslation.createSelectedDominantNucTranslationAndNucPixelsContainerNoAALetter(charFont, charMaxSizeToDraw,
 				charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
 
 
 		// AminoAcid
 
-		charPixDefaultAA =  new AACharPixelsContainer();
+		charPixDefaultAA =  new CharPixelsContainerAA();
 		if(colorSchemeAminoAcid.getALLCompundColors() != null){
-			CompoundCharPixelsContainer compContainer = CompoundCharPixelsContainer.createDefaultCompoundColorContainer(charFont, charMaxSizeToDraw,
+			CharPixelsContainerCompound compContainer = CharPixelsContainerCompound.createDefaultCompoundColorContainer(charFont, charMaxSizeToDraw,
 					charPixWidth, charPixHeight, colorSchemeAminoAcid, getFontCase());
 			charPixDefaultAA.setCompoundContainer(compContainer);
 		}else{
-			CharPixelsContainer container = CharPixelsContainer.createDefaultAAContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeAminoAcid, getFontCase());
+			CharPixelsContainer container = ContainerFactory.createDefaultAAContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeAminoAcid, getFontCase());
 			charPixDefaultAA.setContainer(container);
 		}
 
-		charPixSelectedAA =  new AACharPixelsContainer();
+		charPixSelectedAA =  new CharPixelsContainerAA();
 		if(colorSchemeAminoAcid.getALLCompundColors() != null){
 
-			CompoundCharPixelsContainer compContainer = CompoundCharPixelsContainer.createSelectedCompoundColorContainer(charFont, charMaxSizeToDraw,
+			CharPixelsContainerCompound compContainer = CharPixelsContainerCompound.createSelectedCompoundColorContainer(charFont, charMaxSizeToDraw,
 					charPixWidth, charPixHeight, colorSchemeAminoAcid, getFontCase());
 			charPixSelectedAA.setCompoundContainer(compContainer);
 		}else{
-			CharPixelsContainer container = CharPixelsContainer.createSelectedAAContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeAminoAcid, getFontCase());
+			CharPixelsContainer container = ContainerFactory.createSelectedAAContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeAminoAcid, getFontCase());
 			charPixSelectedAA.setContainer(container);
 		}
 
-		charPixConsensusAA =  new AACharPixelsContainer();
+		charPixConsensusAA =  new CharPixelsContainerAA();
 		if(colorSchemeAminoAcid.getALLCompundColors() != null){
-			CompoundCharPixelsContainer compContainer = CompoundCharPixelsContainer.createDefaultCompoundColorContainer(charFont, charMaxSizeToDraw,
+			CharPixelsContainerCompound compContainer = CharPixelsContainerCompound.createDefaultCompoundColorContainer(charFont, charMaxSizeToDraw,
 					charPixWidth, charPixHeight, colorSchemeAminoAcid, getFontCase());
 			charPixConsensusAA.setCompoundContainer(compContainer);
 
 		}else{
-			CharPixelsContainer container = CharPixelsContainer.createConsensusAAContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeAminoAcid, getFontCase());
+			CharPixelsContainer container = ContainerFactory.createConsensusAAContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeAminoAcid, getFontCase());
 			charPixConsensusAA.setContainer(container);
 		}
 

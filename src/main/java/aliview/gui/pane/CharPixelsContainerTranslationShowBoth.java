@@ -14,8 +14,8 @@ import aliview.color.ColorScheme;
 import aliview.sequencelist.AlignmentListModel;
 
 
-public class TranslationCharPixelsContainerShowBoth {
-	private static final Logger logger = Logger.getLogger(TranslationCharPixelsContainerShowBoth.class);
+public class CharPixelsContainerTranslationShowBoth {
+	private static final Logger logger = Logger.getLogger(CharPixelsContainerTranslationShowBoth.class);
 	private CharPixelsContainer[] allAAContainers;
 
 	public RGBArray getRGBArray(AminoAcid aa, byte residue){
@@ -23,8 +23,8 @@ public class TranslationCharPixelsContainerShowBoth {
 	}
 
 
-	public static TranslationCharPixelsContainerShowBoth createDefaultTranslationPixelsContainer(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
-		TranslationCharPixelsContainerShowBoth transContainer = new TranslationCharPixelsContainerShowBoth();
+	public static CharPixelsContainerTranslationShowBoth createDefaultTranslationPixelsContainer(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
+		CharPixelsContainerTranslationShowBoth transContainer = new CharPixelsContainerTranslationShowBoth();
 		transContainer.allAAContainers = new CharPixelsContainer[AminoAcid.HIGEST_AA_INT_VAL + 1];
 		for(AminoAcid containerAcid: AminoAcid.GROUP_ALL){
 			CharPixelsContainer container = new CharPixelsContainer();
@@ -39,8 +39,8 @@ public class TranslationCharPixelsContainerShowBoth {
 		return transContainer;
 	}
 
-	public static TranslationCharPixelsContainerShowBoth createSelectedTranslationPixelsContainer(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
-		TranslationCharPixelsContainerShowBoth transContainer = new TranslationCharPixelsContainerShowBoth();
+	public static CharPixelsContainerTranslationShowBoth createSelectedTranslationPixelsContainer(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
+		CharPixelsContainerTranslationShowBoth transContainer = new CharPixelsContainerTranslationShowBoth();
 		transContainer.allAAContainers = new CharPixelsContainer[AminoAcid.HIGEST_AA_INT_VAL + 1];
 		for(AminoAcid containerAcid: AminoAcid.GROUP_ALL){
 			CharPixelsContainer container = new CharPixelsContainer();
@@ -56,8 +56,8 @@ public class TranslationCharPixelsContainerShowBoth {
 		return transContainer;
 	}
 
-	public static TranslationCharPixelsContainerShowBoth createLetterTranslationPixelsContainer(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
-		TranslationCharPixelsContainerShowBoth transContainer = new TranslationCharPixelsContainerShowBoth();
+	public static CharPixelsContainerTranslationShowBoth createLetterTranslationPixelsContainer(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
+		CharPixelsContainerTranslationShowBoth transContainer = new CharPixelsContainerTranslationShowBoth();
 		transContainer.allAAContainers = new CharPixelsContainer[AminoAcid.HIGEST_AA_INT_VAL + 1];
 		for(AminoAcid containerAcid: AminoAcid.GROUP_ALL){
 			CharPixelsContainer container = new CharPixelsContainer();
@@ -71,8 +71,8 @@ public class TranslationCharPixelsContainerShowBoth {
 		return transContainer;
 	}
 
-	public static TranslationCharPixelsContainerShowBoth createSelectedLetterTranslationPixelsContainer(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
-		TranslationCharPixelsContainerShowBoth transContainer = new TranslationCharPixelsContainerShowBoth();
+	public static CharPixelsContainerTranslationShowBoth createSelectedLetterTranslationPixelsContainer(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
+		CharPixelsContainerTranslationShowBoth transContainer = new CharPixelsContainerTranslationShowBoth();
 		transContainer.allAAContainers = new CharPixelsContainer[AminoAcid.HIGEST_AA_INT_VAL + 1];
 		for(AminoAcid containerAcid: AminoAcid.GROUP_ALL){
 			CharPixelsContainer container = new CharPixelsContainer();

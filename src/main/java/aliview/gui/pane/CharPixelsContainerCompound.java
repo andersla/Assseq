@@ -14,14 +14,14 @@ import aliview.color.ColorScheme;
 import aliview.sequencelist.AlignmentListModel;
 
 
-public class CompoundCharPixelsContainer {
-	private static final Logger logger = Logger.getLogger(CompoundCharPixelsContainer.class);
+public class CharPixelsContainerCompound {
+	private static final Logger logger = Logger.getLogger(CharPixelsContainerCompound.class);
 	private HashMap<Color, CharPixelsContainer> colorContainerMap;
 
 	// Below is for CompounColorScheme
 	private ColorScheme colorScheme;
 
-	public CompoundCharPixelsContainer() {
+	public CharPixelsContainerCompound() {
 		logger.info("init CharPixContainer");
 	}
 
@@ -34,13 +34,13 @@ public class CompoundCharPixelsContainer {
 	}
 
 
-	public static CompoundCharPixelsContainer createDefaultCompoundColorContainer(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
+	public static CharPixelsContainerCompound createDefaultCompoundColorContainer(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
 
 		if(colorScheme.getALLCompundColors() == null || colorScheme.getALLCompundColors().length == 0){
 			return null;
 		}
 
-		CompoundCharPixelsContainer compundContainer = new CompoundCharPixelsContainer();
+		CharPixelsContainerCompound compundContainer = new CharPixelsContainerCompound();
 		compundContainer.colorScheme = colorScheme;
 
 		compundContainer.colorContainerMap = new HashMap<Color, CharPixelsContainer>(colorScheme.getALLCompundColors().length);
@@ -63,13 +63,13 @@ public class CompoundCharPixelsContainer {
 
 	}
 
-	public static CompoundCharPixelsContainer createSelectedCompoundColorContainer(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
+	public static CharPixelsContainerCompound createSelectedCompoundColorContainer(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
 
 		if(colorScheme.getALLCompundColors() == null || colorScheme.getALLCompundColors().length == 0){
 			return null;
 		}
 
-		CompoundCharPixelsContainer compundContainer = new CompoundCharPixelsContainer();
+		CharPixelsContainerCompound compundContainer = new CharPixelsContainerCompound();
 		compundContainer.colorScheme = colorScheme;
 
 		compundContainer.colorContainerMap = new HashMap<Color, CharPixelsContainer>(colorScheme.getALLCompundColors().length);

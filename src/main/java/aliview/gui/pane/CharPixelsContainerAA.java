@@ -14,9 +14,9 @@ import aliview.color.ColorScheme;
 import aliview.sequencelist.AlignmentListModel;
 
 
-public class AACharPixelsContainer {
-	private static final Logger logger = Logger.getLogger(AACharPixelsContainer.class);
-	private CompoundCharPixelsContainer compoundContainer;
+public class CharPixelsContainerAA {
+	private static final Logger logger = Logger.getLogger(CharPixelsContainerAA.class);
+	private CharPixelsContainerCompound compoundContainer;
 	private CharPixelsContainer container;
 
 	// Below is for CompounColorScheme
@@ -33,7 +33,7 @@ public class AACharPixelsContainer {
 	}
 
 	public void setCompoundContainer(
-			CompoundCharPixelsContainer compoundContainer) {
+			CharPixelsContainerCompound compoundContainer) {
 		this.compoundContainer = compoundContainer;
 	}
 
