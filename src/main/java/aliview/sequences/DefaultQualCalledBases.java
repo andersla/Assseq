@@ -16,10 +16,10 @@ public class DefaultQualCalledBases implements Bases {
 	private static final Logger logger = Logger.getLogger(DefaultQualCalledBases.class);
 	private static final String TEXT_FILE_BYTE_ENCODING = "ASCII";
 	byte[] backend;
-	byte[] qualCalls;
-	byte NONE_QUALCALL = 0;
+	short[] qualCalls;
+	short NONE_QUALCALL = 0;
 
-	public DefaultQualCalledBases(byte[] bytes, byte[] qualCalls) {
+	public DefaultQualCalledBases(byte[] bytes, short[] qualCalls) {
 		this.backend = bytes;
 		this.qualCalls = qualCalls;
 	}
@@ -93,7 +93,7 @@ public class DefaultQualCalledBases implements Bases {
 		backend = ArrayUtils.addAll(backend, additional);
 		
 		// Qualcalls
-		byte[] additionalQual = new byte[additionalCount];
+		short[] additionalQual = new short[additionalCount];
 		Arrays.fill(additionalQual, NONE_QUALCALL);
 		qualCalls = ArrayUtils.addAll(qualCalls, additionalQual);
 		
@@ -104,7 +104,7 @@ public class DefaultQualCalledBases implements Bases {
 		backend = ArrayUtils.addAll(backend, newBytes);
 		
 		// QualCalls
-		byte[] additionalQual = new byte[newBytes.length];
+		short[] additionalQual = new short[newBytes.length];
 		Arrays.fill(additionalQual, NONE_QUALCALL);
 		qualCalls = ArrayUtils.addAll(qualCalls, additionalQual);
 	}
@@ -124,9 +124,9 @@ public class DefaultQualCalledBases implements Bases {
 		backend = newArray;
 		
 		// QualCalls
-		byte[] additionalQual = new byte[newBytes.length];
+		short[] additionalQual = new short[newBytes.length];
 		Arrays.fill(additionalQual, NONE_QUALCALL);
-		byte[] newQual = ArrayUtilities.insertAt(qualCalls, n, additionalQual);
+		short[] newQual = ArrayUtilities.insertAt(qualCalls, n, additionalQual);
 		qualCalls = newQual;
 		
 	}
@@ -152,10 +152,10 @@ public class DefaultQualCalledBases implements Bases {
 		backend = newBackend;
 		
 		// QualCalls
-		byte[] newCalls = new byte[newLength];
+		short[] newCalls = new short[newLength];
 		
 		// Create empty new ones
-		byte[] insertQual = new byte[insertBases.length];
+		short[] insertQual = new short[insertBases.length];
 		Arrays.fill(insertQual, NONE_QUALCALL);
 
 		// copy first untouched part of sequence
@@ -197,7 +197,7 @@ public class DefaultQualCalledBases implements Bases {
 		}
 		
 		logger.warn("Not fixed for qual-called bases");
-		qualCalls = new byte[backend.length];
+		qualCalls = new short[backend.length];
 
 	}
 
@@ -245,7 +245,7 @@ public class DefaultQualCalledBases implements Bases {
 		backend = newBases;
 		
 		logger.warn("Not fixed for qual-called bases");
-		qualCalls = new byte[backend.length];
+		qualCalls = new short[backend.length];
 		
 	}
 

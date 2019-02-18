@@ -7,6 +7,8 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.DebugGraphics;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.biojava.nbio.core.exceptions.CompoundNotFoundException;
@@ -22,6 +24,7 @@ import aliview.sequences.FastFastaSequence;
 import aliview.sequences.Sequence;
 import aliview.sequences.Trace;
 import aliview.sequences.Traces;
+import aliview.utils.ArrayUtilities;
 
 
 public class ABIImporter {
@@ -46,14 +49,25 @@ public class ABIImporter {
 			Trace traceC = new Trace(abiTrace.getTrace("C"));
 			Trace traceG = new Trace(abiTrace.getTrace("G"));
 			Trace traceT = new Trace(abiTrace.getTrace("T"));
+			
+			
+			//traceA.debug();
+			//traceG.debug();
+			
 			int[] baseCalls = abiTrace.getBasecalls();
+			
+			//ArrayUtilities.debug(baseCalls);
+			
 			Traces traces = new Traces(traceA, traceG, traceC, traceT, baseCalls);
 
 			int[] qualCalls = abiTrace.getQcalls();
-			byte[] byteQualCalls = intArray2ByteArray(qualCalls);
+			
+			short[] shortQualCalls = intArray2ShortArray(qualCalls);
+			
+			//ArrayUtilities.debug(shortQualCalls);
 
 			byte[] bases = getSequenceFromABI(abiTrace);
-			Bases basesAndCalls = new DefaultQualCalledBases(bases, byteQualCalls);
+			Bases basesAndCalls = new DefaultQualCalledBases(bases, shortQualCalls);
 
 			ABISequence sequence  = new ABISequence(inputFile.getName(), basesAndCalls, traces);
 
@@ -71,6 +85,14 @@ public class ABIImporter {
 		System.out.println("reading sequences took " + (endTime - startTime) + " milliseconds");
 
 		return sequences;
+	}
+
+	private short[] intArray2ShortArray(int[] input) {
+		short[] output = new short[input.length];
+		for(int n = 0; n < output.length; n++) {
+			output[n] = (short)input[n];
+		}
+		return output;
 	}
 
 	private byte[] intArray2ByteArray(int[] input) {

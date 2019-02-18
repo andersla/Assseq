@@ -320,7 +320,7 @@ public class Assseq implements ApplicationListener{
 
 				//alignmentFile = new File("/home/anders/projekt/alignments/sandies/Grp4+_GBank+208_trim3.phy");
 
-				alignmentFile = new File("/home/anders/projekt/alignments/Woodsia_chloroplast_min1_20131029.fasta");
+				// alignmentFile = new File("/home/anders/projekt/alignments/Woodsia_chloroplast_min1_20131029.fasta");
 				//alignmentFile = new File("/home/anders/projekt/alignments/john/HEV_more.than.1400bp.sequence.MafftE_trim.no.gapseq.CUT.6260_7490.nexus");
 
 				//	alignmentFile = new File("/vol2/big_data/test.nexus");
@@ -361,6 +361,7 @@ public class Assseq implements ApplicationListener{
 				//		alignmentFile = new File("/home/anders/projekt/alignments/infile_V2.phy");
 				//			alignmentFile = new File("/home/anders/projekt/alignments/smalphylipInterlLongName.phy");
 
+				alignmentFile = new File("/home/anders/projekt/alignments/abi/12MT7D9MATK_HF.ab1");
 
 
 				if(! alignmentFile.exists()){
@@ -405,7 +406,6 @@ public class Assseq implements ApplicationListener{
 
 
 		// set debug mode
-		setDebug(true);
 		if(isDebugMode()){
 			Logger.getRootLogger().setLevel(Level.ALL);
 		}

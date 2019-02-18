@@ -38,4 +38,7 @@ public class Trace {
 		logger.info("backend.length=" + backend.length);
 	}
 	
+	public void debug() {
+		ArrayUtilities.debug(backend);
+	}
 }

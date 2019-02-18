@@ -2,8 +2,6 @@ package aliview.utils;
 
 import org.apache.log4j.Logger;
 
-import aliview.alignment.Alignment;
-
 
 public class ArrayUtilities {
 	private static final Logger logger = Logger.getLogger(ArrayUtilities.class);
@@ -67,6 +65,25 @@ public class ArrayUtilities {
 		return newArray;
 	}
 	
+	public static short[] insertAt(short[] array, int pos, short[] newBytes) {
+		if(array == null || newBytes == null || newBytes.length == 0){
+			return array;
+		}
+
+		short[] newArray = new short[array.length + newBytes.length];
+
+		// copy first part of array
+		System.arraycopy(array, 0, newArray, 0, pos); // insert at means first part is to pos - 1
+
+		// copy inserts
+		System.arraycopy(newBytes, 0, newArray, pos, newBytes.length);
+
+		// copy last
+		System.arraycopy(array, pos, newArray, pos + newBytes.length, array.length - pos);
+
+		return newArray;
+	}
+	
 	public static int[] insertAt(int[] array, int pos, int[] newInts) {
 		if(array == null || newInts == null || newInts.length == 0){
 			return array;
@@ -86,7 +103,23 @@ public class ArrayUtilities {
 		return newArray;
 	}
 
-
-
+	
+	public static void debug(int[] array) {
+		for(int n = 0; n < array.length; n++) {
+			logger.info("n=" + n + " " + array[n]);
+		}
+	}
+	
+	public static void debug(byte[] array) {
+		for(int n = 0; n < array.length; n++) {
+			logger.info("n=" + n + " " + array[n]);
+		}
+	}
+	
+	public static void debug(short[] array) {
+		for(int n = 0; n < array.length; n++) {
+			logger.info("n=" + n + " " + array[n]);
+		}
+	}
 
 }
