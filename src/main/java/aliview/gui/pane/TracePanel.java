@@ -53,9 +53,8 @@ import aliview.utils.ArrayUtilities;
 
 // HAS to be JPanel - JComponent is not enough for only partial cliprect when in jscrollpane when painting
 // When JComponent only then I had to paint it all (maybe because of layoutmanager?)
-public class AlignmentPane extends JPanel{
-	private static final long serialVersionUID = 601195400946835871L;
-	private static final Logger logger = Logger.getLogger(AlignmentPane.class);
+public class TracePanel extends JPanel{
+	private static final Logger logger = Logger.getLogger(TracePanel.class);
 	private static final double MIN_CHAR_SIZE = 0;
 	private static final int MAX_CHAR_SIZE = 100;
 	private static final double CHAR_HEIGHT_RATIO = 1.4;
@@ -78,8 +77,7 @@ public class AlignmentPane extends JPanel{
 	private boolean showTranslation = false;
 	private boolean showTranslationAndNuc = false;
 	//	private boolean showTranslationOnePos = false;
-	private AlignmentRuler alignmentRuler;
-	private CharsetRuler charsetRuler;
+	private TraceRuler traceRuler;
 	private boolean drawAminoAcidCode; 
 	private boolean drawCodonPosOnRuler;
 	private Rectangle lastClip = new Rectangle();
@@ -115,7 +113,7 @@ public class AlignmentPane extends JPanel{
 	private double smallCharsSizeNumber = 0;
 	private int CHARSET_LINE_HEIGHT = 5;
 
-	public AlignmentPane() {
+	public TracePanel() {
 		highDPIScaleFactor = (int)OSNativeUtils.getHighDPIScaleFactor();
 		createAdjustedDerivedBaseFont();
 		createAdjustedDerivedHighDPIFont();
@@ -126,8 +124,7 @@ public class AlignmentPane extends JPanel{
 		//this.setDoubleBuffered(false);
 		//this.setBackground(Color.white);
 		//this.infoLabel = infoLabel;
-		alignmentRuler = new AlignmentRuler(this);
-		charsetRuler = new CharsetRuler(this);
+		traceRuler = new TraceRuler(this);
 
 
 	}
@@ -166,10 +163,6 @@ public class AlignmentPane extends JPanel{
 
 	public boolean getDrawCodonPosOnRuler() {
 		return this.drawCodonPosOnRuler;
-	}
-
-	public void setShowCharsetRuler(boolean selected) {
-		charsetRuler.setVisible(selected);
 	}
 
 	public boolean decCharSize(){
@@ -661,8 +654,7 @@ public class AlignmentPane extends JPanel{
 
 		// repaint ruler also if needed
 		if(clip.x != lastClip.x || clip.width != lastClip.width || rulerIsDirty){
-			alignmentRuler.repaint();
-			charsetRuler.repaint();
+			traceRuler.repaint();
 			rulerIsDirty = false;
 		}
 		lastClip = clip;
@@ -711,38 +703,9 @@ public class AlignmentPane extends JPanel{
 					int xPosStart =  clip.x;
 					int xPosEnd =  (int) clip.getMaxX();	
 
-					if(isNucleotideAlignment){
-						if(isShowTranslationOnePos()){							
-							SequencePainter seqPainter = new SequencePainterAminoAcid(seq, seqYPos, clipYPos, xPosStart, xPosEnd, seqPerPixX, 1, 1, highDPIScaleFactor, clipRGB, this, alignment);	
-							executor.execute(seqPainter);
-
-						}else if(showTranslation && !isShowTranslationOnePos() && ignoreGapInTranslation){
-							SequencePainter seqPainter = new SequencePainterAminoAcidTranslatedIgnoreGap(seq, seqYPos, clipYPos, xPosStart, xPosEnd, seqPerPixX, 1, 1, highDPIScaleFactor, clipRGB, this, alignment);	
-							executor.execute(seqPainter);
-
-						}else if(showTranslation){
-							if(showTranslationAndNuc){
-								SequencePainter seqPainter = new SequencePainterNucleotideTranslatedShowNucAndAcid(seq, seqYPos, clipYPos, xPosStart, xPosEnd, seqPerPixX, 1, 1, highDPIScaleFactor, clipRGB, this, alignment);	
-								executor.execute(seqPainter);
-
-							}else{
-								SequencePainter seqPainter = new SequencePainterAminoAcidTranslated(seq, seqYPos, clipYPos, xPosStart, xPosEnd, seqPerPixX, 1, 1, highDPIScaleFactor, clipRGB, this, alignment);	
-								executor.execute(seqPainter);
-							}
-
-						}else{
-							SequencePainter seqPainter = new SequencePainterNucleotide(seq, seqYPos, clipYPos, xPosStart, xPosEnd, seqPerPixX, 1, 1, highDPIScaleFactor, clipRGB, this, alignment);	
-							executor.execute(seqPainter);
-						}
-					}
 					
-					// Else draw as AminoAcids
-					//
-					else{
-						SequencePainter seqPainter = new SequencePainterAminoAcid(seq, seqYPos, clipYPos, xPosStart, xPosEnd, seqPerPixX, 1, 1, highDPIScaleFactor, clipRGB, this, alignment);	
-						executor.execute(seqPainter);
-					}
-
+					TracePainter seqPainter = new TracePainterABI(seq, seqYPos, clipYPos, xPosStart, xPosEnd, seqPerPixX, 1, 1, highDPIScaleFactor, clipRGB, this, alignment);	
+					executor.execute(seqPainter);
 
 				}
 				else{
@@ -785,36 +748,10 @@ public class AlignmentPane extends JPanel{
 				int xPosEnd = xMax;
 
 
-				if(isNucleotideAlignment){
-					if(isShowTranslationOnePos()){							
-						SequencePainter seqPainter = new SequencePainterAminoAcid(seq, seqYPos, clipYPos, xPosStart, xPosEnd, normalCharSeqPerPix, charWidth, charHeight, highDPIScaleFactor, clipRGB, this, alignment);	
+				
+						TracePainter seqPainter = new TracePainterABI(seq, seqYPos, clipYPos, xPosStart, xPosEnd, normalCharSeqPerPix, charWidth, charHeight, highDPIScaleFactor, clipRGB, this, alignment);	
 						executor.execute(seqPainter);
-
-					}else if(showTranslation && !isShowTranslationOnePos() && ignoreGapInTranslation){
-						SequencePainter seqPainter = new SequencePainterAminoAcidTranslatedIgnoreGap(seq, seqYPos, clipYPos, xPosStart, xPosEnd, normalCharSeqPerPix, charWidth, charHeight, highDPIScaleFactor, clipRGB, this, alignment);	
-						executor.execute(seqPainter);
-
-					}else if(showTranslation){
-						if(showTranslationAndNuc){
-							SequencePainter seqPainter = new SequencePainterNucleotideTranslatedShowNucAndAcid(seq, seqYPos, clipYPos, xPosStart, xPosEnd, normalCharSeqPerPix, charWidth, charHeight, highDPIScaleFactor, clipRGB, this, alignment);	
-							executor.execute(seqPainter);
-
-						}else{
-							SequencePainter seqPainter = new SequencePainterAminoAcidTranslated(seq, seqYPos, clipYPos, xPosStart, xPosEnd, normalCharSeqPerPix, charWidth, charHeight, highDPIScaleFactor, clipRGB, this, alignment);	
-							executor.execute(seqPainter);
-						}
-
-						// Normal nucleotide
-					}else{
-						SequencePainter seqPainter = new SequencePainterNucleotide(seq, seqYPos, clipYPos, xPosStart, xPosEnd, normalCharSeqPerPix, charWidth, charHeight, highDPIScaleFactor, clipRGB, this, alignment);	
-						executor.execute(seqPainter);
-					}
-				}
-				// Draw as AminoAcids
-				else{
-					SequencePainter seqPainter = new SequencePainterAminoAcid(seq, seqYPos, clipYPos, xPosStart, xPosEnd, normalCharSeqPerPix, charWidth, charHeight, highDPIScaleFactor, clipRGB, this, alignment);	
-					executor.execute(seqPainter);
-				}
+					
 
 				clipYPos ++;
 			}
@@ -1186,11 +1123,7 @@ public class AlignmentPane extends JPanel{
 	}
 
 	public JComponent getRulerComponent(){
-		return this.alignmentRuler;
-	}
-
-	public JComponent getCharsetRulerComponent(){
-		return this.charsetRuler;
+		return this.traceRuler;
 	}
 
 	public void setDrawAminoAcidCode(boolean drawCode){
@@ -1311,11 +1244,11 @@ public class AlignmentPane extends JPanel{
 		return highlightDiffTrace;
 	}
 
-	private class AlignmentRuler extends JPanel{
+	private class TraceRuler extends JPanel{
 
-		private AlignmentPane alignmentPane;
+		private TracePanel alignmentPane;
 
-		public AlignmentRuler(AlignmentPane alignmentPane) {
+		public TraceRuler(TracePanel alignmentPane) {
 			this.alignmentPane = alignmentPane;
 		}
 
@@ -1647,137 +1580,6 @@ public class AlignmentPane extends JPanel{
 		}
 
 	} // end Ruler class
-
-
-	private class CharsetRuler extends JPanel{
-
-		private AlignmentPane alignmentPane;
-		private Color[] charsetColors = new Color[]{new Color(107,215,204), new Color(239,189,93), new Color(215,127,163),new Color(210,213,102), new Color(127,107,215),new Color(203,241,136)};
-
-		public CharsetRuler(AlignmentPane alignmentPane) {
-			this.alignmentPane = alignmentPane;
-			// Add this component to ToolTipManager
-			ToolTipManager.sharedInstance().registerComponent(this);
-		}
-
-		public void paintComponent(Graphics g){
-			super.paintComponent(g);
-			if(isVisible() && !isShowTranslationOnePos()){
-				paintCharsetRuler(g);
-			}
-		}
-
-		@Override
-		public Dimension getPreferredSize(){
-			logger.info("get pref size");
-			if(!isVisible()){
-				return new Dimension(0,0);
-			}else{
-				Dimension superSize = super.getPreferredSize();
-				int preferredHeight = calculatePreferredHeight();
-				return new Dimension(superSize.width, preferredHeight);
-			}	
-		}
-
-		private int calculatePreferredHeight(){
-			// loop through all charsets and see how many overlaps
-
-			int maxCharsetOverlapCount = alignment.getAlignmentMeta().getCharsets().getMaxOverlapCount();
-			int preferredHeight = CHARSET_LINE_HEIGHT * (maxCharsetOverlapCount + 1); // 1 overlap means t
-
-			return preferredHeight;	
-		}
-
-
-		public void paintCharsetRuler(Graphics g){
-
-			long startTime = System.currentTimeMillis();
-
-			Graphics2D g2d = (Graphics2D) g;
-
-			// What part of alignment matrix is in view (what part of matrix is in graphical view)
-			Rectangle paneClip = alignmentPane.getVisibleRect();
-			Rectangle matrixClip = paneCoordToMatrixCoord(paneClip);
-
-			// Draw ruler background
-			Rectangle rulerRect = new Rectangle(this.getVisibleRect());
-			g2d.setColor(colorSchemeNucleotide.getBaseBackgroundColor(NucleotideUtilities.GAP));
-			g2d.fill(rulerRect);
-
-			int offsetDueToScrollPanePosition = paneClip.x;
-
-			CharSets charsets = alignment.getAlignmentMeta().getCharsets();
-
-			int maxCharsetOverlapCount = charsets.getMaxOverlapCount();
-			logger.info("maxCharsetOverlapCount" + maxCharsetOverlapCount); 
-
-			int maxX = Math.min(alignment.getMaxX(), (int) matrixClip.getMaxX());
-			int minX = (int) matrixClip.getMinX();
-
-			int colorIndex = 0;
-			int charsetIndex = 0;
-			for(CharSet charSet: charsets){
-				if(charSet.intersects(minX,maxX)){
-					logger.info("intersects" + charSet.getName());
-
-					int lineHeight = CHARSET_LINE_HEIGHT;
-					int charsetLineYPos = (charsetIndex % (maxCharsetOverlapCount + 1)) * lineHeight;
-					logger.info("charsetLineYPos" + charsetLineYPos);
-
-					int charSetMinX = charSet.getMinimumStartPos();
-					int charSetMaxX = charSet.getMaximumEndPos();
-
-					Point charSetMinXPanePos = alignmentPane.matrixCoordToPaneCoord(new Point(charSetMinX, 0));
-					Point charSetMaxXPanePos = alignmentPane.matrixCoordToPaneCoord(new Point(charSetMaxX, 0));
-
-					int width = charSetMaxXPanePos.x - charSetMinXPanePos.x + (int)(1*charWidth); // + 1 because if start and end is same should be one pixel
-
-					// we are drawing not on a large scrollable ruler, but a window sized fixed pane we have to adjust with offsetDueToScrollPanePosition
-					Rectangle charsetRect = new Rectangle(charSetMinXPanePos.x - offsetDueToScrollPanePosition, charsetLineYPos, width, lineHeight);	
-
-					Color charsetColor = charsetColors[colorIndex % charsetColors.length];
-					g2d.setColor(charsetColor);
-
-					g2d.fill(charsetRect);
-				}
-				charsetIndex ++;
-				colorIndex ++;
-			}
-
-			long endTime = System.currentTimeMillis();
-			logger.info("CharsetRuler PaintComponent took " + (endTime - startTime) + " milliseconds");
-		}
-
-
-		private int roundToClosestUpper(int inval, int roundTo) {
-			// int rounded = ((num + 99) / 100 ) * 100;
-			int rounded = ((inval + roundTo -1) / roundTo ) * roundTo;
-			return rounded;
-		}
-
-		@Override
-		public String getToolTipText(MouseEvent event) {
-			logger.info("ToolTipLoc:" + event.getPoint());
-
-			Rectangle paneClip = alignmentPane.getVisibleRect();
-			int offsetDueToScrollPanePosition = paneClip.x;
-			int xPosPane = offsetDueToScrollPanePosition + event.getPoint().x;
-			Point posMatrix = paneCoordToMatrixCoord(new Point(xPosPane,0));
-
-			String toolTip = "<html>";	
-			CharSets charsets = alignment.getAlignmentMeta().getCharsets();
-			for(CharSet charSet: charsets){
-				if(charSet.contains(posMatrix.x)){
-					toolTip += charSet.getName() + "<br>";
-				}
-			}			
-			toolTip += "</html>";
-
-			return toolTip;		
-		}
-
-
-	} // end CodonPosRuler class
 
 }
 

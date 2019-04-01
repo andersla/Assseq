@@ -14,6 +14,8 @@ import java.awt.datatransfer.FlavorMap;
 import java.awt.dnd.Autoscroll;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetListener;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -134,7 +136,6 @@ public class SequenceJList extends javax.swing.JList implements Autoscroll{
 		super.setModel(model);
 	}
 
-
 	public void paintComponent(Graphics g){
 		long startTime = System.currentTimeMillis();
 		Graphics2D g2 = (Graphics2D) g;
@@ -157,8 +158,10 @@ public class SequenceJList extends javax.swing.JList implements Autoscroll{
 		logger.info("synch ScrollPanes");
 		JScrollPane source = listScrollPane;
 		JScrollPane dest = alignmentScrollPane;
-		Point viewPos = new Point(dest.getViewport().getViewPosition().x, source.getViewport().getViewPosition().y );
-		dest.getViewport().setViewPosition(viewPos);	
+		if(source != null && dest != null){
+			Point viewPos = new Point(dest.getViewport().getViewPosition().x, source.getViewport().getViewPosition().y );
+			dest.getViewport().setViewPosition(viewPos);	
+		}
 	}
 
 	@Override
@@ -299,6 +302,41 @@ public class SequenceJList extends javax.swing.JList implements Autoscroll{
 		Point pos = indexToLocation(index);
 		SwingUtilities.convertPointToScreen(pos, this);
 		return pos;
+	}
+
+	public void addPrimaryMouseListener(MouseListener mouseListener) {
+		// To be able to consume mouse events before they gets to the
+		// JList default listeners we first remove all built in listeners
+		// and then instead add our ones at top, and finally add the old ones back
+		MouseListener[] oldOnes = this.getMouseListeners();
+		for(MouseListener oldMl: oldOnes){
+			this.removeMouseListener(oldMl);
+		}
+		
+		this.addMouseListener(mouseListener);
+		
+		// And return the default listeners below our ones
+		for(MouseListener oldMl: oldOnes){
+			this.addMouseListener(oldMl);
+		}
+	}
+
+	public void addPrimaryMouseMotionListener(MouseMotionListener mouseMotionListener) {
+		// To be able to consume mouse events before they gets to the
+		// JList default listeners we first remove all built in listeners
+		// and then instead add our ones at top, and finally add the old ones back
+		MouseMotionListener[] oldMMOnes = this.getMouseMotionListeners();
+		for(MouseMotionListener oldMl: oldMMOnes){
+			this.removeMouseMotionListener(oldMl);
+		}
+		
+		this.addMouseMotionListener(mouseMotionListener);
+		
+		// And return the default listeners below our ones
+		for(MouseMotionListener oldMl: oldMMOnes){
+			this.addMouseMotionListener(oldMl);
+		}
+		
 	}
 
 

@@ -145,6 +145,7 @@ import aliview.gui.ListTopOffsetJPanel;
 import aliview.gui.MessageLogFrame;
 import aliview.gui.ScrollBarModelSyncChangeListener;
 import aliview.gui.SearchPanel;
+import aliview.gui.SplitSyncher;
 import aliview.gui.StatusPanel;
 import aliview.gui.TextEditDialog;
 import aliview.gui.TextEditFrame;
@@ -155,6 +156,7 @@ import aliview.gui.pane.AlignmentPane;
 import aliview.gui.pane.CharPixels;
 import aliview.gui.pane.InvalidAlignmentPositionException;
 import aliview.gui.pane.NotUsed_AlignmentPane_Orig;
+import aliview.gui.pane.TracePanel;
 import aliview.importer.AlignmentFactory;
 import aliview.importer.AlignmentImportException;
 import aliview.importer.FileFormat;
@@ -205,6 +207,7 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 	private static final int DEFAULT_WIN_EXTENDED_STATE = Frame.NORMAL;
 	protected JViewport viewport;
 	protected AlignmentPane alignmentPane;
+	protected TracePanel tracePanel;
 	// MyScrollPane 
 	JScrollPane alignmentScrollPane;
 	//JPanel alignmentAndRulerPanel;
@@ -457,14 +460,31 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		//alignmentPane.getRulerComponent().addKeyListener(kl);
 
 		alignmentPane.setAlignment(alignment);
+		
+		
+		// Create the Trace panel where trace is drawn
+		tracePanel = new TracePanel();
+
+//		AlignmentPaneMouseListener tracePml = new AlignmentPaneMouseListener();
+//		alignmentPane.addMouseListener(ml);
+//		alignmentPane.addMouseMotionListener(ml);
+//		alignmentPane.addMouseWheelListener(ml); 
+//
+//		AlignmentRulerMouseListener rl = new AlignmentRulerMouseListener();
+//		alignmentPane.getRulerComponent().addMouseListener(rl);
+//		alignmentPane.getRulerComponent().addMouseMotionListener(rl);
+
+//		AlignmentKeyListener kl = new AlignmentKeyListener();
+//		alignmentPane.addKeyListener(kl);
+		//alignmentPane.getRulerComponent().addKeyListener(kl);
+
+		tracePanel.setAlignment(alignment);
 
 		// When alignment is loaded
 		this.updateWindowTitle();
 
 		// Always horizontal scrollbar so list and pane not have varied height - then list and alignment could get out of synch	
 		//	alignmentScrollPane = new MyScrollPane(alignmentPane, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-
-
 		alignmentScrollPane = new JScrollPane(alignmentPane, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 
 		alignmentScrollPane.setAutoscrolls(true);
@@ -490,42 +510,16 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 
 		sequenceJList = new SequenceJList(alignment.getSequences(), alignmentPane.getCharHeight(), this);
 
-		//
-		// To be able to consume mouse events before they gets to the
-		// JList default listeners we first remove all built in listeners
-		// and then instead add our ones at top, and finally add the old ones back
-		//
-		MouseListener[] oldOnes = sequenceJList.getMouseListeners();
-		for(MouseListener oldMl: oldOnes){
-			sequenceJList.removeMouseListener(oldMl);
-		}
-		MouseMotionListener[] oldMMOnes = sequenceJList.getMouseMotionListeners();
-		for(MouseMotionListener oldMl: oldMMOnes){
-			sequenceJList.removeMouseMotionListener(oldMl);
-		}
-		//		MouseWheelListener[] oldMWOnes = sequenceJList.getMouseWheelListeners();
-		//		for(MouseWheelListener oldMl: oldMWOnes){
-		//			sequenceJList.removeMouseWheelListener(oldMl);
-		//		}
-		// Add our listeners
+
+		// Add our mouse listeners as primary so that they consume mouse events before default JList listeners
 		SequenceListMouseListener ourSeqListML = new SequenceListMouseListener(this);
-		sequenceJList.addMouseListener(ourSeqListML);
-		sequenceJList.addMouseMotionListener(ourSeqListML);
+		sequenceJList.addPrimaryMouseListener(ourSeqListML);
+		sequenceJList.addPrimaryMouseMotionListener(ourSeqListML);
+		
 		SequenceListMouseWheelListener ourSeqListMWL = new SequenceListMouseWheelListener(this);
 		sequenceJList.addMouseWheelListener(ourSeqListMWL);
 
-		// And return the default listeners below our ones
-		for(MouseListener oldMl: oldOnes){
-			sequenceJList.addMouseListener(oldMl);
-		}
-		for(MouseMotionListener oldMl: oldMMOnes){
-			sequenceJList.addMouseMotionListener(oldMl);
-		}
-		//		for(MouseWheelListener oldMl: oldMWOnes){
-		//			sequenceJList.addMouseWheelListener(oldMl);
-		//		}
-		//		
-
+		
 
 		//	sequenceJList.setBackground(COLORSCHEME_BACKGROUND);
 		//		aliListener = new AlignmentDataAndSelectionListener(alignmentPane, this, sequenceJList);
@@ -547,14 +541,6 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		// Synchronize vertical scroll between two panes from alignment pane model to list (first the model)
 		scrollBarListener = new ScrollBarModelSyncChangeListener(listScrollPane.getVerticalScrollBar().getModel());
 		alignmentScrollPane.getVerticalScrollBar().getModel().addChangeListener( scrollBarListener );
-
-		// Second sync is from list scrollbar back to alignmentPane
-		//		ScrollPaneSyncKeyAndMouseWheelListener wl = new ScrollPaneSyncKeyAndMouseWheelListener(listScrollPane, alignmentScrollPane); //, aliViewWindow);
-		//		listScrollPane.addMouseWheelListener(wl);
-		//		JScrollBar listBar = listScrollPane.getVerticalScrollBar();
-		//		listBar.addMouseMotionListener(wl);
-		//		listBar.addMouseListener(wl);
-		//		sequenceJList.addKeyListener(wl);
 
 		sequenceJList.addSynchPanes(listScrollPane, alignmentScrollPane);
 
@@ -594,9 +580,48 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		splitPane.setDividerLocation(200);
 		//listTopOffset.setBackground(splitPane.getBackground());
 
-		this.getContentPane().add(splitPane, BorderLayout.CENTER);
+		//this.getContentPane().add(splitPane, BorderLayout.CENTER);
 
-
+		
+        //
+		//
+		// TRACE
+		//
+		//
+		
+		
+		
+		// Create traceJList and trace panel
+		SequenceJList traceSequenceJList = new SequenceJList(alignment.getSequences(), alignmentPane.getCharHeight(), this);
+		
+		JScrollPane traceListScrollPane = new JScrollPane(traceSequenceJList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+		traceListScrollPane.setBorder(new EmptyBorder(0,0,0,0));
+		
+		
+		//JPanel tracePanel = new JPanel();
+		//tracePanel.setPreferredSize(new Dimension(300,300));
+		//tracePanel.setBackground(Color.green);
+		
+		// Add traceJList and tracePanel to splitPane
+		JSplitPane listAndTraceSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, traceListScrollPane, tracePanel);
+		listAndTraceSplitPane.setDividerSize(6);
+		listAndTraceSplitPane.setDividerLocation(300);
+		
+		//Split between alignment and trace
+		JSplitPane verticalSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, splitPane, listAndTraceSplitPane);
+		verticalSplitPane.setDividerSize(6);
+		verticalSplitPane.setDividerLocation(300);
+		
+		this.getContentPane().add(verticalSplitPane, BorderLayout.CENTER);
+		
+		SplitSyncher splitSynch = new SplitSyncher(splitPane, listAndTraceSplitPane);
+		
+        //
+		//
+		// End TRACE
+		//
+		//
+		
 		// Panel with all small status message labels such as xpos ypos 
 		statusPanel = new StatusPanel(alignmentPane, alignment);
 		alignment.addAlignmentListener(statusPanel);

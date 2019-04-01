@@ -361,7 +361,8 @@ public class Assseq implements ApplicationListener{
 				//		alignmentFile = new File("/home/anders/projekt/alignments/infile_V2.phy");
 				//			alignmentFile = new File("/home/anders/projekt/alignments/smalphylipInterlLongName.phy");
 
-				alignmentFile = new File("/home/anders/projekt/alignments/abi/12MT7D9MATK_HF.ab1");
+				//alignmentFile = new File("/home/anders/projekt/alignments/abi/12MT7D9MATK_HF.ab1");
+				alignmentFile = new File("/home/anders/projekt/alignments/gold_strains_gg16S_aligned.fasta");
 
 
 				if(! alignmentFile.exists()){
