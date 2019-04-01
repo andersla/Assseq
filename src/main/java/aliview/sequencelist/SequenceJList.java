@@ -52,7 +52,7 @@ import aliview.settings.Settings;
 import aliview.undo.UndoSavedStateSequenceOrder;
 
 
-public class SequenceJList extends javax.swing.JList implements Autoscroll{
+public class SequenceJList extends javax.swing.JList implements Autoscroll, AlignmentSelectionListener{
 	private static final Logger logger = Logger.getLogger(SequenceJList.class);
 	// todo These two constants should be synchronized in one class (AlignmentPane & this)
 	private static final int MIN_CHAR_SIZE = 2;
@@ -336,7 +336,31 @@ public class SequenceJList extends javax.swing.JList implements Autoscroll{
 		for(MouseMotionListener oldMl: oldMMOnes){
 			this.addMouseMotionListener(oldMl);
 		}
+	}
+	
+	//
+	// AlignmentSelectionListener
+	//
+	public void selectionChanged(AlignmentSelectionEvent e) {
+		logger.info("selectionChanged");
+		requestRepaintRect(e.getBounds());
+	}
+
+	public void requestRepaintRect(Rectangle rect) {
+
+		Rectangle visiRect = this.getVisibleRect();
 		
+		//
+		// TODO fix rect so that only selected will be repainted
+		//
+		
+		Rectangle grown = this.getVisibleRect();
+		
+		Rectangle drawListBounds = new Rectangle(visiRect.x,grown.y, visiRect.width, grown.height);
+		//		sequenceJList.scrollRectToVisible(drawListBounds);
+		logger.info("drawListBounds" + drawListBounds);
+		//		sequenceJList.repaint(visiRect.x,paneBounds.y, visiRect.width, paneBounds.height);
+		this.repaint(drawListBounds);
 	}
 
 

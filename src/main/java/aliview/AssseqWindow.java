@@ -153,6 +153,7 @@ import aliview.gui.TextEditPanel;
 import aliview.gui.TextEditPanelCharsets;
 import aliview.gui.TranslationToolPanel;
 import aliview.gui.pane.AlignmentPane;
+import aliview.gui.pane.AlignmentPaneMouseListener;
 import aliview.gui.pane.CharPixels;
 import aliview.gui.pane.InvalidAlignmentPositionException;
 import aliview.gui.pane.NotUsed_AlignmentPane_Orig;
@@ -446,7 +447,7 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		// Create the main panel where alignment is drawn
 		alignmentPane = new AlignmentPane();
 
-		AlignmentPaneMouseListener ml = new AlignmentPaneMouseListener();
+		AlignmentPaneMouseListener ml = new AlignmentPaneMouseListener(alignment, alignmentPane, sequenceJList);
 		alignmentPane.addMouseListener(ml);
 		alignmentPane.addMouseMotionListener(ml);
 		alignmentPane.addMouseWheelListener(ml); 
@@ -479,6 +480,7 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		//alignmentPane.getRulerComponent().addKeyListener(kl);
 
 		tracePanel.setAlignment(alignment);
+		tracePanel.setDoubleBuffered(true);
 
 		// When alignment is loaded
 		this.updateWindowTitle();
@@ -493,17 +495,19 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		//boolean paneDoubleBuff = alignmentPane.isDoubleBuffered();
 		boolean paneDoubleBuff = true;
 		alignmentScrollPane.setDoubleBuffered(paneDoubleBuff);
-		//alignmentScrollPane.setDoubleBuffered(false);
 		alignmentScrollPane.getVerticalScrollBar().setUnitIncrement(16);
 		alignmentScrollPane.getHorizontalScrollBar().setUnitIncrement(160);
+			
 
 		// BACKINGSTORE_SCROLL_MODE is not working on Mac Retina-screen
 		//alignmentScrollPane.getViewport().setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE);
 
-		//alignmentScrollPane.setDropTarget(alignmentPane);
 		alignmentPane.setDoubleBuffered(paneDoubleBuff);
-		//alignmentPane.setDoubleBuffered(false);
-		//alignmentScrollPane.setBorder(null);
+		tracePanel.setDoubleBuffered(paneDoubleBuff);
+		
+		alignment.addAlignmentSelectionListener(alignmentPane);
+		alignment.addAlignmentSelectionListener(tracePanel);
+		
 		alignmentScrollPane.setBorder(BorderFactory.createEmptyBorder());
 		viewport = alignmentScrollPane.getViewport();
 		viewport.setAutoscrolls(true);
@@ -518,6 +522,8 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		
 		SequenceListMouseWheelListener ourSeqListMWL = new SequenceListMouseWheelListener(this);
 		sequenceJList.addMouseWheelListener(ourSeqListMWL);
+		
+		alignment.addAlignmentSelectionListener(sequenceJList);
 
 		
 
@@ -593,14 +599,10 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		
 		// Create traceJList and trace panel
 		SequenceJList traceSequenceJList = new SequenceJList(alignment.getSequences(), alignmentPane.getCharHeight(), this);
+		alignment.addAlignmentSelectionListener(traceSequenceJList);
 		
 		JScrollPane traceListScrollPane = new JScrollPane(traceSequenceJList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		traceListScrollPane.setBorder(new EmptyBorder(0,0,0,0));
-		
-		
-		//JPanel tracePanel = new JPanel();
-		//tracePanel.setPreferredSize(new Dimension(300,300));
-		//tracePanel.setBackground(Color.green);
 		
 		// Add traceJList and tracePanel to splitPane
 		JSplitPane listAndTraceSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, traceListScrollPane, tracePanel);
@@ -1506,21 +1508,8 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 	private void setupNewAlignment(Alignment newAlignment){
 
 		alignment = newAlignment;	
-		alignment.addAlignmentListener(this);
-		alignment.addAlignmentDataListener(this);
-		alignment.addAlignmentSelectionListener(this);
 
-		alignment.addAlignmentListener(statusPanel);
-		alignment.addAlignmentDataListener(statusPanel);
-		alignment.addAlignmentSelectionListener(statusPanel);
-
-		alignment.addAlignmentListener(aliViewMenuBar);
-		alignment.addAlignmentDataListener(aliViewMenuBar);
-		alignment.addAlignmentSelectionListener(aliViewMenuBar);
-
-		alignment.addAlignmentListener(translationPanel);
-		alignment.addAlignmentDataListener(translationPanel);
-		alignment.addAlignmentSelectionListener(translationPanel);
+		setupListeners();
 
 
 		alignmentPane.setAlignment(alignment);
@@ -1544,6 +1533,32 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 				Settings.getHideUnknownAlignmentType().putBooleanValue(hideMessageNextTime);
 			}
 		}
+	}
+
+
+	private void setupListeners() {
+		alignment.addAlignmentListener(this);
+		alignment.addAlignmentDataListener(this);
+		alignment.addAlignmentSelectionListener(this);
+
+		alignment.addAlignmentSelectionListener(alignmentPane);
+		
+		alignment.addAlignmentSelectionListener(tracePanel);
+		
+		alignment.addAlignmentSelectionListener(sequenceJList);
+		
+		alignment.addAlignmentListener(statusPanel);
+		alignment.addAlignmentDataListener(statusPanel);
+		alignment.addAlignmentSelectionListener(statusPanel);
+
+		alignment.addAlignmentListener(aliViewMenuBar);
+		alignment.addAlignmentDataListener(aliViewMenuBar);
+		alignment.addAlignmentSelectionListener(aliViewMenuBar);
+
+		alignment.addAlignmentListener(translationPanel);
+		alignment.addAlignmentDataListener(translationPanel);
+		alignment.addAlignmentSelectionListener(translationPanel);
+		
 	}
 
 
@@ -2147,7 +2162,7 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 	}
 
 
-	private boolean isUndoable() {
+	public boolean isUndoable() {
 
 		//		MemoryUtils.logMem();
 		//		logger.info("getPresumableFreeMemory()=" + MemoryUtils.getPresumableFreeMemoryMB());
@@ -2519,11 +2534,6 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		aliViewWindow.getUndoControler().pushUndoState(new UndoSavedStateSequenceOrder(alignment.getSequences().getDelegateSequencesCopy(), alignment.getAlignentMetaCopy()));
 		alignment.moveSelectedSequencesTo(index);
 		requestScrollToVisibleSelection();	
-	}
-
-	public void selectEverythingWithinGaps(Point point) {
-		alignment.selectEverythingWithinGaps(point);
-		//requestPaneRepaint();
 	}
 
 	public void selectAll() {
@@ -3288,381 +3298,7 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 
 
 
-	// TODO could be moved to alignmentPane - but is ok here for now (then labels could be passed to or from alignmentPane)
-	// TODO could do a Selection change listener and also mousepointer moved listener (Easiest would be to do status label in alignment pane and pass it to window)
-	// todo mouse listener on jlist - it is to slow to listen on selection change events (update on alignment pane is not instatiounous)
-	private class AlignmentPaneMouseListener implements MouseListener, MouseMotionListener, MouseWheelListener {
-		private Point startPoint;
-		private Point startPointScreen;
-		private Point startPaneVisibleRectLocation;
-		private Point dragPointStart;
-		private boolean isDragging;
-		private Rectangle lastRect;
-		private Rectangle maxRepaintRect;
 
-
-		/*
-			// Chech if no ctrl modifier - then clear previous selection
-			if(! e.isControlDown()){
-				logger.info("modifiers" + e.getModifiers());
-				alignmentPane.clearSelection();
-				alignmentList.clearSelection();
-			}
-
-			try {
-				alignmentPane.selectBaseAt(mousePos);
-			} catch (InvalidAlignmentPositionException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		 */
-
-		public void mousePressed(MouseEvent e) {
-
-			alignmentPane.requestFocus();
-
-			// Skip right click
-			if(e.getButton() == e.BUTTON3){
-				return;
-			}
-
-			logger.info("mouse pressed" + e.getClickCount());
-
-			// Save some startpoints
-			startPoint = e.getPoint();
-			startPointScreen = e.getLocationOnScreen();
-			startPaneVisibleRectLocation = alignmentPane.getVisibleRect().getLocation();
-			lastRect = new Rectangle(e.getPoint());
-
-			logger.info("points done");
-
-			// if click is within an existing selection
-			// we should think about drag possibility
-			if(alignmentPane.isWithinExistingSelection(e.getPoint())){
-				dragPointStart = e.getPoint();
-			}else{
-
-
-
-				// if shift is down something is selected already make a new rect selection
-				if(e.isShiftDown()){
-
-					// this is done in mouse released instead
-				}
-				// new single point selection
-				else{
-					// clear list selection
-					sequenceJList.clearSelection();
-					alignmentPane.requestFocus();
-
-					alignment.clearSelection();
-					sequenceJList.clearSelection();
-
-					try {
-						alignmentPane.selectBaseAt(startPoint);
-						//			statusPanel.setPointerPos(startPoint);
-					} catch (InvalidAlignmentPositionException e1) {
-						//nothing needs to be done
-						e1.printStackTrace();
-					}
-				}
-				// requestPaneRepaint();
-			}
-		}
-
-		public void mouseReleased(MouseEvent e){
-
-			logger.info("mouseReleased e.getPoint=" + e.getPoint());
-
-			// Skip right click
-			if(e.getButton() == e.BUTTON3){
-				return;
-			}
-
-			//	logger.info("mouse released" + e.getClickCount());
-
-			if(startPoint == null){
-				logger.info("nostartpos");
-
-			}else{
-				// if startpoint is same as release-point select by point
-				if(alignmentPane.paneCoordToMatrixCoord(e.getPoint()).distance(alignmentPane.paneCoordToMatrixCoord(startPoint)) == 0){				
-					// if shift is down something is selected already make a new rect selection
-					if(e.isShiftDown()){	
-
-						//						// set default first pos and override if cursor is selected
-						//						Point firstPos = alignment.getFirstSelectedPosition();
-						//						// if there is a cursor-pos and it is selected then use it instead of
-						//						if(aliCursor != null){
-						//							if(alignment.isBaseSelected(aliCursor.x, aliCursor.y)){
-						//								firstPos = new Point(aliCursor.x, aliCursor.y);
-						//							}
-						//						}
-						Point clickPoint = alignmentPane.paneCoordToMatrixCoord(e.getPoint());
-						Rectangle clickRect = new Rectangle(clickPoint);
-						logger.info(clickRect);
-						Rectangle currentSelection = alignment.getSelectionAsMinRect();
-						logger.info(currentSelection);
-						Rectangle newSelection = Utils.addRects(clickRect, currentSelection);
-						logger.info(newSelection);
-
-
-						// clear before new selection - this to avoid non-rectangle selections
-						alignment.clearSelection();
-						alignment.setSelectionWithin(newSelection);
-						//int selectionSize = alignmentPane.selectWithin(newSelection);
-					}
-
-					else{
-						logger.info("mouse released");
-						// clear selection
-						alignment.clearSelection();
-						alignment.clearTempSelection();
-						// if click is on ruler, all should get select
-						if(e.getComponent() == alignmentPane.getRulerComponent()){
-							alignmentPane.selectColumnAt(startPoint);
-							// cursor have to change
-							int x = alignmentPane.getColumnAt(e.getPoint());
-							aliCursor.setPosition(x,0);
-						}else{
-							try {
-								alignmentPane.selectBaseAt(startPoint);
-							} catch (InvalidAlignmentPositionException e1) {
-								// nothing needs to be done
-								e1.printStackTrace();
-							}
-						}
-					}
-				}else if(isDragging){
-					isDragging = false;
-					alignment.clearSelectionOffset();
-					dragPointStart = null;
-					// else select by rectangle
-				}else{
-					logger.info("select Within");
-					Rectangle selectRect = new Rectangle(e.getPoint());
-					selectRect.add(startPoint);
-
-
-					logger.info("selectRect" + selectRect);
-
-					if(e.isControlDown()){
-						//	alignmentPane.addSelectionWithin(selectRect);
-					}
-					else{
-						int selectionSize = 0;
-						alignment.clearSelection();
-						if(e.getComponent() == alignmentPane.getRulerComponent()){
-							selectionSize = alignmentPane.selectColumnsWithin(selectRect);
-						}else{
-							selectionSize = alignmentPane.selectWithin(selectRect);
-						}
-						logger.info(alignment.getSelectionAsMinRect());
-					} 
-					alignment.clearTempSelection();
-				}
-
-
-				// Clear stuff when released
-				startPoint = null;
-				startPointScreen = null;
-				isDragging = false;
-				alignment.clearSelectionOffset();
-				dragPointStart = null;
-			}
-			maxRepaintRect = null;
-			//sequenceJList.validateSelection();
-			//requestPaneRepaint();
-			//		logger.info(e.getPoint());
-
-			// new cursor-pos if shift is not pressed
-			if(! e.isShiftDown()){
-				Point clickPos = alignmentPane.paneCoordToMatrixCoord(e.getPoint());
-				logger.info(clickPos);
-				aliCursor.setPosition(clickPos.x, clickPos.y);
-			}
-		}
-
-		public void mouseEntered(MouseEvent e) {
-
-		}
-
-		public void mouseExited(MouseEvent e) {
-		}
-
-		public void mouseClicked(MouseEvent e) {
-			logger.info("mouse clicked" + e.getClickCount());
-
-			// Skip right click
-			if(e.getButton() == e.BUTTON3){
-				return;
-			}
-
-			if(e.getClickCount() == 2){
-				Point matrixCoord = alignmentPane.paneCoordToMatrixCoord(e.getPoint());
-				logger.info(matrixCoord);
-				selectEverythingWithinGaps(matrixCoord);
-			}
-
-			/*
-			if(e.getButton() == e.BUTTON3){
-				logger.info("right-click");
-
-				try {
-					alignmentPane.setDifferenceTraceSequence(e.getPoint());
-				} catch (InvalidAlignmentPositionException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				alignmentPane.repaint();
-			}
-			 */
-
-		}
-
-
-		public void mouseDragged(MouseEvent e) {
-			//		logger.info("mouse dragged start");
-			// Theese lines makes sure pane is scrolling when user selects
-			// and moves outside current visible rect (keyword scroll speed)
-			Rectangle preferredVisisble = new Rectangle(e.getPoint());
-
-			// scroll if pointer outside of scrollpane window
-			if(! alignmentPane.getVisibleRect().contains(e.getPoint())){	
-				// grow little extra so it scrolls quickly in beginning
-				preferredVisisble.grow(30,30);
-				alignmentPane.scrollRectToVisible(preferredVisisble);
-			}
-
-			//statusPanel.setPointerPos(e.getPoint());
-
-			if(startPoint != null){
-
-
-				// Dragging bases
-				if(dragPointStart != null){
-
-					if(isDragging != true){
-						isDragging = true;
-						getUndoControler().pushUndoState();
-					}
-
-					Rectangle selectRect = alignment.getSelectionAsMinRect();
-					Rectangle selectInPaneCoord = alignmentPane.matrixCoordToPaneCoord(selectRect);
-					//if(selectInPaneCoord.contains(e.getPoint())){		
-					int diff = e.getPoint().x - dragPointStart.x;
-					double diffInSeqPositons = diff/alignmentPane.getCharWidth();
-					int intDiffInseqPos = (int)diffInSeqPositons;
-
-					// Test first if move is possible - otherwise many false requestedit if not possible
-					if(alignment.isMoveSelectionRightPossible() || alignment.isMoveSelectionLeftPossible()){
-						if(requestEditMode()){
-
-							//if(e.getPoint().x >= selectInPaneCoord.x && e.getPoint().x <= selectInPaneCoord.getMaxX()){
-							alignment.moveSelection(intDiffInseqPos, isUndoable());
-							//}
-
-						}	
-					}
-
-					selectInPaneCoord.grow(4 + 3 * Math.abs(diff),0);
-					//requestPaneRepaintRect(selectInPaneCoord); 
-
-				}
-				// Selecting
-				else{
-					Rectangle selectRect = new Rectangle(e.getPoint());
-					selectRect.add(startPoint);
-
-					Rectangle selectRectMatrixCoords = alignmentPane.paneCoordToMatrixCoord(selectRect);
-					alignment.setTempSelection(selectRectMatrixCoords);
-
-
-					if(maxRepaintRect == null){	
-						maxRepaintRect = new Rectangle(selectRect);
-					}else{
-						maxRepaintRect.add(selectRect);
-					}
-
-					//		requestPaneRepaintRect(new Rectangle(maxRepaintRect));
-
-				}
-
-				// sequenceJList.validateSelection();
-
-			}	
-
-			//		logger.info("mouse dragged done");
-		}
-
-		public void mouseMoved(MouseEvent e) {
-			//			int ungapedPos = alignmentPane.getUngapedSequenceXPositionAt(e.getPoint());
-			//			// add one because of program internaly works with pos 0 as the first
-			//			lblSelectionInfo.setText("" + (ungapedPos + 1) + " (ungaped position) ");
-
-		}
-
-		public void mouseWheelMoved(MouseWheelEvent e) {
-			// Zoom in out if ctrl is pressed
-			if(e.getModifiersEx() ==  OSNativeUtils.getMouseWheelZoomModifierMask()){
-				if(e.getWheelRotation() > 0){
-					aliViewWindow.zoomOutAt(e.getPoint());
-				}
-				else if(e.getWheelRotation() < 0){		
-					aliViewWindow.zoomInAt(e.getPoint());
-				}
-			}
-			// Else scroll pane left or right
-			else if(e.isShiftDown()){
-				int wheelRotation = e.getWheelRotation();
-				if(aliViewWindow.isReverseHorizontalRotation()){
-					wheelRotation = wheelRotation * -1;
-				}
-				if(wheelRotation > 0){
-					Rectangle preferedVisible = alignmentPane.getVisibleRect();  
-					preferedVisible.setLocation((int) (preferedVisible.x - (double)Settings.getHorizontalScrollModifier().getIntValue()/200 * preferedVisible.getWidth()), preferedVisible.y);
-					alignmentPane.scrollRectToVisible(preferedVisible);
-					alignmentPane.revalidate();
-					// break to avoid diagonal moves
-					return;
-				}
-				else if(wheelRotation < 0){	
-					Rectangle preferedVisible = alignmentPane.getVisibleRect();
-					preferedVisible.setLocation((int) (preferedVisible.x + (double)Settings.getHorizontalScrollModifier().getIntValue()/200 * preferedVisible.getWidth()), preferedVisible.y);
-					alignmentPane.scrollRectToVisible(preferedVisible);
-					alignmentPane.revalidate();
-					// break to avoid diagonal moves
-					return;
-				}
-				// Else scroll pane up or down				
-			}else{
-				int wheelRotation = e.getWheelRotation();
-				if(aliViewWindow.isReverseVerticalRotation()){
-					wheelRotation = wheelRotation * -1;
-				}
-				if(wheelRotation > 0){
-					Rectangle preferedVisible = alignmentPane.getVisibleRect();
-					preferedVisible.setLocation(preferedVisible.x, (int) (preferedVisible.y + (double)Settings.getVerticalScrollModifier().getIntValue()/200 * preferedVisible.getHeight()));
-					alignmentPane.scrollRectToVisible(preferedVisible);
-					alignmentPane.revalidate();
-					// break to avoid diagonal moves
-					return;
-				}
-				else if(wheelRotation < 0){	
-					Rectangle preferedVisible = alignmentPane.getVisibleRect();
-					preferedVisible.setLocation(preferedVisible.x, (int) (preferedVisible.y - (double)Settings.getVerticalScrollModifier().getIntValue()/200 * preferedVisible.getHeight()));
-					alignmentPane.scrollRectToVisible(preferedVisible);
-					alignmentPane.revalidate();
-					// break to avoid diagonal moves
-					return;
-
-				}
-			}
-		}
-	}	
-	//
-	//         END AlignmentPaneMouseListener
-	//
 
 
 	//
@@ -3924,7 +3560,7 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		}
 	}
 
-	private AliCursor getAliCursor(){
+	public AliCursor getAliCursor(){
 		if(aliCursor == null){
 			aliCursor = createNewAliCursor();
 		}
@@ -3954,7 +3590,7 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		//requestRepaintCursor();
 	}
 
-	private class AliCursor{
+	public class AliCursor{
 		int x;
 		int y;
 		Sequence cursorSeq;
@@ -4166,7 +3802,6 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 	}
 
 	protected void externalCommandCallback(CommandItem cmdItem) {
@@ -4262,9 +3897,10 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 	//
 	// AlignmentSelectionListener
 	//
+	
 	public void selectionChanged(AlignmentSelectionEvent e) {
 		logger.info("selectionChanged");
-		requestRepaintRect(e.getBounds());
+		//requestRepaintRect(e.getBounds());
 	}
 
 	public void requestRepaintRect(Rectangle rect) {
@@ -4299,10 +3935,6 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		//		sequenceJList.repaint(visiRect.x,paneBounds.y, visiRect.width, paneBounds.height);
 		sequenceJList.repaint(drawListBounds);
 	}
-
-
-
-
 
 	public int print(Graphics graphics, PageFormat pageFormat, int pageIndex)throws PrinterException{
 		double dpi = 72;

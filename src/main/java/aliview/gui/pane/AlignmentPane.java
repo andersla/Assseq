@@ -45,6 +45,8 @@ import aliview.color.ColorScheme;
 import aliview.color.ColorSchemeFactory;
 import aliview.color.ColorUtils;
 import aliview.messenges.Messenger;
+import aliview.sequencelist.AlignmentSelectionEvent;
+import aliview.sequencelist.AlignmentSelectionListener;
 import aliview.sequences.AminoAcidAndPosition;
 import aliview.sequences.Sequence;
 import aliview.settings.Settings;
@@ -53,7 +55,7 @@ import aliview.utils.ArrayUtilities;
 
 // HAS to be JPanel - JComponent is not enough for only partial cliprect when in jscrollpane when painting
 // When JComponent only then I had to paint it all (maybe because of layoutmanager?)
-public class AlignmentPane extends JPanel{
+public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 	private static final long serialVersionUID = 601195400946835871L;
 	private static final Logger logger = Logger.getLogger(AlignmentPane.class);
 	private static final double MIN_CHAR_SIZE = 0;
@@ -1310,6 +1312,42 @@ public class AlignmentPane extends JPanel{
 	public boolean isHighlightDiffTrace() {
 		return highlightDiffTrace;
 	}
+	
+	//
+	// AlignmentSelectionListener
+	//
+	public void selectionChanged(AlignmentSelectionEvent e) {
+		logger.info("selectionChanged");
+		requestRepaintRect(e.getBounds());
+	}
+
+	public void requestRepaintRect(Rectangle rect) {
+
+		int dx =(int) (this.getCharWidth() * 3);
+		int dy =(int) (this.getCharHeight() * 1);
+		// if small chars, redraw at least a few pix
+		if(dx < 3 || dy < 1){
+			dx = 6;
+			dy = 2;
+		}
+
+		Rectangle paneBounds = this.matrixCoordToPaneCoord(rect);
+		Rectangle grown = new Rectangle(paneBounds.x - dx, paneBounds.y - dy, paneBounds.getBounds().width + 2*dx, paneBounds.getBounds().height + 2*dy);
+
+		this.validateSize();
+		this.validateSequenceOrder();
+
+		//alignmentPane.paintImmediately(paneBounds);
+		//aliList.paintImmediately(aliList.getVisibleRect());
+		//alignmentPane.scrollRectToVisible(paneBounds);
+		//logger.info("paneBounds" + paneBounds);
+		this.repaint(grown);
+
+		//alignmentPane.repaint();
+		//aliList.repaint();
+
+	}
+	
 
 	private class AlignmentRuler extends JPanel{
 
