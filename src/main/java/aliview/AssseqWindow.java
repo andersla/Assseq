@@ -125,6 +125,7 @@ import utils.nexus.NexusUtilities;
 import aliview.aligner.Aligner;
 import aliview.aligner.AlignerADDItemsFrame;
 import aliview.aligner.AlignerALLItemsFrame;
+import aliview.alignment.AliCursor;
 import aliview.alignment.Alignment;
 import aliview.alignment.AlignmentEvent;
 import aliview.alignment.AlignmentFile;
@@ -234,9 +235,7 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 	private JMenu mnFilePages;
 	private UndoControler undoControler;
 	private FindObject findObj;
-	private AliCursor aliCursor = new AliCursor(0, 0);
 	private JScrollPane listScrollPane;
-	private ScrollBarModelSyncChangeListener scrollBarListener;
 	private ButtonModel editModeModel;
 	private AliViewJMenuBar aliViewMenuBar;
 	//	private AlignmentDataAndSelectionListener aliListener;
@@ -447,17 +446,7 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		// Create the main panel where alignment is drawn
 		alignmentPane = new AlignmentPane();
 
-		AlignmentPaneMouseListener ml = new AlignmentPaneMouseListener(alignment, alignmentPane, sequenceJList);
-		alignmentPane.addMouseListener(ml);
-		alignmentPane.addMouseMotionListener(ml);
-		alignmentPane.addMouseWheelListener(ml); 
-
-		AlignmentRulerMouseListener rl = new AlignmentRulerMouseListener();
-		alignmentPane.getRulerComponent().addMouseListener(rl);
-		alignmentPane.getRulerComponent().addMouseMotionListener(rl);
-
-		AlignmentKeyListener kl = new AlignmentKeyListener();
-		alignmentPane.addKeyListener(kl);
+		
 		//alignmentPane.getRulerComponent().addKeyListener(kl);
 
 		alignmentPane.setAlignment(alignment);
@@ -520,7 +509,7 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		sequenceJList.addPrimaryMouseListener(ourSeqListML);
 		sequenceJList.addPrimaryMouseMotionListener(ourSeqListML);
 		
-		SequenceListMouseWheelListener ourSeqListMWL = new SequenceListMouseWheelListener(this);
+		SequenceListMouseWheelListener ourSeqListMWL = new SequenceListMouseWheelListener(alignmentPane);
 		sequenceJList.addMouseWheelListener(ourSeqListMWL);
 		
 		alignment.addAlignmentSelectionListener(sequenceJList);
@@ -545,8 +534,9 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		//listScrollPane.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_NEVER);
 
 		// Synchronize vertical scroll between two panes from alignment pane model to list (first the model)
-		scrollBarListener = new ScrollBarModelSyncChangeListener(listScrollPane.getVerticalScrollBar().getModel());
+		ScrollBarModelSyncChangeListener scrollBarListener = new ScrollBarModelSyncChangeListener(listScrollPane.getVerticalScrollBar().getModel());
 		alignmentScrollPane.getVerticalScrollBar().getModel().addChangeListener( scrollBarListener );
+		alignmentPane.addScrollBarListener(scrollBarListener);
 
 		sequenceJList.addSynchPanes(listScrollPane, alignmentScrollPane);
 
@@ -708,6 +698,28 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 
 		// Set a default ColorScheme (has to be done after all pnels are created)
 		setColorSchemeNucleotide(Settings.getColorSchemeNucleotide());
+		
+		
+		AlignmentPaneMouseListener ml = new AlignmentPaneMouseListener(alignment, alignmentPane, this, sequenceJList);
+		alignmentPane.addMouseListener(ml);
+		alignmentPane.addMouseMotionListener(ml);
+		alignmentPane.addMouseWheelListener(ml); 
+
+		AlignmentKeyListener kl = new AlignmentKeyListener();
+		alignmentPane.addKeyListener(kl);
+		
+		AlignmentPaneMouseListener tracePanelML = new AlignmentPaneMouseListener(alignment, tracePanel, this, traceSequenceJList);
+		tracePanel.addMouseListener(tracePanelML);
+		tracePanel.addMouseMotionListener(tracePanelML);
+		tracePanel.addMouseWheelListener(tracePanelML); 
+
+		AlignmentRulerMouseListener rl = new AlignmentRulerMouseListener();
+		tracePanel.getRulerComponent().addMouseListener(rl);
+		tracePanel.getRulerComponent().addMouseMotionListener(rl);
+
+		AlignmentKeyListener tracePanelKL = new AlignmentKeyListener();
+		tracePanel.addKeyListener(tracePanelKL);
+		
 
 		logger.info("init() finished");
 	}
@@ -1017,197 +1029,8 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 	 * These methods should be moved out to parent container
 	 */
 
-	public void zoomInAt(Point mousePos){
+	
 
-		// TODO Problem is that a scrollpane need to be resized before setViewPosiiton()
-		// and all should be done at once before repaint!!!
-
-		// Get alignmentPane size before resize since it will change afeter resize
-		// we need to now relative size different between new and old size because
-		// we want to zoom in on same position (same nucleotide) where mouse was in
-		// old pane
-		Dimension oldSize = alignmentPane.getPreferredSize();
-		Point viewPoint = alignmentScrollPane.getViewport().getViewPosition();
-		Point mousePosInScrollPaneCoord = new Point(mousePos.x - viewPoint.x, mousePos.y - viewPoint.y);
-
-		logger.info("oldSize" + oldSize);
-
-		logger.info("mousePosInScrollPaneCoord" + mousePosInScrollPaneCoord);
-
-		logger.info("mousePosOnPane" + mousePos);
-
-		incCharSize();
-
-		Dimension newSize = alignmentPane.getPreferredSize();
-		alignmentPane.setSize(newSize);
-
-		logger.info("pane-newSize" + newSize);
-
-		// Now when alignmentPanel coordinates have changed due to resize, lets focus on the 
-		// relative position where mouse pointer were earlier (same nucleotide)		
-		double paneRelSizeX = newSize.getWidth()/oldSize.getWidth();
-		double paneRelSizeY = newSize.getHeight()/oldSize.getHeight();
-
-		int mousePosXOnResizedPane = (int) (mousePos.getX() * paneRelSizeX);
-		int mousePosYOnResizedPane = (int) (mousePos.getY() * paneRelSizeY);
-
-		Point mousePosOnResizedPane = new Point(mousePosXOnResizedPane, mousePosYOnResizedPane);
-
-		// calculate new view location	
-		int newX = mousePosOnResizedPane.x - mousePosInScrollPaneCoord.x;
-		int newY = mousePosOnResizedPane.y - mousePosInScrollPaneCoord.y;
-
-		logger.info("newX" + newX);
-		logger.info("newY" + newY);
-
-		final Point newViewPoint = new Point(newX, newY);
-
-		viewPoint = alignmentScrollPane.getViewport().getViewPosition();
-		logger.info("beforeViewPoint" + viewPoint);
-		logger.info("newViewPoint" + newViewPoint);
-
-		// Old viewport has to be replaced - otherwise problem drawing graphics
-		// Not needed actually on zoomIn - only on zoomOut
-		//		alignmentScrollPane.setViewport(null);
-		//		alignmentScrollPane.setViewportView(alignmentPane);
-
-		// Set new position
-		alignmentScrollPane.getViewport().setViewPosition(newViewPoint);
-
-		Point afterViewPoint = alignmentScrollPane.getViewport().getViewPosition();
-		logger.info("afterViewPoint" + viewPoint);
-
-		//		if(alignmentPane.isPointWithinMatrix(mousePosOnResizedPane)){
-		//		
-		//			// This moving the mouse is done to make sure zoom in at right point even if pane is to small
-		//			int xMouseDiff = newViewPoint.x - afterViewPoint.x;
-		//			int yMouseDiff = newViewPoint.y - afterViewPoint.y;
-		//			logger.info("xMouseDiff=" + xMouseDiff);
-		//			logger.info("yMouseDiff=" + yMouseDiff);
-		//			
-		//			try {
-		//				
-		//				Robot robot = new Robot();
-		//				Point onScreen = MouseInfo.getPointerInfo().getLocation();		
-		//				robot.mouseMove(onScreen.x + xMouseDiff, onScreen.y + yMouseDiff);	
-		//			} catch (AWTException e) {
-		//				// TODO Auto-generated catch block
-		//				e.printStackTrace();
-		//			}
-		//		}
-
-
-
-		//alignmentPane.setForceRepaintAll(true);
-		//requestPaneRepaint();
-		//alignmentPane.setForceRepaintAll(true);
-		//alignmentPane.repaint(0,0,newSize.width, newSize.height);
-
-		// no longer need to paintImmediately, since instead destroying viewport
-		//alignmentPane.paintImmediately(0,0,newSize.width, newSize.height);
-
-
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run(){
-				scrollBarListener.stateChanged(new ChangeEvent(alignmentScrollPane.getVerticalScrollBar().getModel()));
-			}
-		});
-
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run(){
-				// listScrollPane.getViewport().setViewPosition(new Point(0, newViewPoint.y));
-			}
-		});
-	}
-
-	public void zoomOutAt(Point mousePos){
-
-		// Get alignmentPane size before resize since it will change afeter resize
-		// we need to now relative size different between new and old size because
-		// we want to zoom in on same position (same nucleotide) where mouse was in
-		// old pane
-		Dimension oldSize = alignmentPane.getPreferredSize();
-		Point viewPoint = alignmentScrollPane.getViewport().getViewPosition();
-		Point mousePosInScrollPaneCoord = new Point(mousePos.x - viewPoint.x, mousePos.y - viewPoint.y);
-
-		Point mouseInMatrixCoord = alignmentPane.paneCoordToMatrixCoord(mousePosInScrollPaneCoord);
-
-		logger.info("oldSize" + oldSize);
-
-		boolean didChangeSize = decCharSize();
-
-		if(didChangeSize){
-
-			final Dimension newSize = alignmentPane.getPreferredSize();
-			alignmentPane.setSize(newSize);
-			logger.info("newSize" + newSize);
-
-			// Now when alignmentPanel coordinates have changed due to resize, lets focus on the 
-			// relative position where mouse pointer were earlier (same nucleotide)		
-			double paneRelSizeX = newSize.getWidth()/oldSize.getWidth();
-			double paneRelSizeY = newSize.getHeight()/oldSize.getHeight();
-
-			int mousePosXOnResizedPane = (int) (mousePos.getX() * paneRelSizeX);
-			int mousePosYOnResizedPane = (int) (mousePos.getY() * paneRelSizeY);
-
-			Point mousePosOnResizedPane = new Point(mousePosXOnResizedPane, mousePosYOnResizedPane);
-
-			// calculate new vew location	
-			int newX = mousePosOnResizedPane.x - mousePosInScrollPaneCoord.x;
-			int newY = mousePosOnResizedPane.y - mousePosInScrollPaneCoord.y;
-			final Point newViewPoint = new Point(newX, newY);
-
-			// Old viewport has to be replaced 
-			alignmentScrollPane.setViewport(null);
-			alignmentScrollPane.setViewportView(alignmentPane);
-			// Set new pos
-			alignmentScrollPane.getViewport().setViewPosition(newViewPoint);
-
-			Point afterViewPoint = alignmentScrollPane.getViewport().getViewPosition();
-			logger.info("afterViewPoint" + viewPoint);
-
-			//			if(alignmentPane.isPointWithinMatrix(mousePosOnResizedPane)){
-			//			
-			//				// This moving the mouse is done to make sure zoom in at right point even if pane is to small
-			//				int xMouseDiff = newViewPoint.x - afterViewPoint.x;
-			//				int yMouseDiff = newViewPoint.y - afterViewPoint.y;
-			//				logger.info("xMouseDiff=" + xMouseDiff);
-			//				logger.info("yMouseDiff=" + yMouseDiff);
-			//				
-			//				try {
-			//					
-			//					Robot robot = new Robot();
-			//					Point onScreen = MouseInfo.getPointerInfo().getLocation();		
-			//					robot.mouseMove(onScreen.x + xMouseDiff, onScreen.y + yMouseDiff);	
-			//				} catch (AWTException e) {
-			//					// TODO Auto-generated catch block
-			//					e.printStackTrace();
-			//				}
-			//			}
-
-
-			//requestPaneRepaint();
-			//alignmentPane.setForceRepaintAll(true);
-			//alignmentPane.repaint(0,0,newSize.width, newSize.height);
-
-			// no longer need to paintImmediately, since instead destroying viewport
-			//alignmentPane.paintImmediately(0,0,newSize.width, newSize.height);
-
-
-
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run(){
-					scrollBarListener.stateChanged(new ChangeEvent(alignmentScrollPane.getVerticalScrollBar().getModel()));
-				}
-			});
-
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run(){
-					//			listScrollPane.getViewport().setViewPosition(new Point(0, newViewPoint.y));
-				}
-			});
-		}
-	}
 
 
 	/*
@@ -1560,36 +1383,6 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		alignment.addAlignmentSelectionListener(translationPanel);
 		
 	}
-
-
-	public void zoomIn(){
-		// if pointer is on pane
-		Point zoomPoint = alignmentPane.getMousePosition();
-		if(zoomPoint == null){
-			// else get center position of view
-			Point viewPoint = alignmentScrollPane.getViewport().getViewPosition();
-			Dimension dimension = alignmentScrollPane.getViewport().getExtentSize();
-			Point centerPos = new Point(viewPoint.x + dimension.width / 2, viewPoint.y + dimension.height / 2);
-			zoomPoint = centerPos;
-		}
-		zoomInAt(zoomPoint);
-
-	}
-
-	public void zoomOut(){
-		// if pointer is on pane
-		Point zoomPoint = alignmentPane.getMousePosition();
-		if(zoomPoint == null){
-			// else get center position of view
-			Point viewPoint = alignmentScrollPane.getViewport().getViewPosition();
-			Dimension dimension = alignmentScrollPane.getViewport().getExtentSize();
-			Point centerPos = new Point(viewPoint.x + dimension.width / 2, viewPoint.y + dimension.height / 2);
-			zoomPoint = centerPos;
-		}
-		zoomOutAt(zoomPoint);
-	}
-
-
 
 	protected void incCharSize(){
 		alignmentPane.incCharSize();
@@ -2789,10 +2582,6 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 	}
 
 	public void clearSelection(){
-		if(aliCursor != null){
-			aliCursor.restorePosition();
-		}
-
 		alignment.clearSelection();
 	}
 
@@ -3361,17 +3150,17 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 					if(startPointOnAlignmentPane.x == endPointOnAlignmentPane.x){
 						alignmentPane.selectColumnAt(endPointOnAlignmentPane);
 						int x = alignmentPane.getColumnAt(e.getPoint());
-						logger.info(aliCursor);
-						logger.info(aliCursor.x);
-						logger.info(aliCursor.y);
-						aliCursor.setPosition(x,0);
+//						logger.info(aliCursor);
+//						logger.info(aliCursor.x);
+//						logger.info(aliCursor.y);
+						alignment.getAliCursor().setPosition(x,0);
 					}else{
 						selectionSize = alignmentPane.selectColumnsWithin(selectRect);
 						int x = alignmentPane.getColumnAt(e.getPoint());
-						logger.info(aliCursor);
-						logger.info(aliCursor.x);
-						logger.info(aliCursor.y);
-						aliCursor.setPosition(x,0);
+//						logger.info(aliCursor);
+//						logger.info(aliCursor.x);
+//						logger.info(aliCursor.y);
+						alignment.getAliCursor().setPosition(x,0);
 					}
 
 					alignment.clearTempSelection();
@@ -3382,7 +3171,7 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 			Point posOnPaneNotRuler = new Point(alignmentPane.getVisibleRect().x + e.getPoint().x,0);
 			Point matrixPoint = alignmentPane.paneCoordToMatrixCoord(posOnPaneNotRuler);
 			logger.info("x=" + matrixPoint.x);
-			aliCursor.setPosition(matrixPoint.x,0);
+			alignment.getAliCursor().setPosition(matrixPoint.x,0);
 			// request focus after aliCursor change otherwise not really working
 			alignmentPane.requestFocus();
 
@@ -3501,21 +3290,6 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		}
 	}
 
-	private AliCursor createNewAliCursor(){
-		//alignment.clearSelection();
-		Point center = alignmentPane.matrixCoordToPaneCoord((new Point((int)alignmentPane.getVisibleRect().getCenterX(), (int)alignmentPane.getVisibleRect().getCenterY())));
-		AliCursor newAliCursor = new AliCursor(center.x, center.y);
-		return newAliCursor;
-	}
-
-	public boolean isReverseHorizontalRotation() {
-		return Settings.getReverseHorizontalMouseWheel().getBooleanValue();
-	}
-
-	public boolean isReverseVerticalRotation() {
-		return Settings.getReverseVerticalMouseWheel().getBooleanValue();
-	}
-
 	public void scrollToPos(Point matrixPos) {
 		alignmentPane.scrollToPos(matrixPos);
 	}
@@ -3524,7 +3298,7 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 
 		AliCursor aliCursor = getAliCursor();
 		if(aliCursor != null){
-			Point pointInPaneCoord = alignmentPane.matrixCoordToPaneCoord(new Point(aliCursor.x, aliCursor.y));
+			Point pointInPaneCoord = alignmentPane.matrixCoordToPaneCoord(new Point(aliCursor.getX(), aliCursor.getY()));
 			Rectangle visiRect = new Rectangle(pointInPaneCoord);
 			if(keyDirection == KeyEvent.VK_LEFT){
 				visiRect.add(visiRect.getMinX() - 40, visiRect.getCenterY());
@@ -3548,8 +3322,8 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		AliCursor aliCursor = getAliCursor();
 		logger.info(aliCursor);
 		if(aliCursor != null){
-			logger.info("point" + new Point(aliCursor.x, aliCursor.y));
-			Point pointInPaneCoord = alignmentPane.matrixCoordToPaneCoord(new Point(aliCursor.x, aliCursor.y));
+			logger.info("point" + new Point(aliCursor.getX(), aliCursor.getY()));
+			Point pointInPaneCoord = alignmentPane.matrixCoordToPaneCoord(new Point(aliCursor.getX(), aliCursor.getY()));
 			Rectangle visiRect = new Rectangle(pointInPaneCoord);
 			visiRect.grow(40, 40);
 			logger.info("alignmentPane.getVisibleRect()" + alignmentPane.getVisibleRect());
@@ -3561,10 +3335,7 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 	}
 
 	public AliCursor getAliCursor(){
-		if(aliCursor == null){
-			aliCursor = createNewAliCursor();
-		}
-		return aliCursor;
+		return alignment.getAliCursor();
 	}
 
 
@@ -3590,124 +3361,7 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		//requestRepaintCursor();
 	}
 
-	public class AliCursor{
-		int x;
-		int y;
-		Sequence cursorSeq;
-		int posInSeq;
-
-		public AliCursor(int x, int y) {
-			setPosition(x, y);
-		}
-
-		public void setPosition(int x, int y){
-			this.x = x;
-			this.y = y;
-			savePosition();
-		}
-
-		public void restorePosition(){
-			if(cursorSeq != null){
-				int xFromSeq = cursorSeq.getPosOfSelectedIndex(posInSeq);
-				int yFromSeq = alignment.getSequenceIndex(cursorSeq);
-				if(alignment.isPositionValid(xFromSeq ,yFromSeq)){
-					x = xFromSeq;
-					y = yFromSeq;
-				}
-			}
-		}
-
-		public void savePosition(){
-			if(alignment != null && alignment.getSequences() != null){
-				if(alignment.isPositionValid(x, y)){
-					logger.info("savepos");
-					this.cursorSeq = alignment.getSequences().get(y);
-					this.posInSeq = (int) cursorSeq.countSelectedPositions(0, x);
-				}
-			}
-		}
-
-		public void moveLeft(boolean isShiftDown){
-			restorePosition();
-			if(alignment.isPositionValid(x-1,y)){
-				if(isShiftDown){
-					// if moving into selection deselect previous
-					if(alignment.getSelectionAt(x-1, y) == true){
-						alignment.clearColumnSelection(x);
-					}
-					// if moving into clear then select and leave previous
-					else{
-						alignment.copySelectionFromPosX1toX2(x,x-1);
-					}		
-				}else{
-					alignment.setSelectionAt(x-1, y, true);
-				}
-				x--;
-
-			}
-			savePosition();
-
-
-		}
-
-		public void moveRight(boolean isShiftDown){
-			restorePosition();
-			if(alignment.isPositionValid(x+1,y)){
-				if(isShiftDown){
-					// if moving into selection deselect previous
-					if(alignment.getSelectionAt(x+1, y) == true){					
-						alignment.clearColumnSelection(x);
-					}
-					// if moving into clear then select and leave previous
-					else{
-						alignment.copySelectionFromPosX1toX2(x, x+1);
-					}				
-				}else{
-					alignment.setSelectionAt(x+1, y, true);	
-				}		
-				x++;
-			}
-			savePosition();
-		}
-
-		public void moveUp(boolean isShiftDown){
-			restorePosition();
-			if(alignment.isPositionValid(x,y-1)){
-				if(isShiftDown){
-					// if moving into selection deselect previous
-					if(alignment.getSelectionAt(x, y-1) == true){
-						alignment.setAllHorizontalSelectionAt(y, false);
-					}
-					// if moving into clear then select and leave previous
-					else{
-						alignment.copySelectionFromSequenceTo(y, y-1);
-					}		
-				}else{
-					alignment.setSelectionAt(x, y-1, true);
-				}
-				y--;
-			}
-			savePosition();
-		}
-		public void moveDown(boolean isShiftDown){
-			restorePosition();
-			if(alignment.isPositionValid(x,y+1)){
-				if(isShiftDown){
-					// if moving into selection deselect previous
-					if(alignment.getSelectionAt(x, y+1) == true){
-						alignment.setAllHorizontalSelectionAt(y, false);
-						// if moving into clear then select and leave previous
-					}else{
-						alignment.copySelectionFromSequenceTo(y,y+1);
-					}	
-				}else{
-					alignment.setSelectionAt(x, y+1, true);
-				}
-				y++;
-			}
-			savePosition();
-		}
-	}
+	
 
 
 
@@ -4226,6 +3880,20 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 	public void missingToGAP() {
 		getUndoControler().pushUndoState();
 		alignment.missingToGAP();
+	}
+
+
+	public void zoomOut() {
+		
+		// TODO Get Active Panel?
+		alignmentPane.zoomOut();
+		
+	}
+
+	public void zoomIn() {
+		// TODO Get Active Panel?
+		alignmentPane.zoomIn();
+		
 	}
 
 }

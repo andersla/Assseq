@@ -79,6 +79,7 @@ public class Alignment implements FileSequenceLoadListener {
 	private boolean editMode;
 	private ArrayList<AlignmentListener> alignmentListeners = new ArrayList<AlignmentListener>();
 	private boolean isSelectable;
+	private AliCursor aliCursor = new AliCursor(0, 0, this);
 
 	public Alignment(){
 		this(null, new MemorySequenceAlignmentListModel(), new AlignmentMeta());
@@ -177,8 +178,10 @@ public class Alignment implements FileSequenceLoadListener {
 	}
 
 	public void clearSelection() {
+		if(aliCursor != null){
+			aliCursor.restorePosition();
+		}
 		sequences.clearSequenceSelection();
-		//fireSelectionChanged();
 	}
 
 	public int getSequenceIndex(Sequence seq) {
@@ -1939,4 +1942,15 @@ public class Alignment implements FileSequenceLoadListener {
 		return sequences.isEqualLength();
 	}
 
+	public AliCursor getAliCursor(){
+		return aliCursor;
+	}
+	/*
+	public AliCursor createNewAliCursor(Point center){
+		//alignment.clearSelection();
+		AliCursor newAliCursor = new AliCursor(center.x, center.y, this);
+		return newAliCursor;
+	}
+	*/
+	
 }

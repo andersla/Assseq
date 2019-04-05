@@ -15,6 +15,7 @@ import utils.OSNativeUtils;
 import aliview.Assseq;
 import aliview.AssseqWindow;
 import aliview.alignment.Alignment;
+import aliview.gui.pane.AlignmentPane;
 import aliview.settings.Settings;
 
 /*
@@ -25,11 +26,11 @@ import aliview.settings.Settings;
 public class SequenceListMouseWheelListener implements MouseWheelListener{
 	private static final Logger logger = Logger.getLogger(SequenceListMouseWheelListener.class);
 
-	private AssseqWindow aliViewWin;
+	private AlignmentPane alignmentPane;
 
 
-	public SequenceListMouseWheelListener(AssseqWindow aliViewWindow) {
-		this.aliViewWin = aliViewWindow;
+	public SequenceListMouseWheelListener(AlignmentPane alignmentPane) {
+		this.alignmentPane = alignmentPane;
 	}
 
 
@@ -37,10 +38,10 @@ public class SequenceListMouseWheelListener implements MouseWheelListener{
 		// Zoom in out if ctrl is pressed
 		if(e.getModifiersEx() ==  OSNativeUtils.getMouseWheelZoomModifierMask()){
 			if(e.getWheelRotation() > 0){
-				Assseq.getActiveWindow().zoomOutAt(e.getPoint());
+				alignmentPane.zoomOutAt(e.getPoint());
 			}
 			else if(e.getWheelRotation() < 0){		
-				Assseq.getActiveWindow().zoomInAt(e.getPoint());
+				alignmentPane.zoomInAt(e.getPoint());
 			}
 
 			return;
@@ -74,7 +75,7 @@ public class SequenceListMouseWheelListener implements MouseWheelListener{
 		else{
 
 			int wheelRotation = e.getWheelRotation();
-			if(aliViewWin.isReverseVerticalRotation()){							
+			if(alignmentPane.isReverseVerticalRotation()){							
 				wheelRotation = wheelRotation * -1;
 			}
 

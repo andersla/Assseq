@@ -1,6 +1,7 @@
 package aliview.gui.pane;
 
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.MouseEvent;
@@ -26,7 +27,10 @@ import java.util.concurrent.TimeUnit;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
+import javax.swing.event.ChangeEvent;
 
 import org.apache.log4j.Logger;
 
@@ -44,6 +48,7 @@ import aliview.alignment.NucleotideHistogram;
 import aliview.color.ColorScheme;
 import aliview.color.ColorSchemeFactory;
 import aliview.color.ColorUtils;
+import aliview.gui.ScrollBarModelSyncChangeListener;
 import aliview.messenges.Messenger;
 import aliview.sequencelist.AlignmentSelectionEvent;
 import aliview.sequencelist.AlignmentSelectionListener;
@@ -116,6 +121,7 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 	CharPixelsContainerTranslation charPixTranslationAndNucDominantNucNoAALetterSelected;
 	private double smallCharsSizeNumber = 0;
 	private int CHARSET_LINE_HEIGHT = 5;
+	private ScrollBarModelSyncChangeListener scrollBarListener;
 
 	public AlignmentPane() {
 		highDPIScaleFactor = (int)OSNativeUtils.getHighDPIScaleFactor();
@@ -130,7 +136,6 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 		//this.infoLabel = infoLabel;
 		alignmentRuler = new AlignmentRuler(this);
 		charsetRuler = new CharsetRuler(this);
-
 
 	}
 
@@ -1816,6 +1821,262 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 
 
 	} // end CodonPosRuler class
+	
+	
+	private JScrollPane getParentScrollPane(){
+		JScrollPane parentScrollPane = null;
+		Container c = getParent();
+		while(c != null) {
+			if( c instanceof JScrollPane ) {
+				parentScrollPane = (JScrollPane) c;
+				break;
+			}
+			c = c.getParent();
+		}
+		return parentScrollPane;
+	}
+	
+	public void zoomIn(){
+		JScrollPane scrollPane = getParentScrollPane();
+		// if pointer is on pane
+		Point zoomPoint = this.getMousePosition();
+		if(zoomPoint == null){
+			// else get center position of view
+			Point viewPoint = scrollPane.getViewport().getViewPosition();
+			Dimension dimension = scrollPane.getViewport().getExtentSize();
+			Point centerPos = new Point(viewPoint.x + dimension.width / 2, viewPoint.y + dimension.height / 2);
+			zoomPoint = centerPos;
+		}
+		this.zoomInAt(zoomPoint);
+
+	}
+
+	public void zoomOut(){
+		JScrollPane scrollPane = getParentScrollPane();
+		// if pointer is on pane
+		Point zoomPoint = this.getMousePosition();
+		if(zoomPoint == null){
+			// else get center position of view
+			Point viewPoint = scrollPane.getViewport().getViewPosition();
+			Dimension dimension = scrollPane.getViewport().getExtentSize();
+			Point centerPos = new Point(viewPoint.x + dimension.width / 2, viewPoint.y + dimension.height / 2);
+			zoomPoint = centerPos;
+		}
+		this.zoomOutAt(zoomPoint);
+	}
+	
+	public void zoomOutAt(Point mousePos){
+
+		// Get alignmentPane size before resize since it will change afeter resize
+		// we need to now relative size different between new and old size because
+		// we want to zoom in on same position (same nucleotide) where mouse was in
+		// old pane
+		Dimension oldSize = this.getPreferredSize();
+		// TODO what if panel is not in a scrollPane???!!!
+		final JScrollPane scrollPane = getParentScrollPane();
+		Point viewPoint = scrollPane.getViewport().getViewPosition();
+		Point mousePosInScrollPaneCoord = new Point(mousePos.x - viewPoint.x, mousePos.y - viewPoint.y);
+
+		Point mouseInMatrixCoord = this.paneCoordToMatrixCoord(mousePosInScrollPaneCoord);
+
+		logger.info("oldSize" + oldSize);
+
+		boolean didChangeSize = decCharSize();
+
+		if(didChangeSize){
+
+			final Dimension newSize = this.getPreferredSize();
+			this.setSize(newSize);
+			logger.info("newSize" + newSize);
+
+			// Now when alignmentPanel coordinates have changed due to resize, lets focus on the 
+			// relative position where mouse pointer were earlier (same nucleotide)		
+			double paneRelSizeX = newSize.getWidth()/oldSize.getWidth();
+			double paneRelSizeY = newSize.getHeight()/oldSize.getHeight();
+
+			int mousePosXOnResizedPane = (int) (mousePos.getX() * paneRelSizeX);
+			int mousePosYOnResizedPane = (int) (mousePos.getY() * paneRelSizeY);
+
+			Point mousePosOnResizedPane = new Point(mousePosXOnResizedPane, mousePosYOnResizedPane);
+
+			// calculate new vew location	
+			int newX = mousePosOnResizedPane.x - mousePosInScrollPaneCoord.x;
+			int newY = mousePosOnResizedPane.y - mousePosInScrollPaneCoord.y;
+			final Point newViewPoint = new Point(newX, newY);
+
+			// Old viewport has to be replaced 
+			scrollPane.setViewport(null);
+			scrollPane.setViewportView(this);
+			// Set new pos
+			scrollPane.getViewport().setViewPosition(newViewPoint);
+
+			Point afterViewPoint = scrollPane.getViewport().getViewPosition();
+			logger.info("afterViewPoint" + viewPoint);
+
+			//			if(alignmentPane.isPointWithinMatrix(mousePosOnResizedPane)){
+			//			
+			//				// This moving the mouse is done to make sure zoom in at right point even if pane is to small
+			//				int xMouseDiff = newViewPoint.x - afterViewPoint.x;
+			//				int yMouseDiff = newViewPoint.y - afterViewPoint.y;
+			//				logger.info("xMouseDiff=" + xMouseDiff);
+			//				logger.info("yMouseDiff=" + yMouseDiff);
+			//				
+			//				try {
+			//					
+			//					Robot robot = new Robot();
+			//					Point onScreen = MouseInfo.getPointerInfo().getLocation();		
+			//					robot.mouseMove(onScreen.x + xMouseDiff, onScreen.y + yMouseDiff);	
+			//				} catch (AWTException e) {
+			//					// TODO Auto-generated catch block
+			//					e.printStackTrace();
+			//				}
+			//			}
+
+
+			//requestPaneRepaint();
+			//alignmentPane.setForceRepaintAll(true);
+			//alignmentPane.repaint(0,0,newSize.width, newSize.height);
+
+			// no longer need to paintImmediately, since instead destroying viewport
+			//alignmentPane.paintImmediately(0,0,newSize.width, newSize.height);
+
+			
+
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run(){
+					scrollBarListener.stateChanged(new ChangeEvent(scrollPane.getVerticalScrollBar().getModel()));
+				}
+			});
+
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run(){
+					//			listScrollPane.getViewport().setViewPosition(new Point(0, newViewPoint.y));
+				}
+			});
+			
+			
+		}
+	}
+	
+	public void zoomInAt(Point mousePos){
+
+		// TODO Problem is that a scrollpane need to be resized before setViewPosiiton()
+		// and all should be done at once before repaint!!!
+
+		// Get alignmentPane size before resize since it will change afeter resize
+		// we need to now relative size different between new and old size because
+		// we want to zoom in on same position (same nucleotide) where mouse was in
+		// old pane
+		Dimension oldSize = this.getPreferredSize();
+		final JScrollPane scrollPane = getParentScrollPane();
+		logger.info("scrollPane" + scrollPane);
+		Point viewPoint = scrollPane.getViewport().getViewPosition();
+		Point mousePosInScrollPaneCoord = new Point(mousePos.x - viewPoint.x, mousePos.y - viewPoint.y);
+
+		logger.info("oldSize" + oldSize);
+
+		logger.info("mousePosInScrollPaneCoord" + mousePosInScrollPaneCoord);
+
+		logger.info("mousePosOnPane" + mousePos);
+
+		incCharSize();
+
+		Dimension newSize = this.getPreferredSize();
+		this.setSize(newSize);
+
+		logger.info("pane-newSize" + newSize);
+
+		// Now when alignmentPanel coordinates have changed due to resize, lets focus on the 
+		// relative position where mouse pointer were earlier (same nucleotide)		
+		double paneRelSizeX = newSize.getWidth()/oldSize.getWidth();
+		double paneRelSizeY = newSize.getHeight()/oldSize.getHeight();
+
+		int mousePosXOnResizedPane = (int) (mousePos.getX() * paneRelSizeX);
+		int mousePosYOnResizedPane = (int) (mousePos.getY() * paneRelSizeY);
+
+		Point mousePosOnResizedPane = new Point(mousePosXOnResizedPane, mousePosYOnResizedPane);
+
+		// calculate new view location	
+		int newX = mousePosOnResizedPane.x - mousePosInScrollPaneCoord.x;
+		int newY = mousePosOnResizedPane.y - mousePosInScrollPaneCoord.y;
+
+		logger.info("newX" + newX);
+		logger.info("newY" + newY);
+
+		final Point newViewPoint = new Point(newX, newY);
+
+		viewPoint = scrollPane.getViewport().getViewPosition();
+		logger.info("beforeViewPoint" + viewPoint);
+		logger.info("newViewPoint" + newViewPoint);
+
+		// Old viewport has to be replaced - otherwise problem drawing graphics
+		// Not needed actually on zoomIn - only on zoomOut
+		//		alignmentScrollPane.setViewport(null);
+		//		alignmentScrollPane.setViewportView(alignmentPane);
+
+		// Set new position
+		scrollPane.getViewport().setViewPosition(newViewPoint);
+
+		Point afterViewPoint = scrollPane.getViewport().getViewPosition();
+		logger.info("afterViewPoint" + viewPoint);
+
+		//		if(alignmentPane.isPointWithinMatrix(mousePosOnResizedPane)){
+		//		
+		//			// This moving the mouse is done to make sure zoom in at right point even if pane is to small
+		//			int xMouseDiff = newViewPoint.x - afterViewPoint.x;
+		//			int yMouseDiff = newViewPoint.y - afterViewPoint.y;
+		//			logger.info("xMouseDiff=" + xMouseDiff);
+		//			logger.info("yMouseDiff=" + yMouseDiff);
+		//			
+		//			try {
+		//				
+		//				Robot robot = new Robot();
+		//				Point onScreen = MouseInfo.getPointerInfo().getLocation();		
+		//				robot.mouseMove(onScreen.x + xMouseDiff, onScreen.y + yMouseDiff);	
+		//			} catch (AWTException e) {
+		//				// TODO Auto-generated catch block
+		//				e.printStackTrace();
+		//			}
+		//		}
+
+
+
+		//alignmentPane.setForceRepaintAll(true);
+		//requestPaneRepaint();
+		//alignmentPane.setForceRepaintAll(true);
+		//alignmentPane.repaint(0,0,newSize.width, newSize.height);
+
+		// no longer need to paintImmediately, since instead destroying viewport
+		//alignmentPane.paintImmediately(0,0,newSize.width, newSize.height);
+
+
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run(){
+				scrollBarListener.stateChanged(new ChangeEvent(scrollPane.getVerticalScrollBar().getModel()));
+			}
+		});
+
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run(){
+				// listScrollPane.getViewport().setViewPosition(new Point(0, newViewPoint.y));
+			}
+		});
+		
+
+	}
+
+	public boolean isReverseHorizontalRotation() {
+		return Settings.getReverseHorizontalMouseWheel().getBooleanValue();
+	}
+
+	public boolean isReverseVerticalRotation() {
+		return Settings.getReverseVerticalMouseWheel().getBooleanValue();
+	}
+
+	public void addScrollBarListener(ScrollBarModelSyncChangeListener scrollBarListener) {
+		this.scrollBarListener = scrollBarListener;
+	}
+
 
 }
 

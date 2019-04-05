@@ -29,13 +29,15 @@ public class AlignmentPaneMouseListener implements MouseListener, MouseMotionLis
 	private AlignmentPane alignmentPane;
 	private SequenceJList sequenceJList;
 	private Alignment alignment;
-	private AssseqWindow aliViewWindow;
+	private AssseqWindow assseqWindow;
 
-	public AlignmentPaneMouseListener(Alignment alignment, AlignmentPane alignmentPane, SequenceJList sequenceJList) {
+	public AlignmentPaneMouseListener(Alignment alignment, AlignmentPane alignmentPane, AssseqWindow assseqWindow, SequenceJList sequenceJList) {
 		super();
 		this.alignment = alignment;
 		this.alignmentPane = alignmentPane;
+		this.assseqWindow = assseqWindow;
 		this.sequenceJList = sequenceJList;
+		
 	}
 
 	/*
@@ -89,6 +91,7 @@ public class AlignmentPaneMouseListener implements MouseListener, MouseMotionLis
 			// new single point selection
 			else{
 				// clear list selection
+				logger.info("sequenceJList" + sequenceJList);
 				sequenceJList.clearSelection();
 				alignmentPane.requestFocus();
 
@@ -160,7 +163,7 @@ public class AlignmentPaneMouseListener implements MouseListener, MouseMotionLis
 						alignmentPane.selectColumnAt(startPoint);
 						// cursor have to change
 						int x = alignmentPane.getColumnAt(e.getPoint());
-						aliViewWindow.getAliCursor().setPosition(x,0);
+						alignment.getAliCursor().setPosition(x,0);
 					}else{
 						try {
 							alignmentPane.selectBaseAt(startPoint);
@@ -216,7 +219,7 @@ public class AlignmentPaneMouseListener implements MouseListener, MouseMotionLis
 		if(! e.isShiftDown()){
 			Point clickPos = alignmentPane.paneCoordToMatrixCoord(e.getPoint());
 			logger.info(clickPos);
-			aliViewWindow.getAliCursor().setPosition(clickPos.x, clickPos.y);
+			alignment.getAliCursor().setPosition(clickPos.x, clickPos.y);
 		}
 	}
 
@@ -281,7 +284,7 @@ public class AlignmentPaneMouseListener implements MouseListener, MouseMotionLis
 
 				if(isDragging != true){
 					isDragging = true;
-					aliViewWindow.getUndoControler().pushUndoState();
+					assseqWindow.getUndoControler().pushUndoState();
 				}
 
 				Rectangle selectRect = alignment.getSelectionAsMinRect();
@@ -293,10 +296,10 @@ public class AlignmentPaneMouseListener implements MouseListener, MouseMotionLis
 
 				// Test first if move is possible - otherwise many false requestedit if not possible
 				if(alignment.isMoveSelectionRightPossible() || alignment.isMoveSelectionLeftPossible()){
-					if(aliViewWindow.requestEditMode()){
+					if(assseqWindow.requestEditMode()){
 
 						//if(e.getPoint().x >= selectInPaneCoord.x && e.getPoint().x <= selectInPaneCoord.getMaxX()){
-						alignment.moveSelection(intDiffInseqPos, aliViewWindow.isUndoable());
+						alignment.moveSelection(intDiffInseqPos, assseqWindow.isUndoable());
 						//}
 
 					}	
@@ -343,16 +346,16 @@ public class AlignmentPaneMouseListener implements MouseListener, MouseMotionLis
 		// Zoom in out if ctrl is pressed
 		if(e.getModifiersEx() ==  OSNativeUtils.getMouseWheelZoomModifierMask()){
 			if(e.getWheelRotation() > 0){
-				aliViewWindow.zoomOutAt(e.getPoint());
+				alignmentPane.zoomOutAt(e.getPoint());
 			}
 			else if(e.getWheelRotation() < 0){		
-				aliViewWindow.zoomInAt(e.getPoint());
+				alignmentPane.zoomInAt(e.getPoint());
 			}
 		}
 		// Else scroll pane left or right
 		else if(e.isShiftDown()){
 			int wheelRotation = e.getWheelRotation();
-			if(aliViewWindow.isReverseHorizontalRotation()){
+			if(alignmentPane.isReverseHorizontalRotation()){
 				wheelRotation = wheelRotation * -1;
 			}
 			if(wheelRotation > 0){
@@ -374,7 +377,7 @@ public class AlignmentPaneMouseListener implements MouseListener, MouseMotionLis
 			// Else scroll pane up or down				
 		}else{
 			int wheelRotation = e.getWheelRotation();
-			if(aliViewWindow.isReverseVerticalRotation()){
+			if(alignmentPane.isReverseVerticalRotation()){
 				wheelRotation = wheelRotation * -1;
 			}
 			if(wheelRotation > 0){
