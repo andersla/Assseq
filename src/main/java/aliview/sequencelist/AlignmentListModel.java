@@ -76,7 +76,7 @@ public class AlignmentListModel implements ListModel, Iterable<Sequence>{
 	private volatile int cachedLongestSequenceLength = -1;
 	private boolean isTranslated;
 	private Alignment alignment;
-	private MemorySequenceAlignmentListModel consensusModel;
+	private Sequence fixedConsensus;
 
 
 	public AlignmentListModel() {
@@ -1399,11 +1399,15 @@ public class AlignmentListModel implements ListModel, Iterable<Sequence>{
 	}
 	
 	public char getFixedNucleotideConsensusAt(int pos){
-		return consensusModel.get(0).getCharAtPos(pos);
+		return fixedConsensus.getCharAtPos(pos);
+	}
+	
+	public void setFixedConsensus(Sequence seq) {
+		this.fixedConsensus = seq;
 	}
 
 	public int getFixedNucleotideConsensusQualityAt(int x) {
-		TraceSequence seq = (TraceSequence) consensusModel.get(0);
+		TraceSequence seq = (TraceSequence) fixedConsensus;
 		return seq.getQualValAt(x);
 	}
 
@@ -2262,9 +2266,5 @@ public class AlignmentListModel implements ListModel, Iterable<Sequence>{
 			}
 		}
 		return true;
-	}
-
-	public void setConsensusModel(MemorySequenceAlignmentListModel consensusModel) {
-		this.consensusModel = consensusModel;
 	}
 }

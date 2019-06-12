@@ -154,12 +154,10 @@ public class SequencesFactory {
 				try {
 					ACEImporter importer = new ACEImporter(alignmentFile);
 					List<Sequence> sequences = importer.importSequences();
+					Sequence consensus = importer.importConsensus();
 					model = new MemorySequenceAlignmentListModel();
 					model.setSequences(sequences);
-					MemorySequenceAlignmentListModel consensusModel = new MemorySequenceAlignmentListModel();
-					Sequence consensus = importer.importConsensus();
-					consensusModel.add(consensus);
-					model.setConsensusModel(consensusModel);
+					model.setFixedConsensus(consensus);
 					model.setFileFormat(FileFormat.ACE);
 				} catch (FileNotFoundException e) {
 					importErrorMessage += "Tried import as ACE but: " + e.getMessage() + LF;
