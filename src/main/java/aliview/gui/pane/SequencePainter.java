@@ -71,9 +71,6 @@ public abstract class SequencePainter implements Runnable{
 		}
 	}
 
-
-
-
 	abstract void copyPixels(Sequence seq, RGBArray clipRGB, int seqXPos, int seqYPos, int pixelPosX, int pixelPosY, AlignmentPane aliPane, Alignment alignment);
 
 

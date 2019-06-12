@@ -54,6 +54,7 @@ import aliview.sequences.BasicSequence;
 import aliview.sequences.InMemorySequence;
 import aliview.sequences.Sequence;
 import aliview.sequences.SequenceUtils;
+import aliview.sequences.TraceSequence;
 import aliview.undo.UndoSavedStateEditedSequences;
 
 public class AlignmentListModel implements ListModel, Iterable<Sequence>{
@@ -75,6 +76,7 @@ public class AlignmentListModel implements ListModel, Iterable<Sequence>{
 	private volatile int cachedLongestSequenceLength = -1;
 	private boolean isTranslated;
 	private Alignment alignment;
+	private MemorySequenceAlignmentListModel consensusModel;
 
 
 	public AlignmentListModel() {
@@ -1384,6 +1386,26 @@ public class AlignmentListModel implements ListModel, Iterable<Sequence>{
 		}
 		return new String(cons);
 	}
+	
+	public char getNucleotideConsensusAt(int pos){
+		byte consVal = 0;
+		for(Sequence sequence : delegateSequences){
+			byte baseVal = sequence.getBaseAtPos(pos);
+			// bitwise add everything
+			consVal = (byte) (consVal | baseVal);
+
+		}
+		return NucleotideUtilities.charFromBaseVal(consVal);
+	}
+	
+	public char getFixedNucleotideConsensusAt(int pos){
+		return consensusModel.get(0).getCharAtPos(pos);
+	}
+
+	public int getFixedNucleotideConsensusQualityAt(int x) {
+		TraceSequence seq = (TraceSequence) consensusModel.get(0);
+		return seq.getQualValAt(x);
+	}
 
 	public void reverseComplement() {
 		for(Sequence seq : delegateSequences){
@@ -2240,5 +2262,9 @@ public class AlignmentListModel implements ListModel, Iterable<Sequence>{
 			}
 		}
 		return true;
+	}
+
+	public void setConsensusModel(MemorySequenceAlignmentListModel consensusModel) {
+		this.consensusModel = consensusModel;
 	}
 }

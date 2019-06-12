@@ -34,7 +34,6 @@ import org.apache.log4j.Logger;
 
 import aliview.AssseqWindow;
 import aliview.externalcommands.CommandItem;
-import aliview.old.MyScrollPane;
 import aliview.settings.Settings;
 
 public class AlignerALLItemsFrame extends JFrame {

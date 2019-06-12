@@ -1,6 +1,7 @@
 package aliview.gui.pane;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -19,6 +20,7 @@ import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -28,9 +30,11 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.apache.log4j.Logger;
 
@@ -41,17 +45,19 @@ import aliview.Assseq;
 import aliview.AminoAcid;
 import aliview.Base;
 import aliview.NucleotideUtilities;
-import aliview.alignment.AAHistogram;
-import aliview.alignment.AliHistogram;
+import aliview.ScrollViewChangeListener;
 import aliview.alignment.Alignment;
-import aliview.alignment.NucleotideHistogram;
+import aliview.alignment.AlignmentEvent;
+import aliview.alignment.AlignmentListener;
 import aliview.color.ColorScheme;
 import aliview.color.ColorSchemeFactory;
 import aliview.color.ColorUtils;
 import aliview.gui.ScrollBarModelSyncChangeListener;
 import aliview.messenges.Messenger;
+import aliview.sequencelist.AlignmentDataListener;
 import aliview.sequencelist.AlignmentSelectionEvent;
 import aliview.sequencelist.AlignmentSelectionListener;
+import aliview.sequencelist.SequenceJList;
 import aliview.sequences.AminoAcidAndPosition;
 import aliview.sequences.Sequence;
 import aliview.settings.Settings;
@@ -60,19 +66,20 @@ import aliview.utils.ArrayUtilities;
 
 // HAS to be JPanel - JComponent is not enough for only partial cliprect when in jscrollpane when painting
 // When JComponent only then I had to paint it all (maybe because of layoutmanager?)
-public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
+public class AlignmentPane extends JPanel implements AlignmentSelectionListener, ViewListener{
 	private static final long serialVersionUID = 601195400946835871L;
 	private static final Logger logger = Logger.getLogger(AlignmentPane.class);
-	private static final double MIN_CHAR_SIZE = 0;
-	private static final int MAX_CHAR_SIZE = 100;
-	private static final double CHAR_HEIGHT_RATIO = 1.4;
+	private static final double MIN_CHAR_SIZE = 1;
+	private static final int MAX_CHAR_SIZE = 26;
+	private static final double CHAR_HEIGHT_RATIO = 2.5; //2.5;
+	private static final double CHAR_ZOOM_CHANGE_RATIO = 0.12;
 	public static final int MAX_CHARSIZE_TO_DRAW = 6;
 	//private static final Color ALPHACOLOR = new Color(255, 255,255, 128 );
-	double charWidth = 10;
-	double charHeight = 12;
-	private Font baseFont = new Font(OSNativeUtils.getMonospacedFontName(), Font.PLAIN, (int)charWidth);
-	private Font highDPIFont = new Font(OSNativeUtils.getMonospacedFontName(), Font.PLAIN, (int)charWidth);
-	private int highDPIScaleFactor = 1;
+	double charWidth = 10; //10
+	double charHeight = charWidth * CHAR_HEIGHT_RATIO; //12
+	Font baseFont = new Font(OSNativeUtils.getMonospacedFontName(), Font.PLAIN, (int)charWidth);
+	Font highDPIFont = new Font(OSNativeUtils.getMonospacedFontName(), Font.PLAIN, (int)charWidth);
+	int highDPIScaleFactor = 1;
 
 	private Alignment alignment;
 
@@ -82,31 +89,38 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 
 	// TODO This should instead be tracing a sequence instead of a position?
 	int differenceTraceSequencePosition = 0;
-	private boolean showTranslation = false;
-	private boolean showTranslationAndNuc = false;
+	boolean showTranslation = false;
+	boolean showTranslationAndNuc = false;
 	//	private boolean showTranslationOnePos = false;
-	private AlignmentRuler alignmentRuler;
-	private CharsetRuler charsetRuler;
-	private boolean drawAminoAcidCode; 
-	private boolean drawCodonPosOnRuler;
-	private Rectangle lastClip = new Rectangle();
-	private boolean rulerIsDirty;
-	boolean highlightDiffTrace = false;
-	boolean highlightNonCons;
+	AlignmentRuler alignmentRuler;
+	CharsetRuler charsetRuler;
+	ConsensusRuler consensusRuler;
+	boolean drawAminoAcidCode; 
+	boolean drawCodonPosOnRuler;
+	Rectangle lastClip = new Rectangle();
+	boolean rulerIsDirty;
+	boolean highlightDiffTrace;
+	boolean highlightNonCons; // Default value is set by button press in AssseqWindow initWindow() method
 	boolean highlightCons;
-	private boolean ignoreGapInTranslation;
-	private byte byteToDraw;
-	private long endTime; // performance measure
-	private int drawCounter = 0; // performance measure
-	private int DRAWCOUNT_LOF_INTERVAL = 1; // performance measure
-	private int fontCase = Settings.getFontCase().getIntValue();
+	boolean ignoreGapInTranslation;
+	long endTime; // performance measure
+	int drawCounter = 0; // performance measure
+	int DRAWCOUNT_LOF_INTERVAL = 1; // performance measure
+	int fontCase = Settings.getFontCase().getIntValue();
 
+	// These are the pixel containers needed for an alignment
+	// they are all created on every font size or colorscheme change
 	CharPixelsContainer charPixDefaultNuc;
 	CharPixelsContainer charPixSelectedNuc;
 	CharPixelsContainer charPixConsensusNuc;
+	CharPixelsContainer charPixNonConsensusNuc;
+	CharPixelsContainerNucQuality charPixQualityNuc;
+	CharPixelsContainer charPixQualClipNuc;
+
 	CharPixelsContainerAA charPixDefaultAA;
 	CharPixelsContainerAA charPixSelectedAA;
 	CharPixelsContainerAA charPixConsensusAA;
+
 	CharPixelsContainerTranslation charPixTranslationDefault;
 	CharPixelsContainerTranslation charPixTranslationSelected;
 	CharPixelsContainerTranslation charPixTranslationLetter;
@@ -119,11 +133,16 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 	CharPixelsContainerTranslation charPixTranslationAndNucDominantNucNoAALetter;
 	CharPixelsContainerTranslation charPixTranslationAndNucDominantNucSelected;
 	CharPixelsContainerTranslation charPixTranslationAndNucDominantNucNoAALetterSelected;
+	CharPixelsContainerTranslation charPixTranslationQualClip;
+
+
 	private double smallCharsSizeNumber = 0;
 	private int CHARSET_LINE_HEIGHT = 5;
-	private ScrollBarModelSyncChangeListener scrollBarListener;
+	ViewModel viewModel;
 
-	public AlignmentPane() {
+
+	public AlignmentPane(ViewModel viewModel) {
+		this.viewModel = viewModel;
 		highDPIScaleFactor = (int)OSNativeUtils.getHighDPIScaleFactor();
 		createAdjustedDerivedBaseFont();
 		createAdjustedDerivedHighDPIFont();
@@ -136,7 +155,10 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 		//this.infoLabel = infoLabel;
 		alignmentRuler = new AlignmentRuler(this);
 		charsetRuler = new CharsetRuler(this);
-
+		consensusRuler = new ConsensusRuler(this);
+		// Now we can update model wiith char sizes
+		viewModel.setNewView(this, charWidth, charHeight, null);
+		logger.info("Done init AliPane");
 	}
 
 	public long getEndTime(){
@@ -179,6 +201,10 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 		charsetRuler.setVisible(selected);
 	}
 
+	public ColorScheme getColorSchemeNucleotide() {
+		return colorSchemeNucleotide;
+	}
+
 	public boolean decCharSize(){
 
 		// stop when everything is in view (or char is 1 for smaller alignments)
@@ -194,12 +220,13 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 			if(charWidth > 1){
 				// a little bit faster above char 18
 				if(charWidth >= 18){
-					preferredWidth = (int) (charWidth - 0.12*charWidth); // +1
+					preferredWidth = (int) (charWidth - CHAR_ZOOM_CHANGE_RATIO*charWidth); // +1
 				}else{
 					preferredWidth = charWidth - 1;
 				}
 
-				preferredHeight = (int)(preferredWidth*CHAR_HEIGHT_RATIO);// 1.2 * charWidth;
+
+				preferredHeight = (int)(preferredWidth*getCharHeightRatio());// 1.2 * charWidth;
 			}
 			else{
 
@@ -227,7 +254,45 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 			didDecrease = true;
 		}
 
+
+
 		return didDecrease;
+
+	}
+
+	double getCharHeightRatio() {
+		return CHAR_HEIGHT_RATIO;
+	}
+
+	public void setCharWidth(double newCharWidth){
+		charWidth = newCharWidth;
+
+		if(charWidth >= 1){
+			charHeight = (int)(charWidth*getCharHeightRatio());
+		}else{
+			smallCharsSizeNumber --;
+			if(smallCharsSizeNumber <= 0){
+				charWidth = 1;
+			}
+			else{
+				charWidth = Math.pow(0.85, smallCharsSizeNumber);
+			}
+			charHeight = charWidth; // +1	
+		}
+
+		if(charWidth > MAX_CHAR_SIZE){
+			charWidth = MAX_CHAR_SIZE;
+			charHeight = (int)(charWidth*getCharHeightRatio());
+		}
+
+		logger.debug("charWidth" + charWidth);
+		logger.debug("charHeight" + charHeight);
+
+		createAdjustedDerivedBaseFont();
+		createAdjustedDerivedHighDPIFont();
+		createCharPixelsContainers();
+		//		logFontMetrics();
+		//this.validateSize();
 
 	}
 
@@ -235,12 +300,12 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 		if(charWidth >= 1){
 			// a little bit faster above char 16
 			if(charWidth >= 16){
-				charWidth = (int) (charWidth + 0.12*charWidth); // +1
+				charWidth = (int) (charWidth + CHAR_ZOOM_CHANGE_RATIO*charWidth); // +1
 			}
 			else{
 				charWidth = (int) charWidth + 1; // +1
 			}
-			charHeight = (int)(charWidth*CHAR_HEIGHT_RATIO);
+			charHeight = (int)(charWidth*getCharHeightRatio());
 		}else{
 			smallCharsSizeNumber --;
 			if(smallCharsSizeNumber <= 0){
@@ -254,9 +319,11 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 		}
 		if(charWidth > MAX_CHAR_SIZE){
 			charWidth = MAX_CHAR_SIZE;
-			charHeight = (int)(charWidth*CHAR_HEIGHT_RATIO);
+			charHeight = (int)(charWidth*getCharHeightRatio());
 		}
-		//baseFont = new Font(baseFont.getName(), baseFont.getStyle(), (int)charWidth);
+
+		logger.debug("charWidth" + charWidth);
+		logger.debug("charHeight" + charHeight);
 
 		createAdjustedDerivedBaseFont();
 		createAdjustedDerivedHighDPIFont();
@@ -286,9 +353,12 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 
 		// Nucleotides
 
-		charPixDefaultNuc = ContainerFactory.createDefaultNucleotideContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
-		charPixSelectedNuc = ContainerFactory.createSelectedNucleotideContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
-		charPixConsensusNuc = ContainerFactory.createConsensusNucleotideContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
+		charPixDefaultNuc = CharPixelsContainer.createDefaultNucleotideContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
+		charPixSelectedNuc = CharPixelsContainer.createSelectedNucleotideContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
+		charPixConsensusNuc = CharPixelsContainer.createConsensusNucleotideContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
+		charPixNonConsensusNuc = CharPixelsContainer.createNonConsensusNucleotideContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
+		charPixQualityNuc = CharPixelsContainerNucQuality.createQualityNucleotideContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
+		charPixQualClipNuc = CharPixelsContainer.createQualityClippedNucleotideContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
 
 		// Translated
 
@@ -332,40 +402,16 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 		charPixTranslationAndNucDominantNucNoAALetterSelected = CharPixelsContainerTranslation.createSelectedDominantNucTranslationAndNucPixelsContainerNoAALetter(charFont, charMaxSizeToDraw,
 				charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
 
+		charPixTranslationQualClip = CharPixelsContainerTranslation.createTranslationQualClip(charFont, charMaxSizeToDraw,
+				charPixWidth, charPixHeight, colorSchemeNucleotide, getFontCase());
+
 
 		// AminoAcid
+		charPixDefaultAA = CharPixelsContainerAA.createDefaultAAContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeAminoAcid, getFontCase());
 
-		charPixDefaultAA =  new CharPixelsContainerAA();
-		if(colorSchemeAminoAcid.getALLCompundColors() != null){
-			CharPixelsContainerCompound compContainer = CharPixelsContainerCompound.createDefaultCompoundColorContainer(charFont, charMaxSizeToDraw,
-					charPixWidth, charPixHeight, colorSchemeAminoAcid, getFontCase());
-			charPixDefaultAA.setCompoundContainer(compContainer);
-		}else{
-			CharPixelsContainer container = ContainerFactory.createDefaultAAContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeAminoAcid, getFontCase());
-			charPixDefaultAA.setContainer(container);
-		}
+		charPixSelectedAA = CharPixelsContainerAA.createSelectedAAContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeAminoAcid, getFontCase());
 
-		charPixSelectedAA =  new CharPixelsContainerAA();
-		if(colorSchemeAminoAcid.getALLCompundColors() != null){
-
-			CharPixelsContainerCompound compContainer = CharPixelsContainerCompound.createSelectedCompoundColorContainer(charFont, charMaxSizeToDraw,
-					charPixWidth, charPixHeight, colorSchemeAminoAcid, getFontCase());
-			charPixSelectedAA.setCompoundContainer(compContainer);
-		}else{
-			CharPixelsContainer container = ContainerFactory.createSelectedAAContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeAminoAcid, getFontCase());
-			charPixSelectedAA.setContainer(container);
-		}
-
-		charPixConsensusAA =  new CharPixelsContainerAA();
-		if(colorSchemeAminoAcid.getALLCompundColors() != null){
-			CharPixelsContainerCompound compContainer = CharPixelsContainerCompound.createDefaultCompoundColorContainer(charFont, charMaxSizeToDraw,
-					charPixWidth, charPixHeight, colorSchemeAminoAcid, getFontCase());
-			charPixConsensusAA.setCompoundContainer(compContainer);
-
-		}else{
-			CharPixelsContainer container = ContainerFactory.createConsensusAAContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeAminoAcid, getFontCase());
-			charPixConsensusAA.setContainer(container);
-		}
+		charPixConsensusAA = CharPixelsContainerAA.createConsensusAAContainer(charFont, charMaxSizeToDraw, charPixWidth, charPixHeight, colorSchemeAminoAcid, getFontCase());
 
 		endTime = System.currentTimeMillis();
 		logger.info("Creating charPixContainers took " + (endTime - startTime) + " milliseconds");
@@ -385,20 +431,21 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 		Map<TextAttribute, Object> attributes = new HashMap<TextAttribute, Object>();
 
 		// create a font without Tracking to see the diff in font actual size and specified font size
+		double fontWidth = charWidth;
 		attributes.put(TextAttribute.TRACKING, 0);
-		attributes.put(TextAttribute.SIZE, (int)charWidth);
+		attributes.put(TextAttribute.SIZE, (int)fontWidth);
 		Font calcFont = baseFont.deriveFont(attributes);
 		FontMetrics metrics = getFontMetrics(calcFont);
 		int fontActualWidth = metrics.stringWidth("X");
 
-		double sizeDiff = charWidth - fontActualWidth;
+		double sizeDiff = fontWidth - fontActualWidth;
 		// Calculate tracking for font size
-		double tracking = (double)sizeDiff/charWidth;
+		double tracking = (double)sizeDiff/fontWidth;
 		logger.info("tracking" + tracking);
 
 		// Create a font with correct tracking so characters are exactly spaced as pixels on pane
 		attributes.put(TextAttribute.TRACKING, tracking); // 8
-		attributes.put(TextAttribute.SIZE, (int)charWidth);
+		attributes.put(TextAttribute.SIZE, (int)fontWidth);
 		Font spacedFont = baseFont.deriveFont(attributes);
 
 		baseFont = spacedFont;
@@ -670,8 +717,10 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 		if(clip.x != lastClip.x || clip.width != lastClip.width || rulerIsDirty){
 			alignmentRuler.repaint();
 			charsetRuler.repaint();
+			consensusRuler.repaint();
 			rulerIsDirty = false;
 		}
+
 		lastClip = clip;
 
 	}
@@ -742,7 +791,7 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 							executor.execute(seqPainter);
 						}
 					}
-					
+
 					// Else draw as AminoAcids
 					//
 					else{
@@ -1045,9 +1094,6 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 		//		logger.info("unimplemented should be done by changelistener");
 	}
 
-
-
-
 	public void validateSize() {
 		// Set component preferred size
 		Dimension current = getSize();
@@ -1060,7 +1106,6 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 			this.rulerIsDirty = true;
 			this.revalidate();
 		}
-		//		this.scrollRectToVisible(prefRect);
 	}
 
 	@Override
@@ -1196,6 +1241,10 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 		return this.alignmentRuler;
 	}
 
+	public JComponent getConsensusRulerComponent(){
+		return this.consensusRuler;
+	}
+
 	public JComponent getCharsetRulerComponent(){
 		return this.charsetRuler;
 	}
@@ -1254,18 +1303,6 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 		this.setLocation( getLocation().x + offsetPane, getLocation().y );
 	}
 
-	public boolean getIgnoreGapInTranslation(){	
-		return ignoreGapInTranslation;
-	}
-
-	public void setIgnoreGapInTranslation(boolean ignoreGapInTranslation) {
-		this.ignoreGapInTranslation = ignoreGapInTranslation;
-	}
-
-	public void setFontCase(int fontCase){
-		this.fontCase = fontCase;
-		createCharPixelsContainers();
-	}
 
 	public void scrollRectToSelection() {
 		Rectangle selectRect = alignment.getSelectionAsMinRect();
@@ -1302,6 +1339,19 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 		scrollRectToVisible(newVisible);
 	}
 
+	public boolean getIgnoreGapInTranslation(){	
+		return ignoreGapInTranslation;
+	}
+
+	public void setIgnoreGapInTranslation(boolean ignoreGapInTranslation) {
+		this.ignoreGapInTranslation = ignoreGapInTranslation;
+	}
+
+	public void setFontCase(int fontCase){
+		this.fontCase = fontCase;
+		createCharPixelsContainers();
+	}
+
 	public boolean getShowTranslationAndNuc() {
 		return showTranslationAndNuc;
 	}
@@ -1317,7 +1367,7 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 	public boolean isHighlightDiffTrace() {
 		return highlightDiffTrace;
 	}
-	
+
 	//
 	// AlignmentSelectionListener
 	//
@@ -1352,9 +1402,9 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 		//aliList.repaint();
 
 	}
-	
 
-	private class AlignmentRuler extends JPanel{
+
+	class AlignmentRuler extends JPanel{
 
 		private AlignmentPane alignmentPane;
 
@@ -1821,8 +1871,143 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 
 
 	} // end CodonPosRuler class
-	
-	
+
+	private class ConsensusRuler extends JPanel{
+
+		private AlignmentPane alignmentPane;
+
+		public ConsensusRuler(AlignmentPane alignmentPane) {
+			this.alignmentPane = alignmentPane;
+		}
+
+
+		public void paintComponent(Graphics g){
+			super.paintComponent(g);
+			paintRuler(g);
+		}
+
+		public void paintRuler(Graphics g){
+
+			long startTime = System.currentTimeMillis();
+
+			//super.paintComponent(g);
+			Graphics2D g2d = (Graphics2D) g;
+
+			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,  
+					RenderingHints.VALUE_ANTIALIAS_OFF); 
+			g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+					RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+			g2d.setRenderingHint(RenderingHints.KEY_RENDERING,
+					RenderingHints.VALUE_RENDER_SPEED);
+			//			g2d.setRenderingHint(RenderingHints.KEY_RENDERING,
+			//					RenderingHints.VALUE_RENDER_QUALITY);
+			g2d.setRenderingHint(RenderingHints.KEY_DITHERING,
+					RenderingHints.VALUE_DITHER_DISABLE);		
+
+			//			g2d.setRenderingHint(RenderingHints.KEY_RENDERING,
+			//					RenderingHints.VALUE_RENDER_QUALITY);
+			//			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+			//					RenderingHints.VALUE_ANTIALIAS_ON);
+			//			g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+			//								RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+			//			//g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
+			//					RenderingHints.VALUE_FRACTIONALMETRICS_OFF);
+			//g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING,
+			//					RenderingHints.VALUE_COLOR_RENDER_SPEED);
+			//g2d.setRenderingHint(RenderingHints.KEY_DITHERING,
+			//					RenderingHints.VALUE_DITHER_DISABLE);
+
+
+			//		g2d.setFont(baseFont);
+
+			// What part of alignment matrix is in view (what part of matrix is in graphical view)
+			Rectangle paneClip = alignmentPane.getVisibleRect();
+			Rectangle matrixClip = paneCoordToMatrixCoord(paneClip);
+
+			// todo calculate from font metrics
+			double charCenterXOffset = 0.9997;
+
+
+			// NUMBERS
+			int rulerCharWidth = 11;
+			Font rulerFont = new Font(alignmentPane.getFont().getName(), alignmentPane.getFont().getStyle(), (int)rulerCharWidth);
+			g2d.setFont(rulerFont);
+			
+			int textPosY = (int)((double)rulerCharWidth * 1.4);
+			
+			//
+			// Draw ruler background
+			//
+			Rectangle rulerRect = new Rectangle(this.getVisibleRect());
+			g2d.setColor(getBackground());
+			g2d.fill(rulerRect);
+			
+			int offsetDueToScrollPanePosition = 0;
+
+			// Normal char-with smaller 
+			if(charWidth >= 1){
+
+				offsetDueToScrollPanePosition = paneClip.x % (int)charWidth;
+				offsetDueToScrollPanePosition = offsetDueToScrollPanePosition;
+
+				// NUMBERS
+
+				// Only draw every xx pos
+				int drawEveryNpos = 1;
+
+				if(charWidth < 4){
+					drawEveryNpos = 50;
+				}else if(charWidth < 5){
+					drawEveryNpos = 20;
+				}
+
+				// position numbers
+				int lastTextEndPos = 0;
+				int pos = 0;
+				for(int x = matrixClip.x ; x < matrixClip.getMaxX() + 1; x++){
+				
+					//char consensusResidue = alignment.getNucleotideConsensusAt(x);
+					char consensusResidue = alignment.getFixedNucleotideConsensusAt(x);
+					int qualVal = alignment.getFixedNucleotideConsensusQualityAt(x);
+					String stringToDraw = String.valueOf(consensusResidue);
+					
+					
+					int posX = (int)((pos) * charWidth - offsetDueToScrollPanePosition -1); // -1 just beause it looks good since it is exact lining up with alignment
+
+					
+					double textXOffset = (double)charWidth * 0.2;
+					
+					// Draq quality background color // new Color((int)(Math.random() * 0x1000000));
+					Color qualValColor = colorSchemeNucleotide.getBaseQualityBackgroundColor(consensusResidue, CharPixelsContainerNucQuality.getQualClassFromQualVal(qualVal));
+					g2d.setColor(qualValColor);
+					g2d.fillRect(posX, 0, (int)charWidth, paneClip.height);
+					
+					// Draw base
+					g2d.setColor(Color.black);
+					g2d.drawString(stringToDraw, posX + (int)textXOffset, textPosY);
+
+					pos ++;
+				}	
+			}
+
+
+			long endTime = System.currentTimeMillis();
+			logger.info("Ruler PaintComponent took " + (endTime - startTime) + " milliseconds");
+
+
+		}
+
+
+		private int roundToClosestUpper(int inval, int roundTo) {
+			// int rounded = ((num + 99) / 100 ) * 100;
+			int rounded = ((inval + roundTo -1) / roundTo ) * roundTo;
+			return rounded;
+		}
+
+	} // end Ruler class
+
+
+
 	private JScrollPane getParentScrollPane(){
 		JScrollPane parentScrollPane = null;
 		Container c = getParent();
@@ -1835,16 +2020,21 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 		}
 		return parentScrollPane;
 	}
-	
+
 	public void zoomIn(){
 		JScrollPane scrollPane = getParentScrollPane();
 		// if pointer is on pane
 		Point zoomPoint = this.getMousePosition();
 		if(zoomPoint == null){
-			// else get center position of view
+			//			// else get center position of view
+			//			Point viewPoint = scrollPane.getViewport().getViewPosition();
+			//			Dimension dimension = scrollPane.getViewport().getExtentSize();
+			//			Point centerPos = new Point(viewPoint.x + dimension.width / 2, viewPoint.y + dimension.height / 2);
+			//			zoomPoint = centerPos;
+			// else get top position of current view and centerX
 			Point viewPoint = scrollPane.getViewport().getViewPosition();
 			Dimension dimension = scrollPane.getViewport().getExtentSize();
-			Point centerPos = new Point(viewPoint.x + dimension.width / 2, viewPoint.y + dimension.height / 2);
+			Point centerPos = new Point(viewPoint.x + dimension.width / 2, viewPoint.y);
 			zoomPoint = centerPos;
 		}
 		this.zoomInAt(zoomPoint);
@@ -1857,15 +2047,21 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 		Point zoomPoint = this.getMousePosition();
 		if(zoomPoint == null){
 			// else get center position of view
+			//			Point viewPoint = scrollPane.getViewport().getViewPosition();
+			//			Dimension dimension = scrollPane.getViewport().getExtentSize();
+			//			Point centerPos = new Point(viewPoint.x + dimension.width / 2, viewPoint.y + dimension.height / 2);
+			//			zoomPoint = centerPos;
+			// else get top position of current view and centerX
 			Point viewPoint = scrollPane.getViewport().getViewPosition();
 			Dimension dimension = scrollPane.getViewport().getExtentSize();
-			Point centerPos = new Point(viewPoint.x + dimension.width / 2, viewPoint.y + dimension.height / 2);
+			Point centerPos = new Point(viewPoint.x + dimension.width / 2, viewPoint.y);
 			zoomPoint = centerPos;
 		}
 		this.zoomOutAt(zoomPoint);
 	}
-	
-	public void zoomOutAt(Point mousePos){
+
+
+	public void zoomOutAt(Point zoomPoint){
 
 		// Get alignmentPane size before resize since it will change afeter resize
 		// we need to now relative size different between new and old size because
@@ -1875,9 +2071,9 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 		// TODO what if panel is not in a scrollPane???!!!
 		final JScrollPane scrollPane = getParentScrollPane();
 		Point viewPoint = scrollPane.getViewport().getViewPosition();
-		Point mousePosInScrollPaneCoord = new Point(mousePos.x - viewPoint.x, mousePos.y - viewPoint.y);
+		Point mousePosInScrollPaneCoord = new Point(zoomPoint.x - viewPoint.x, zoomPoint.y - viewPoint.y);
 
-		Point mouseInMatrixCoord = this.paneCoordToMatrixCoord(mousePosInScrollPaneCoord);
+		//	Point mouseInMatrixCoord = this.paneCoordToMatrixCoord(mousePosInScrollPaneCoord);
 
 		logger.info("oldSize" + oldSize);
 
@@ -1894,70 +2090,41 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 			double paneRelSizeX = newSize.getWidth()/oldSize.getWidth();
 			double paneRelSizeY = newSize.getHeight()/oldSize.getHeight();
 
-			int mousePosXOnResizedPane = (int) (mousePos.getX() * paneRelSizeX);
-			int mousePosYOnResizedPane = (int) (mousePos.getY() * paneRelSizeY);
+			int mousePosXOnResizedPane = (int) (zoomPoint.getX() * paneRelSizeX);
+			int mousePosYOnResizedPane = (int) (viewPoint.getY() * paneRelSizeY);
+			int viewPosXOnResizedPane = (int) (viewPoint.getX() * paneRelSizeX);
+			int viewPosYOnResizedPane = (int) (viewPoint.getY() * paneRelSizeY);
 
 			Point mousePosOnResizedPane = new Point(mousePosXOnResizedPane, mousePosYOnResizedPane);
+			Point viewPosOnResizedPane = new Point(viewPosXOnResizedPane, viewPosYOnResizedPane);
+
 
 			// calculate new vew location	
+			// This is changed to viewPoint and not mouseY to get zoomIn zoomOut keep top sequence fixed on zoomIn zoomOut
 			int newX = mousePosOnResizedPane.x - mousePosInScrollPaneCoord.x;
-			int newY = mousePosOnResizedPane.y - mousePosInScrollPaneCoord.y;
+			//int newY = mousePosOnResizedPane.y - mousePosInScrollPaneCoord.y;
+			int newY = viewPosOnResizedPane.y;
 			final Point newViewPoint = new Point(newX, newY);
 
-			// Old viewport has to be replaced 
+			// Old viewport has to be replaced
+			ChangeListener[] changeListeners = scrollPane.getViewport().getChangeListeners();
 			scrollPane.setViewport(null);
 			scrollPane.setViewportView(this);
+			// Add listeners back
+			for(ChangeListener cl: changeListeners) {
+				scrollPane.getViewport().addChangeListener(cl);
+			}
 			// Set new pos
 			scrollPane.getViewport().setViewPosition(newViewPoint);
+
+			viewModel.setNewView(this, getCharWidth(), getCharHeight(), newViewPoint);
 
 			Point afterViewPoint = scrollPane.getViewport().getViewPosition();
 			logger.info("afterViewPoint" + viewPoint);
 
-			//			if(alignmentPane.isPointWithinMatrix(mousePosOnResizedPane)){
-			//			
-			//				// This moving the mouse is done to make sure zoom in at right point even if pane is to small
-			//				int xMouseDiff = newViewPoint.x - afterViewPoint.x;
-			//				int yMouseDiff = newViewPoint.y - afterViewPoint.y;
-			//				logger.info("xMouseDiff=" + xMouseDiff);
-			//				logger.info("yMouseDiff=" + yMouseDiff);
-			//				
-			//				try {
-			//					
-			//					Robot robot = new Robot();
-			//					Point onScreen = MouseInfo.getPointerInfo().getLocation();		
-			//					robot.mouseMove(onScreen.x + xMouseDiff, onScreen.y + yMouseDiff);	
-			//				} catch (AWTException e) {
-			//					// TODO Auto-generated catch block
-			//					e.printStackTrace();
-			//				}
-			//			}
-
-
-			//requestPaneRepaint();
-			//alignmentPane.setForceRepaintAll(true);
-			//alignmentPane.repaint(0,0,newSize.width, newSize.height);
-
-			// no longer need to paintImmediately, since instead destroying viewport
-			//alignmentPane.paintImmediately(0,0,newSize.width, newSize.height);
-
-			
-
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run(){
-					scrollBarListener.stateChanged(new ChangeEvent(scrollPane.getVerticalScrollBar().getModel()));
-				}
-			});
-
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run(){
-					//			listScrollPane.getViewport().setViewPosition(new Point(0, newViewPoint.y));
-				}
-			});
-			
-			
 		}
 	}
-	
+
 	public void zoomInAt(Point mousePos){
 
 		// TODO Problem is that a scrollpane need to be resized before setViewPosiiton()
@@ -1974,12 +2141,15 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 		Point mousePosInScrollPaneCoord = new Point(mousePos.x - viewPoint.x, mousePos.y - viewPoint.y);
 
 		logger.info("oldSize" + oldSize);
+		logger.info("getCharWidth" + getCharWidth());
 
 		logger.info("mousePosInScrollPaneCoord" + mousePosInScrollPaneCoord);
 
 		logger.info("mousePosOnPane" + mousePos);
 
 		incCharSize();
+
+		logger.info("new getCharWidth" + getCharWidth());
 
 		Dimension newSize = this.getPreferredSize();
 		this.setSize(newSize);
@@ -1993,12 +2163,17 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 
 		int mousePosXOnResizedPane = (int) (mousePos.getX() * paneRelSizeX);
 		int mousePosYOnResizedPane = (int) (mousePos.getY() * paneRelSizeY);
+		int viewPosXOnResizedPane = (int) (viewPoint.getX() * paneRelSizeX);
+		int viewPosYOnResizedPane = (int) (viewPoint.getY() * paneRelSizeY);
 
 		Point mousePosOnResizedPane = new Point(mousePosXOnResizedPane, mousePosYOnResizedPane);
+		Point viewPosOnResizedPane = new Point(viewPosXOnResizedPane, viewPosYOnResizedPane);
 
 		// calculate new view location	
 		int newX = mousePosOnResizedPane.x - mousePosInScrollPaneCoord.x;
-		int newY = mousePosOnResizedPane.y - mousePosInScrollPaneCoord.y;
+		// This is changed to viewPoint and not mouseY to get zoomIn zoomOut keep top sequence fixed on zoomIn zoomOut
+		//int newY = mousePosOnResizedPane.y - mousePosInScrollPaneCoord.y;
+		int newY = viewPosOnResizedPane.y;
 
 		logger.info("newX" + newX);
 		logger.info("newY" + newY);
@@ -2017,51 +2192,11 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 		// Set new position
 		scrollPane.getViewport().setViewPosition(newViewPoint);
 
+		viewModel.setNewView(this, getCharWidth(), getCharHeight(), newViewPoint);
+
 		Point afterViewPoint = scrollPane.getViewport().getViewPosition();
 		logger.info("afterViewPoint" + viewPoint);
 
-		//		if(alignmentPane.isPointWithinMatrix(mousePosOnResizedPane)){
-		//		
-		//			// This moving the mouse is done to make sure zoom in at right point even if pane is to small
-		//			int xMouseDiff = newViewPoint.x - afterViewPoint.x;
-		//			int yMouseDiff = newViewPoint.y - afterViewPoint.y;
-		//			logger.info("xMouseDiff=" + xMouseDiff);
-		//			logger.info("yMouseDiff=" + yMouseDiff);
-		//			
-		//			try {
-		//				
-		//				Robot robot = new Robot();
-		//				Point onScreen = MouseInfo.getPointerInfo().getLocation();		
-		//				robot.mouseMove(onScreen.x + xMouseDiff, onScreen.y + yMouseDiff);	
-		//			} catch (AWTException e) {
-		//				// TODO Auto-generated catch block
-		//				e.printStackTrace();
-		//			}
-		//		}
-
-
-
-		//alignmentPane.setForceRepaintAll(true);
-		//requestPaneRepaint();
-		//alignmentPane.setForceRepaintAll(true);
-		//alignmentPane.repaint(0,0,newSize.width, newSize.height);
-
-		// no longer need to paintImmediately, since instead destroying viewport
-		//alignmentPane.paintImmediately(0,0,newSize.width, newSize.height);
-
-
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run(){
-				scrollBarListener.stateChanged(new ChangeEvent(scrollPane.getVerticalScrollBar().getModel()));
-			}
-		});
-
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run(){
-				// listScrollPane.getViewport().setViewPosition(new Point(0, newViewPoint.y));
-			}
-		});
-		
 
 	}
 
@@ -2073,8 +2208,35 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener{
 		return Settings.getReverseVerticalMouseWheel().getBooleanValue();
 	}
 
-	public void addScrollBarListener(ScrollBarModelSyncChangeListener scrollBarListener) {
-		this.scrollBarListener = scrollBarListener;
+
+	public void viewChanged(ViewEvent event) {	
+
+		logger.info("inside viewChanged");
+
+		ViewModel model = (ViewModel)event.getSource();
+		double charWidth = model.getCharWidth();
+		Point modelPoint = model.getViewPoint();
+
+		if(this.getCharWidth() != charWidth) {
+			setCharWidth(charWidth);
+		}
+
+		final JScrollPane scrollPane = getParentScrollPane();
+		if(modelPoint != scrollPane.getViewport().getViewPosition()) {
+
+			//			// Old viewport has to be replaced
+			//			ChangeListener[] changeListeners = scrollPane.getViewport().getChangeListeners();
+			//			scrollPane.setViewport(null);
+			//			scrollPane.setViewportView(this);
+			//			// Add listeners back
+			//			for(ChangeListener cl: changeListeners) {
+			//				scrollPane.getViewport().addChangeListener(cl);
+			//			}
+
+			// Set new pos
+			scrollPane.getViewport().setViewPosition(modelPoint);
+		}
+
 	}
 
 

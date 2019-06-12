@@ -1007,7 +1007,19 @@ public class Alignment implements FileSequenceLoadListener {
 	public String getConsensus(){
 		return sequences.getConsensus();
 	}
-
+	
+	public char getNucleotideConsensusAt(int pos) {
+		return sequences.getNucleotideConsensusAt(pos);
+	}
+	
+	public char getFixedNucleotideConsensusAt(int pos) {
+		return sequences.getFixedNucleotideConsensusAt(pos);
+	}
+	
+	public int getFixedNucleotideConsensusQualityAt(int x) {
+		return sequences.getFixedNucleotideConsensusQualityAt(x);
+	}
+	
 	public void deleteVerticalGaps(){
 		String cons = getConsensus();
 

@@ -236,4 +236,21 @@ public class CharPixelsContainerTranslation {
 
 	}
 
+
+	public static CharPixelsContainerTranslation createTranslationQualClip(Font font, int minFontSize, int width, int height, ColorScheme colorScheme, int fontCase) {
+		CharPixelsContainerTranslation transContainer = new CharPixelsContainerTranslation();
+		transContainer.allAAContainers = new CharPixelsContainer[AminoAcid.HIGEST_AA_INT_VAL + 1];
+		for(AminoAcid containerAcid: AminoAcid.GROUP_ALL){
+			CharPixelsContainer container = new CharPixelsContainer();
+			for(int n = 0; n < container.backend.length; n++){	
+				int baseVal = NucleotideUtilities.baseValFromBase((byte)n);
+				Color fgColor = colorScheme.getQualClipForegroundColor();
+				Color bgColor = colorScheme.getQualClipBackgroundColor();
+				container.backend[n] = new CharPixels((char)n, width, height, fgColor, bgColor, font, minFontSize, fontCase);
+			}
+			transContainer.allAAContainers[containerAcid.intVal] = container;
+		}
+		return transContainer;
+	}
+
 }

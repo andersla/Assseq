@@ -4,8 +4,9 @@ import org.apache.log4j.Logger;
 
 import aliview.NucleotideUtilities;
 import aliview.alignment.Alignment;
-import aliview.alignment.NucleotideHistogram;
+import aliview.sequences.ABISequence;
 import aliview.sequences.Sequence;
+import aliview.sequences.TraceSequence;
 
 public class SequencePainterNucleotideQual extends SequencePainter {
 
@@ -19,11 +20,19 @@ public class SequencePainterNucleotideQual extends SequencePainter {
 				charHeight, highDPIScaleFactor, clipRGB, aliPane, alignment);
 		// TODO Auto-generated constructor stub
 	}
-
+	
 	@Override
-	protected void copyPixels(Sequence seq, RGBArray clipArray, int seqXPos, int seqYPos, int pixelPosX, int pixelPosY, AlignmentPane aliPane, Alignment alignment){
-
+	protected void copyPixels(Sequence sequence, RGBArray clipArray, int seqXPos, int seqYPos, int pixelPosX, int pixelPosY, AlignmentPane aliPane, Alignment alignment){
+	/*	
+		ABISequence seq = (ABISequence) sequence;
+		
 		byte residue = seq.getBaseAtPos(seqXPos);
+		
+		short qualVal = 100;
+		if(seq instanceof TraceSequence){
+			qualVal = ((TraceSequence) seq).getQualValAtPos(seqXPos);
+		}
+		
 
 		// A small hack
 		if(residue == 0){
@@ -31,41 +40,11 @@ public class SequencePainterNucleotideQual extends SequencePainter {
 		}
 
 		// set defaults
-		CharPixelsContainer pixContainerToUse = aliPane.charPixDefaultNuc;
+		CharPixelsContainer pixContainerToUse = aliPane.charPixQualityNuc;
 		byte byteToDraw = residue;
 		int baseVal = NucleotideUtilities.baseValFromBase(residue);
-
-
-		// adjustment if only diff compared to diff-trace-selected sequence is to be shown 
-		if(aliPane.isHighlightDiffTrace()){ // TODO CHANGE THIS SO IT IS WORKING EVEN IF TRACING SEQUENCE IS SHORTER THAN OTHER
-			if(seqYPos != aliPane.differenceTraceSequencePosition){
-				if(baseVal == NucleotideUtilities.baseValFromBase(alignment.getBaseAt(seqXPos,aliPane.getDifferenceTraceSequencePosition()))){
-					byteToDraw = '.';
-					pixContainerToUse = aliPane.charPixDefaultNuc;
-				}
-			}
-		}
-
-		// adjustment if non-cons is to be highlighted
-		if(aliPane.isHighlightNonCons()){
-			NucleotideHistogram nucHistogram = (NucleotideHistogram) alignment.getHistogram();
-			if(baseVal == NucleotideUtilities.GAP){
-				// no color on gap even if they are in maj.cons
-			}
-			else if(nucHistogram.isMajorityRuleConsensus(seqXPos,baseVal)){
-				pixContainerToUse = aliPane.charPixConsensusNuc;
-			}
-		}
-		if(aliPane.highlightCons){
-			NucleotideHistogram nucHistogram = (NucleotideHistogram) alignment.getHistogram();
-			if(baseVal == NucleotideUtilities.GAP){
-				// no color on gap even if they are in maj.cons
-			}
-			else if(! nucHistogram.isMajorityRuleConsensus(seqXPos,baseVal)){
-				pixContainerToUse = aliPane.charPixConsensusNuc;
-			}
-		}
-
+		
+		
 		// adjust colors if selected and temp selection
 		// We have to calculate within this way - because rect.contains(Point) is always returning false on a 0-width or 0 height Rectangle
 		boolean isPointWithinSelectionRect = false;
@@ -74,11 +53,21 @@ public class SequencePainterNucleotideQual extends SequencePainter {
 				isPointWithinSelectionRect = true;
 			}
 		}
+		
+		logger.info("Exit here");
+		System.exit(1);
+		
+		if(seq.isQualClippedAtPos(seqXPos)){
+			pixContainerToUse = aliPane.charPixQualClipNuc;
+			logger.info("use:" + aliPane.charPixQualClipNuc);
+		}
+		
 		if(seq.isBaseSelected(seqXPos) || (alignment.getTempSelection() != null && isPointWithinSelectionRect)){
 			pixContainerToUse = aliPane.charPixSelectedNuc;
 		}
+				
 
-		RGBArray newPiece = pixContainerToUse.getRGBArray(byteToDraw);
+		RGBArray newPiece = pixContainerToUse.getRGBArray(byteToDraw, qualVal);
 
 		try {
 			ImageUtils.insertRGBArrayAt(pixelPosX, pixelPosY, newPiece, clipArray);
@@ -89,6 +78,8 @@ public class SequencePainterNucleotideQual extends SequencePainter {
 			logger.info("clipY" + pixelPosY);
 			//break;
 		}
+		*/
 	}
+	
 
 }

@@ -4,7 +4,9 @@ import org.apache.log4j.Logger;
 
 import aliview.AminoAcid;
 import aliview.alignment.Alignment;
+import aliview.sequences.ABISequence;
 import aliview.sequences.Sequence;
+import aliview.sequences.TraceSequence;
 
 public class SequencePainterAminoAcidTranslated extends SequencePainter {
 
@@ -44,6 +46,17 @@ public class SequencePainterAminoAcidTranslated extends SequencePainter {
 		if(seq.isBaseSelected(seqXPos) || (alignment.getTempSelection() != null && isPointWithinSelectionRect)){		
 			pixContainerToUse = aliPane.charPixTranslationSelected;
 			pixLetterContainerToUse = aliPane.charPixTranslationSelectedLetter;			
+		}
+		
+		if(seq instanceof TraceSequence){
+			ABISequence abiSeq = (ABISequence) seq;
+			if(abiSeq.isQualClippedAtPos(seqXPos)){
+				pixContainerToUse = aliPane.charPixTranslationQualClip;
+				pixLetterContainerToUse = aliPane.charPixTranslationQualClip;
+				pixLetterContainerToUseNoAALetter = aliPane.charPixTranslationQualClip;
+				
+				logger.info("use:" + aliPane.charPixQualClipNuc);
+			}
 		}
 
 		RGBArray newPiece;

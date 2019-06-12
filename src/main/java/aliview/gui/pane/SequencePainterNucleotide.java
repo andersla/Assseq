@@ -5,7 +5,9 @@ import org.apache.log4j.Logger;
 import aliview.NucleotideUtilities;
 import aliview.alignment.Alignment;
 import aliview.alignment.NucleotideHistogram;
+import aliview.sequences.ABISequence;
 import aliview.sequences.Sequence;
+import aliview.sequences.TraceSequence;
 
 public class SequencePainterNucleotide extends SequencePainter {
 
@@ -29,14 +31,19 @@ public class SequencePainterNucleotide extends SequencePainter {
 		if(residue == 0){
 			residue = ' ';
 		}
+		
+		short qualVal = 100;
+		if(seq instanceof TraceSequence){
+			qualVal = ((TraceSequence) seq).getQualValAtPos(seqXPos);
+		}
 
 		// set defaults
-		CharPixelsContainer pixContainerToUse = aliPane.charPixDefaultNuc;
+		CharPixelsContainer pixContainerToUse = aliPane.charPixQualityNuc;
+		//CharPixelsContainer pixContainerToUse = aliPane.charPixDefaultNuc;
 		byte byteToDraw = residue;
 		int baseVal = NucleotideUtilities.baseValFromBase(residue);
 
-
-		// adjustment if only diff to be shown
+		// adjustment if only diff compared to diff-trace-selected sequence is to be shown 
 		if(aliPane.isHighlightDiffTrace()){ // TODO CHANGE THIS SO IT IS WORKING EVEN IF TRACING SEQUENCE IS SHORTER THAN OTHER
 			if(seqYPos != aliPane.differenceTraceSequencePosition){
 				if(baseVal == NucleotideUtilities.baseValFromBase(alignment.getBaseAt(seqXPos,aliPane.getDifferenceTraceSequencePosition()))){
@@ -46,23 +53,30 @@ public class SequencePainterNucleotide extends SequencePainter {
 			}
 		}
 
-		// adjustment if non-cons to be highlighted
+		// adjustment if non-cons is to be highlighted
 		if(aliPane.isHighlightNonCons()){
 			NucleotideHistogram nucHistogram = (NucleotideHistogram) alignment.getHistogram();
 			if(baseVal == NucleotideUtilities.GAP){
 				// no color on gap even if they are in maj.cons
 			}
-			else if(nucHistogram.isMajorityRuleConsensus(seqXPos,baseVal)){
-				pixContainerToUse = aliPane.charPixConsensusNuc;
+			else if(! nucHistogram.isMajorityRuleConsensus(seqXPos,baseVal)){
+				pixContainerToUse = aliPane.charPixNonConsensusNuc;
 			}
 		}
-		if(aliPane.highlightCons){
+		if(aliPane.isHighlightCons()){
 			NucleotideHistogram nucHistogram = (NucleotideHistogram) alignment.getHistogram();
 			if(baseVal == NucleotideUtilities.GAP){
 				// no color on gap even if they are in maj.cons
 			}
 			else if(! nucHistogram.isMajorityRuleConsensus(seqXPos,baseVal)){
 				pixContainerToUse = aliPane.charPixConsensusNuc;
+			}
+		}
+		
+		if(seq instanceof TraceSequence){
+			ABISequence abiSeq = (ABISequence) seq;
+			if(abiSeq.isQualClippedAtPos(seqXPos)){
+				pixContainerToUse = aliPane.charPixQualClipNuc;
 			}
 		}
 
@@ -78,7 +92,9 @@ public class SequencePainterNucleotide extends SequencePainter {
 			pixContainerToUse = aliPane.charPixSelectedNuc;
 		}
 
-		RGBArray newPiece = pixContainerToUse.getRGBArray(byteToDraw);
+
+	
+		RGBArray newPiece = pixContainerToUse.getRGBArray(byteToDraw, qualVal);
 
 		try {
 			ImageUtils.insertRGBArrayAt(pixelPosX, pixelPosY, newPiece, clipArray);

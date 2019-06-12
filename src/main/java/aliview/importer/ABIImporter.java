@@ -44,17 +44,13 @@ public class ABIImporter {
 		try {
 
 			ABITrace abiTrace = new ABITrace(inputFile);
+			
+			int[] baseCalls = abiTrace.getBasecalls();
 
 			Trace traceA = new Trace(abiTrace.getTrace("A"));
 			Trace traceC = new Trace(abiTrace.getTrace("C"));
 			Trace traceG = new Trace(abiTrace.getTrace("G"));
 			Trace traceT = new Trace(abiTrace.getTrace("T"));
-			
-			
-			//traceA.debug();
-			//traceG.debug();
-			
-			int[] baseCalls = abiTrace.getBasecalls();
 			
 			//ArrayUtilities.debug(baseCalls);
 			
@@ -62,14 +58,16 @@ public class ABIImporter {
 
 			int[] qualCalls = abiTrace.getQcalls();
 			
-			short[] shortQualCalls = intArray2ShortArray(qualCalls);
+			short[] shortQualCalls = ArrayUtilities.intArray2ShortArray(qualCalls);
 			
 			//ArrayUtilities.debug(shortQualCalls);
 
 			byte[] bases = getSequenceFromABI(abiTrace);
-			Bases basesAndCalls = new DefaultQualCalledBases(bases, shortQualCalls);
+			DefaultQualCalledBases basesAndCalls = new DefaultQualCalledBases(bases, shortQualCalls);
 
 			ABISequence sequence  = new ABISequence(inputFile.getName(), basesAndCalls, traces);
+			
+			logger.info(sequence.toFastQ());
 
 			sequences.add(sequence);
 
@@ -85,22 +83,6 @@ public class ABIImporter {
 		System.out.println("reading sequences took " + (endTime - startTime) + " milliseconds");
 
 		return sequences;
-	}
-
-	private short[] intArray2ShortArray(int[] input) {
-		short[] output = new short[input.length];
-		for(int n = 0; n < output.length; n++) {
-			output[n] = (short)input[n];
-		}
-		return output;
-	}
-
-	private byte[] intArray2ByteArray(int[] input) {
-		byte[] output = new byte[input.length];
-		for(int n = 0; n < output.length; n++) {
-			output[n] = (byte)input[n];
-		}
-		return output;
 	}
 
 	private byte[] getSequenceFromABI(ABITrace abiTrace) throws CompoundNotFoundException{

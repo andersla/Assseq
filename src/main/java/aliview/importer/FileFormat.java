@@ -44,6 +44,8 @@ public class FileFormat {
 
 	public static final FileFormat ABI = new FileFormat("ABI", "ab1", "ab1");
 
+	public static final FileFormat ACE = new FileFormat("ACE", "ace", "ace");
+
 
 	public static void main(String[] args) {
 		//FileFormat ffFileTest = new FileFormat();
@@ -134,6 +136,8 @@ public class FileFormat {
 					foundFormat = FileFormat.PHYLIP;
 			    }else if(ABIImporter.isStringValidFirstLine(firstLine)){
 				    foundFormat = FileFormat.ABI;
+				}else if(ACEImporter.isStringValidFirstLine(firstLine)){
+				    foundFormat = FileFormat.ACE;
 				}
 				
 			}

@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 
 import aliview.AminoAcid;
-import aliview.gui.pane.CharPixelsContainer;
 
 public class AACompColorThreshold {
 

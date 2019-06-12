@@ -362,14 +362,16 @@ public class Assseq implements ApplicationListener{
 				//			alignmentFile = new File("/home/anders/projekt/alignments/smalphylipInterlLongName.phy");
 
 				//alignmentFile = new File("/home/anders/projekt/alignments/abi/12MT7D9MATK_HF.ab1");
-				alignmentFile = new File("/home/anders/projekt/alignments/gold_strains_gg16S_aligned.fasta");
+				//alignmentFile = new File("/home/anders/projekt/alignments/gold_strains_gg16S_aligned.fasta");
+				//alignmentFile = new File("/home/anders/projekt/alignments/woodsia_chloropl_excl_hybrid.selection2.fasta");
+				//alignmentFile = new File("/home/anders/projekt/Assseq_no_sync/testalign3/7MT9B7MATK_KF.ab1");
+				alignmentFile = new File("/home/anders/projekt/alignments/ace/9documentsAssembly.ace");
 				
 
 				if(! alignmentFile.exists()){
 					logger.info("Alignment file not exists: " + alignmentFile);
 					alignmentFile = null;
 				}
-
 			}
 
 
@@ -408,14 +410,13 @@ public class Assseq implements ApplicationListener{
 
 
 		// set debug mode
+		debugMode = true;
 		if(isDebugMode()){
 			Logger.getRootLogger().setLevel(Level.ALL);
 		}
 		else{
 			Logger.getRootLogger().setLevel(Level.ERROR);
 		}
-
-		//Logger.getRootLogger().setLevel(Level.ERROR);
 
 		logger.info("done with main method");
 
@@ -778,9 +779,6 @@ public class Assseq implements ApplicationListener{
 	}
 
 	public void handlePrintFile(ApplicationEvent event) {
-		//		String message = "No print option - Instead choose Export as Image" + LF + "and then print from Image-program";
-		//		JOptionPane.showConfirmDialog(activeWindow, message, "Print", JOptionPane.OK_OPTION);
-		doMacPrintFile();
 	}
 
 	public void handleQuit(ApplicationEvent event) {
@@ -806,10 +804,6 @@ public class Assseq implements ApplicationListener{
 	 * and called by the new MacAdapter (the newer version eawt)
 	 * 
 	 */
-
-	public static void doMacPrintFile(){
-		Assseq.activeWindow.printAlignment();
-	}
 
 	public static void doMacPreferences(){
 		Assseq.activeWindow.openPreferencesGeneral();

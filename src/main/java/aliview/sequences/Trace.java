@@ -18,8 +18,15 @@ public class Trace {
 	}
 
 	public void insertAt(int n, int[] newVals) {
+		
+	//	logger.debug("newVals.length" + newVals.length);
+	//	logger.debug("backend.length" + backend.length);
+		
 		assureSize(n - 1);
 		int[] newArray = ArrayUtilities.insertAt(backend, n, newVals);
+		
+	//	logger.debug("newArray.length" + newArray.length);
+		
 		backend = newArray;
 	}
 	
@@ -38,7 +45,27 @@ public class Trace {
 		logger.info("backend.length=" + backend.length);
 	}
 	
+	public int getMaxVal() {
+		return ArrayUtilities.getMax(backend);
+	}
+	
 	public void debug() {
 		ArrayUtilities.debug(backend);
 	}
+
+	public void deletePos(int startPos, int endPos) {
+		int[] newBackend = ArrayUtilities.deletePos(backend, startPos, endPos + 1);
+		backend = newBackend;
+	}
+
+	public void reverse() {
+		ArrayUtils.reverse(backend);
+	}
+
+	public void trim(int length) {
+		logger.info("Trim trace current length:" + backend.length);
+		backend = ArrayUtils.subarray(backend, 0, length);
+		logger.info("Trim trace:" + length);
+	}
+
 }

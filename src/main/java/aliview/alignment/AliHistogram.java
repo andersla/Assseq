@@ -1,10 +1,14 @@
 package aliview.alignment;
 
+import org.apache.log4j.Logger;
+
 import aliview.AminoAcid;
 import aliview.NucleotideUtilities;
+import aliview.gui.pane.SequencePainterNucleotide;
 import aliview.sequences.Sequence;
 
 public abstract class AliHistogram{
+	private static final Logger logger = Logger.getLogger(AliHistogram.class);
 	int[][] hist;
 
 	public AliHistogram(int length) {

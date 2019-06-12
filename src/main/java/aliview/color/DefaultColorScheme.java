@@ -8,6 +8,8 @@ import aliview.NucleotideUtilities;
 import aliview.alignment.AAHistogram;
 import aliview.alignment.AliHistogram;
 import aliview.alignment.Alignment;
+import aliview.gui.pane.CharPixelsContainer;
+import aliview.gui.pane.CharPixelsContainerNucQuality;
 
 public class DefaultColorScheme implements ColorScheme {
 
@@ -20,6 +22,9 @@ public class DefaultColorScheme implements ColorScheme {
 	Color[] aminoAcidSelectionBackgroundColor;
 	Color[] aminoAcidSelectionForegroundColor;
 	Color baseConsensusBackgroundColor;
+	Color baseNonConsensusBackgroundColor;
+	Color baseQualClippedBackgroundColor;
+	Color baseQualClippedForegroundColor;
 	Color aminoAcidConsensusBackgroundColor;
 
 
@@ -73,6 +78,10 @@ public class DefaultColorScheme implements ColorScheme {
 		baseBackgroundColor[NucleotideUtilities.UNKNOWN] = Color.white;
 
 		baseConsensusBackgroundColor =  new Color(240,240,240);
+		baseNonConsensusBackgroundColor =  new Color(145,240,240);
+		
+		baseQualClippedBackgroundColor =  new Color(245,245,245);
+		baseQualClippedForegroundColor =  new Color(210,210,210);
 
 		baseSelectionForegroundColor = new Color[64];
 		baseSelectionForegroundColor[NucleotideUtilities.A]       =createSelectionForegroundColor(baseForegroundColor[NucleotideUtilities.A] );
@@ -259,9 +268,14 @@ public class DefaultColorScheme implements ColorScheme {
 	public static Color createSelectionColor(Color color) {
 		//return color.darker();
 
-		int r = Math.max(color.getRed() - 85, 0);
-		int g = Math.max(color.getGreen() - 85, 0);
-		int b = Math.max(color.getBlue() - 85, 0);
+	//	int r = Math.max(color.getRed() - 85, 0);
+	//	int g = Math.max(color.getGreen() - 85, 0);
+	//	int b = Math.max(color.getBlue() - 85, 0);
+		
+		int r = 200;
+		int g = 200;
+		int b = 200;
+		
 		return new Color(r,g,b);
 
 	}
@@ -290,7 +304,42 @@ public class DefaultColorScheme implements ColorScheme {
 	public Color getBaseSelectionBackgroundColor(int baseValue) {
 		return baseSelectionBackgroundColor[baseValue];
 	}
+	
+	public Color getQualClipForegroundColor() {
+		return baseQualClippedForegroundColor;
+	}
+	
+	public Color getQualClipBackgroundColor() {
+		return baseQualClippedBackgroundColor;
+	}
+	
+	public Color getBaseQualityForegroundColor(int baseVal, int qualClass) {
+		return Color.BLACK;
+	}
 
+	public Color getBaseQualityBackgroundColor(int baseVal, int qualClass) {
+		//int colorVal = 20 * qualClass + 55; //(255 - 20 * 9);
+		// make the 
+		
+		int[] colorramp = new int[]{
+				70,
+				90,
+				115,
+				140,
+				180,
+				215,
+				235,
+				240,
+				245,
+				250,
+				255,
+				}; 
+		
+		int colorVal = colorramp[qualClass];
+		
+		return new Color(colorVal, colorVal, colorVal);
+	}
+	
 	public Color getAminoAcidBackgroundColor(AminoAcid acid) {
 		return aminoAcidBackgroundColor[acid.intVal];
 	}
@@ -326,6 +375,10 @@ public class DefaultColorScheme implements ColorScheme {
 	public Color getBaseConsensusBackgroundColor() {
 		return baseConsensusBackgroundColor;
 	}
+	
+	public Color getBaseNonConsensusBackgroundColor() {
+		return baseNonConsensusBackgroundColor;
+	}
 
 	public Color getAminoAcidConsensusBackgroundColor() {
 		return aminoAcidConsensusBackgroundColor;
@@ -336,7 +389,5 @@ public class DefaultColorScheme implements ColorScheme {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-
 
 }

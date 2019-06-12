@@ -23,12 +23,12 @@ public class AliToolBar extends JToolBar{
 
 		this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
-		JToggleButton toggleButtonDiffTrace = new JToggleButton();//("Diff");
-		toggleButtonDiffTrace.setFocusPainted(false);
-		toggleButtonDiffTrace.setIcon(AppIcons.getDiffIcon());
-		toggleButtonDiffTrace.setToolTipText("<html>Highlight difference from one selected \"trace\"-sequence<br>(Select trace sequence by right clicking on target)</html>");
-		toggleButtonDiffTrace.setModel(aliMenuBar.getHighlightDiffTraceButtonModel());
-		this.add(toggleButtonDiffTrace);
+//		JToggleButton toggleButtonDiffTrace = new JToggleButton();//("Diff");
+//		toggleButtonDiffTrace.setFocusPainted(false);
+//		toggleButtonDiffTrace.setIcon(AppIcons.getDiffIcon());
+//		toggleButtonDiffTrace.setToolTipText("<html>Highlight difference from one selected \"trace\"-sequence<br>(Select trace sequence by right clicking on target)</html>");
+//		toggleButtonDiffTrace.setModel(aliMenuBar.getHighlightDiffTraceButtonModel());
+//		this.add(toggleButtonDiffTrace);
 
 		JToggleButton toggleBtnNonCons = new JToggleButton();//("Non-Cons");
 		toggleBtnNonCons.setFocusPainted(false);
@@ -37,12 +37,12 @@ public class AliToolBar extends JToolBar{
 		toggleBtnNonCons.setModel(aliMenuBar.getHighlightNonConsButtonModel());
 		this.add(toggleBtnNonCons);
 
-		JToggleButton toggleBtnCons = new JToggleButton();//("Cons");
-		toggleBtnCons.setFocusPainted(false);
-		toggleBtnCons.setToolTipText("Highlight majority rule consensus characters");
-		toggleBtnCons.setIcon(AppIcons.getHighlightConsIcon());
-		toggleBtnCons.setModel(aliMenuBar.getHighlightConsButtonModel());
-		this.add(toggleBtnCons);
+//		JToggleButton toggleBtnCons = new JToggleButton();//("Cons");
+//		toggleBtnCons.setFocusPainted(false);
+//		toggleBtnCons.setToolTipText("Highlight majority rule consensus characters");
+//		toggleBtnCons.setIcon(AppIcons.getHighlightConsIcon());
+//		toggleBtnCons.setModel(aliMenuBar.getHighlightConsButtonModel());
+//		this.add(toggleBtnCons);
 
 		JToggleButton toggleBtnTrans = new JToggleButton();//("Translate");
 		toggleBtnTrans.setFocusPainted(false);

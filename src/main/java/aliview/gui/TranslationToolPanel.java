@@ -42,6 +42,7 @@ public class TranslationToolPanel extends JPanel implements AlignmentListener, A
 		toggleBtnAACode.setModel(aliViewWindow.getAliMenuBar().getShowAACodeButtonModel());
 		this.add(toggleBtnAACode);
 
+		/*
 		JToggleButton toggleBtnTransOnePos = new JToggleButton();//("");
 		toggleBtnTransOnePos.setPreferredSize(new Dimension(32,32));
 		toggleBtnTransOnePos.setMaximumSize(new Dimension(32,32));
@@ -49,6 +50,8 @@ public class TranslationToolPanel extends JPanel implements AlignmentListener, A
 		toggleBtnTransOnePos.setIcon(AppIcons.getTransOnePosIcon());
 		toggleBtnTransOnePos.setModel(aliViewWindow.getAliMenuBar().getTransOnePosButtonModel());
 		this.add(toggleBtnTransOnePos);
+		*/
+
 
 		JToggleButton toggleBtnShowCodon = new JToggleButton();//("");
 		toggleBtnShowCodon.setPreferredSize(new Dimension(32,32));

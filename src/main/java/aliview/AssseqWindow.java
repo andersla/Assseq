@@ -144,6 +144,7 @@ import aliview.gui.GlassPaneKeyListener;
 import aliview.gui.GlassPaneMouseListener;
 import aliview.gui.ListTopOffsetJPanel;
 import aliview.gui.MessageLogFrame;
+import aliview.gui.PanelAndListSynchronizer;
 import aliview.gui.ScrollBarModelSyncChangeListener;
 import aliview.gui.SearchPanel;
 import aliview.gui.SplitSyncher;
@@ -159,14 +160,13 @@ import aliview.gui.pane.CharPixels;
 import aliview.gui.pane.InvalidAlignmentPositionException;
 import aliview.gui.pane.NotUsed_AlignmentPane_Orig;
 import aliview.gui.pane.TracePanel;
+import aliview.gui.pane.ViewModel;
 import aliview.importer.AlignmentFactory;
 import aliview.importer.AlignmentImportException;
 import aliview.importer.FileFormat;
 import aliview.importer.FileImportUtils;
 import aliview.importer.SequencesFactory;
 import aliview.messenges.Messenger;
-import aliview.old.ExternalCmdFrame;
-import aliview.old.MyScrollPane;
 import aliview.phenotype2genotype.Phenotype2Genootype;
 import aliview.primer.Primer;
 import aliview.primer.PrimerResultsFrame;
@@ -198,7 +198,7 @@ import aliview.utils.FileDrop;
 import aliview.utils.Utils;
 import aliview.utils.FileDrop.Listener;
 
-public class AssseqWindow extends JFrame implements UndoControler, AlignmentListener, AlignmentSelectionListener, AlignmentDataListener, Printable{
+public class AssseqWindow extends JFrame implements UndoControler, AlignmentListener, AlignmentSelectionListener, AlignmentDataListener{
 
 	private static final String LF = System.getProperty("line.separator");
 	private static final Logger logger = Logger.getLogger(AssseqWindow.class);
@@ -214,6 +214,7 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 	JScrollPane alignmentScrollPane;
 	//JPanel alignmentAndRulerPanel;
 	private SequenceJList sequenceJList;
+	private SequenceJList traceSequenceJList;
 	private Alignment alignment;
 	private SearchPanel searchPanel;
 	private StatusPanel statusPanel;
@@ -414,12 +415,13 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		return glassPane;
 	}
 
-
+/*
 	public void logScrollPane() {
 		logger.info(alignmentScrollPane.getViewport().getSize());
-
 	}
+*/
 
+	
 	private void initWindow(Alignment newAlignment) {
 		logger.info("inside init()");
 
@@ -428,6 +430,9 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		//Color COLORSCHEME_BACKGROUND = Color.white;//Settings.getColorSchemeNucleotide().getBaseBackgroundColor(NucleotideUtilities.GAP);
 
 		alignment = newAlignment;
+		
+		// When alignment is loaded
+		this.updateWindowTitle();
 
 		// add listener
 		alignment.addAlignmentListener(this);
@@ -444,77 +449,65 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		logger.info("here");
 
 		// Create the main panel where alignment is drawn
-		alignmentPane = new AlignmentPane();
-
 		
-		//alignmentPane.getRulerComponent().addKeyListener(kl);
-
+		ViewModel viewModel = new ViewModel();
+		alignmentPane = new AlignmentPane(viewModel);
 		alignmentPane.setAlignment(alignment);
-		
-		
-		// Create the Trace panel where trace is drawn
-		tracePanel = new TracePanel();
 
-//		AlignmentPaneMouseListener tracePml = new AlignmentPaneMouseListener();
-//		alignmentPane.addMouseListener(ml);
-//		alignmentPane.addMouseMotionListener(ml);
-//		alignmentPane.addMouseWheelListener(ml); 
-//
-//		AlignmentRulerMouseListener rl = new AlignmentRulerMouseListener();
-//		alignmentPane.getRulerComponent().addMouseListener(rl);
-//		alignmentPane.getRulerComponent().addMouseMotionListener(rl);
-
-//		AlignmentKeyListener kl = new AlignmentKeyListener();
-//		alignmentPane.addKeyListener(kl);
-		//alignmentPane.getRulerComponent().addKeyListener(kl);
-
-		tracePanel.setAlignment(alignment);
-		tracePanel.setDoubleBuffered(true);
-
-		// When alignment is loaded
-		this.updateWindowTitle();
 
 		// Always horizontal scrollbar so list and pane not have varied height - then list and alignment could get out of synch	
 		//	alignmentScrollPane = new MyScrollPane(alignmentPane, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-		alignmentScrollPane = new JScrollPane(alignmentPane, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-
+		JScrollPane alignmentScrollPane = new JScrollPane(alignmentPane, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		alignmentScrollPane.setAutoscrolls(true);
 		alignmentScrollPane.setMinimumSize(new Dimension(150, 150));
-		logger.info("alignmentPane.isDoubleBuffered()" +  alignmentPane.isDoubleBuffered());
-		//boolean paneDoubleBuff = alignmentPane.isDoubleBuffered();
-		boolean paneDoubleBuff = true;
-		alignmentScrollPane.setDoubleBuffered(paneDoubleBuff);
 		alignmentScrollPane.getVerticalScrollBar().setUnitIncrement(16);
 		alignmentScrollPane.getHorizontalScrollBar().setUnitIncrement(160);
-			
-
-		// BACKINGSTORE_SCROLL_MODE is not working on Mac Retina-screen
-		//alignmentScrollPane.getViewport().setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE);
-
-		alignmentPane.setDoubleBuffered(paneDoubleBuff);
-		tracePanel.setDoubleBuffered(paneDoubleBuff);
-		
-		alignment.addAlignmentSelectionListener(alignmentPane);
-		alignment.addAlignmentSelectionListener(tracePanel);
-		
 		alignmentScrollPane.setBorder(BorderFactory.createEmptyBorder());
 		viewport = alignmentScrollPane.getViewport();
 		viewport.setAutoscrolls(true);
-
+		
+		boolean paneDoubleBuff = true;
+		alignmentScrollPane.setDoubleBuffered(paneDoubleBuff);
+		alignmentPane.setDoubleBuffered(paneDoubleBuff);
+		
+		// BACKINGSTORE_SCROLL_MODE is not working on Mac Retina-screen
+		//alignmentScrollPane.getViewport().setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE);	
+		
+		alignment.addAlignmentSelectionListener(alignmentPane);
+		
 		sequenceJList = new SequenceJList(alignment.getSequences(), alignmentPane.getCharHeight(), this);
-
-
-		// Add our mouse listeners as primary so that they consume mouse events before default JList listeners
-		SequenceListMouseListener ourSeqListML = new SequenceListMouseListener(this);
-		sequenceJList.addPrimaryMouseListener(ourSeqListML);
-		sequenceJList.addPrimaryMouseMotionListener(ourSeqListML);
-		
-		SequenceListMouseWheelListener ourSeqListMWL = new SequenceListMouseWheelListener(alignmentPane);
-		sequenceJList.addMouseWheelListener(ourSeqListMWL);
-		
 		alignment.addAlignmentSelectionListener(sequenceJList);
 
-		
+		//
+		// To be able to consume mouse events before they gets to the
+		// JList default listeners we first remove all built in listeners
+		// and then instead add our ones at top, and finally add the old ones back
+		//
+		MouseListener[] oldOnes = sequenceJList.getMouseListeners();
+		for(MouseListener oldMl: oldOnes){
+			sequenceJList.removeMouseListener(oldMl);
+		}
+		MouseMotionListener[] oldMMOnes = sequenceJList.getMouseMotionListeners();
+		for(MouseMotionListener oldMl: oldMMOnes){
+			sequenceJList.removeMouseMotionListener(oldMl);
+		}
+
+		// Add our listeners
+		SequenceListMouseListener ourSeqListML = new SequenceListMouseListener(this);
+		sequenceJList.addMouseListener(ourSeqListML);
+		sequenceJList.addMouseMotionListener(ourSeqListML);
+		SequenceListMouseWheelListener ourSeqListMWL = new SequenceListMouseWheelListener(alignmentPane);
+		sequenceJList.addMouseWheelListener(ourSeqListMWL);
+
+		// And return the default listeners below our ones
+		for(MouseListener oldMl: oldOnes){
+			sequenceJList.addMouseListener(oldMl);
+		}
+		for(MouseMotionListener oldMl: oldMMOnes){
+			sequenceJList.addMouseMotionListener(oldMl);
+		}
+	
+
 
 		//	sequenceJList.setBackground(COLORSCHEME_BACKGROUND);
 		//		aliListener = new AlignmentDataAndSelectionListener(alignmentPane, this, sequenceJList);
@@ -524,51 +517,49 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		//		alignment.getSequences().addAlignmentSelectionListener(aliListener);
 
 		// Always horizontal scrollbar so list and pane not have varied height - then list and alignment could get out of synch
-		listScrollPane = new JScrollPane(sequenceJList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-		// TODO the preferred sizes
-		// Setting size does nothing - since it is inside split-pane - setting splitpane dividerlocation does the trick
-		//listScrollPane.setMinimumSize(new Dimension(100, 30));
-		//listScrollPane.setPreferredSize(new Dimension(300,500));
-		//listScrollPane.setDoubleBuffered(true);
+		listScrollPane = new JScrollPane(sequenceJList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		listScrollPane.setBorder(new EmptyBorder(0,0,0,0));
 		//listScrollPane.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_NEVER);
 
-		// Synchronize vertical scroll between two panes from alignment pane model to list (first the model)
-		ScrollBarModelSyncChangeListener scrollBarListener = new ScrollBarModelSyncChangeListener(listScrollPane.getVerticalScrollBar().getModel());
-		alignmentScrollPane.getVerticalScrollBar().getModel().addChangeListener( scrollBarListener );
-		alignmentPane.addScrollBarListener(scrollBarListener);
-
-		sequenceJList.addSynchPanes(listScrollPane, alignmentScrollPane);
-
+		
+		// Synchronize vertical scroll between two panes (alignmentPane and sequenceList)
+	//	ScrollBarModelSyncChangeListener seqListScrollBarListener = new ScrollBarModelSyncChangeListener(listScrollPane.getVerticalScrollBar().getModel());
+	//	ScrollBarModelSyncChangeListener aliPaneScrollBarListener = new ScrollBarModelSyncChangeListener(alignmentScrollPane.getVerticalScrollBar().getModel());
+	//	alignmentScrollPane.getVerticalScrollBar().getModel().addChangeListener( seqListScrollBarListener );
+	//	listScrollPane.getVerticalScrollBar().getModel().addChangeListener( aliPaneScrollBarListener );
+		
 		// Ruler
 		JComponent alignmentRuler = alignmentPane.getRulerComponent();
 		Dimension alignmentRulerDimension = new Dimension(1000,20);
 		alignmentRuler.setPreferredSize(alignmentRulerDimension);
 
-		// CharsetRuler
-		JComponent charsetRuler = alignmentPane.getCharsetRulerComponent();
-		Dimension charsetRulerDimension = new Dimension(0,0);
-		charsetRuler.setPreferredSize(charsetRulerDimension);
-
-
 		// RulerPanel	
 		rulerPanel = new JPanel();
 		rulerPanel.setLayout(new BoxLayout(rulerPanel, BoxLayout.Y_AXIS));
 		rulerPanel.add(alignmentRuler);
-		rulerPanel.add(charsetRuler);
-
-
+		
+		// Consensus Ruler
+		JComponent consensusRuler = alignmentPane.getConsensusRulerComponent();
+		consensusRuler.setPreferredSize(new Dimension(1000,20));
+		
 		// Alignment And RulerPanel together
 		alignmentAndRulerPanel = new JPanel(new BorderLayout());
 		alignmentAndRulerPanel.add(alignmentScrollPane, BorderLayout.CENTER);
-		alignmentAndRulerPanel.add(rulerPanel, BorderLayout.NORTH);
+		alignmentAndRulerPanel.add(rulerPanel, BorderLayout.NORTH);		
+		alignmentAndRulerPanel.add(consensusRuler, BorderLayout.SOUTH);
 
-		// topoffset listpanel to match rulers height
+		// consensus label
+		JPanel consensusLabelPanel = new JPanel();
+		consensusLabelPanel.add(new JLabel("Consensus:"));
+		consensusLabelPanel.setPreferredSize(new Dimension(100, consensusRuler.getPreferredSize().height));
+
+		// topoffset listpanel to match rulers height and also consensus label
 		listTopOffset = new ListTopOffsetJPanel(rulerPanel);
 		listTopOffset.setPreferredSize(new Dimension(100, rulerPanel.getPreferredSize().height));
 		listAndTopOffset = new JPanel(new BorderLayout());
 		listAndTopOffset.add(listScrollPane, BorderLayout.CENTER);
 		listAndTopOffset.add(listTopOffset, BorderLayout.NORTH);
+		listAndTopOffset.add(consensusLabelPanel, BorderLayout.SOUTH);
 
 		// Splitpane between list and alignmentview
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, listAndTopOffset, alignmentAndRulerPanel);
@@ -586,33 +577,155 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		//
 		
 		
-		
 		// Create traceJList and trace panel
-		SequenceJList traceSequenceJList = new SequenceJList(alignment.getSequences(), alignmentPane.getCharHeight(), this);
+		// Create the Trace panel where trace is drawn
+		tracePanel = new TracePanel(viewModel);
+		tracePanel.setAlignment(alignment);
+		tracePanel.setDoubleBuffered(paneDoubleBuff);
+		alignment.addAlignmentSelectionListener(tracePanel);
+			
+		JScrollPane traceScrollPane = new JScrollPane(tracePanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+		traceScrollPane.setAutoscrolls(true);
+		traceScrollPane.setMinimumSize(new Dimension(150, 150));
+		traceScrollPane.getVerticalScrollBar().setUnitIncrement(16);
+		traceScrollPane.getHorizontalScrollBar().setUnitIncrement(160);
+		traceScrollPane.setBorder(BorderFactory.createEmptyBorder());
+		JViewport viewport = traceScrollPane.getViewport();
+		viewport.setAutoscrolls(true);
+		
+		traceScrollPane.setDoubleBuffered(paneDoubleBuff);
+		tracePanel.setDoubleBuffered(paneDoubleBuff);
+		
+		
+		traceSequenceJList = new SequenceJList(alignment.getSequences(), alignmentPane.getCharHeight(), this);
 		alignment.addAlignmentSelectionListener(traceSequenceJList);
 		
 		JScrollPane traceListScrollPane = new JScrollPane(traceSequenceJList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		traceListScrollPane.setBorder(new EmptyBorder(0,0,0,0));
 		
+		
+		//
+		// To be able to consume mouse events before they gets to the
+		// JList default listeners we first remove all built in listeners
+		// and then instead add our ones at top, and finally add the old ones back
+		//
+		MouseListener[] oldTraceOnes = traceSequenceJList.getMouseListeners();
+		for(MouseListener oldMl: oldTraceOnes){
+			traceSequenceJList.removeMouseListener(oldMl);
+		}
+		MouseMotionListener[] oldTraceMMOnes = traceSequenceJList.getMouseMotionListeners();
+		for(MouseMotionListener oldMl: oldTraceMMOnes){
+			sequenceJList.removeMouseMotionListener(oldMl);
+		}
+
+		// Add our listeners
+		SequenceListMouseListener ourTraceSeqListML = new SequenceListMouseListener(this);
+		traceSequenceJList.addMouseListener(ourTraceSeqListML);
+		traceSequenceJList.addMouseMotionListener(ourTraceSeqListML);
+		SequenceListMouseWheelListener ourTraceSeqListMWL = new SequenceListMouseWheelListener(tracePanel);
+		traceSequenceJList.addMouseWheelListener(ourTraceSeqListMWL);
+
+		// And return the default listeners below our ones
+		for(MouseListener oldMl: oldTraceOnes){
+			sequenceJList.addMouseListener(oldMl);
+		}
+		for(MouseMotionListener oldMl: oldTraceMMOnes){
+			sequenceJList.addMouseMotionListener(oldMl);
+		}
+		
+		
+		
 		// Add traceJList and tracePanel to splitPane
-		JSplitPane listAndTraceSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, traceListScrollPane, tracePanel);
+		JSplitPane listAndTraceSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, traceListScrollPane, traceScrollPane);
 		listAndTraceSplitPane.setDividerSize(6);
 		listAndTraceSplitPane.setDividerLocation(300);
 		
 		//Split between alignment and trace
 		JSplitPane verticalSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, splitPane, listAndTraceSplitPane);
 		verticalSplitPane.setDividerSize(6);
-		verticalSplitPane.setDividerLocation(300);
+		logger.debug(verticalSplitPane.getSize());
+		verticalSplitPane.setResizeWeight(0.51);
 		
 		this.getContentPane().add(verticalSplitPane, BorderLayout.CENTER);
 		
 		SplitSyncher splitSynch = new SplitSyncher(splitPane, listAndTraceSplitPane);
+		
+		// Synchronize vertical scroll between two panes (tracePanel and traceList)
+//		ScrollBarModelSyncChangeListener traceListScrollBarListener = new ScrollBarModelSyncChangeListener(traceListScrollPane.getVerticalScrollBar().getModel());
+//		ScrollBarModelSyncChangeListener tracePanelScrollBarListener = new ScrollBarModelSyncChangeListener(traceScrollPane.getVerticalScrollBar().getModel());
+//		traceScrollPane.getVerticalScrollBar().getModel().addChangeListener( traceListScrollBarListener );
+//		traceListScrollPane.getVerticalScrollBar().getModel().addChangeListener( tracePanelScrollBarListener );
+		
+		
+//		// Trace Ruler
+//		JComponent traceRuler = tracePanel.getRulerComponent();
+//		Dimension traceRulerDimension = new Dimension(1000,20);
+//		traceRuler.setPreferredSize(traceRulerDimension);
+//		
+//		JPanel traceRulerPanel;
+//		JPanel traceAndRulerPanel;
+//		ListTopOffsetJPanel traceListTopOffset;
+//		JPanel traceListAndTopOffset;
+//		
+//		// RulerPanel	
+//		traceRulerPanel = new JPanel();
+//		traceRulerPanel.setLayout(new BoxLayout(traceRulerPanel, BoxLayout.Y_AXIS));
+//		traceRulerPanel.add(traceRuler);
+//
+//		// Trace And RulerPanel together
+//		traceAndRulerPanel = new JPanel(new BorderLayout());
+//		traceAndRulerPanel.add(traceScrollPane, BorderLayout.CENTER);
+//		traceAndRulerPanel.add(traceRulerPanel, BorderLayout.NORTH);
+//
+//		// topoffset listpanel to match rulers height
+//		traceListTopOffset = new ListTopOffsetJPanel(traceRulerPanel);
+//		traceListTopOffset.setPreferredSize(new Dimension(100, traceRulerPanel.getPreferredSize().height));
+//		traceListAndTopOffset = new JPanel(new BorderLayout());
+//		traceListAndTopOffset.add(traceListScrollPane, BorderLayout.CENTER);
+//		traceListAndTopOffset.add(traceListTopOffset, BorderLayout.NORTH);
 		
         //
 		//
 		// End TRACE
 		//
 		//
+		
+		
+//		// Synchronize horizontal scroll between two panes (alignmentPane and sequenceList)
+//		ScrollBarModelSyncChangeListener traceScrollBarListener = new ScrollBarModelSyncChangeListener(traceScrollPane.getHorizontalScrollBar().getModel());
+//		ScrollBarModelSyncChangeListener aliPaneHorizontalScrollBarListener = new ScrollBarModelSyncChangeListener(alignmentScrollPane.getHorizontalScrollBar().getModel());
+//		alignmentScrollPane.getHorizontalScrollBar().getModel().addChangeListener( traceScrollBarListener );
+//		traceScrollPane.getHorizontalScrollBar().getModel().addChangeListener( aliPaneHorizontalScrollBarListener );
+		
+//		// Synchronize vertical scroll between two panes (alignmentPane and tracePanel)
+//		ScrollBarModelSyncChangeListener aliListScrollBarListener = new ScrollBarModelSyncChangeListener(listScrollPane.getVerticalScrollBar().getModel());
+//		ScrollBarModelSyncChangeListener traceListVertScrollBarListener = new ScrollBarModelSyncChangeListener(traceListScrollPane.getVerticalScrollBar().getModel());
+//		listScrollPane.getVerticalScrollBar().getModel().addChangeListener( aliListScrollBarListener );
+//		traceListScrollPane.getVerticalScrollBar().getModel().addChangeListener( traceListVertScrollBarListener );
+		
+//		ScrollBarModelSyncChangeListener aliScrollBarListener = new ScrollBarModelSyncChangeListener(alignmentScrollPane.getHorizontalScrollBar().getModel());
+//		ScrollBarModelSyncChangeListener traceScrollBarListener = new ScrollBarModelSyncChangeListener(traceScrollPane.getHorizontalScrollBar().getModel());
+//		alignmentScrollPane.getHorizontalScrollBar().getModel().addChangeListener( traceScrollBarListener );
+//		traceScrollPane.getHorizontalScrollBar().getModel().addChangeListener( aliScrollBarListener );
+		
+		
+	//	alignmentScrollPane.getHorizontalScrollBar().setModel(traceScrollPane.getHorizontalScrollBar().getModel());
+		
+		// Synchronize two alignment-scrollpane and trace scrollpane
+	//	traceScrollPane.getViewport().addChangeListener(new ScrollViewChangeListener(alignmentScrollPane));
+	//	alignmentScrollPane.getViewport().addChangeListener(new ScrollViewChangeListener(traceScrollPane));
+		
+		traceScrollPane.getViewport().addChangeListener(viewModel);
+		alignmentScrollPane.getViewport().addChangeListener(viewModel);
+
+	//	alignmentScrollPane.getHorizontalScrollBar().getModel().addChangeListener(viewModel);
+	//	traceListScrollPane.getHorizontalScrollBar().getModel().addChangeListener(viewModel);
+		
+		viewModel.addViewListener(alignmentPane);
+		viewModel.addViewListener(tracePanel);
+		
+		viewModel.addViewListener(sequenceJList);
+		viewModel.addViewListener(traceSequenceJList);
 		
 		// Panel with all small status message labels such as xpos ypos 
 		statusPanel = new StatusPanel(alignmentPane, alignment);
@@ -640,18 +753,7 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		AlignmentPopupMenu poupMenu = new AlignmentPopupMenu(aliViewWindow, aliViewMenuBar);
 		alignmentPane.addMouseListener(poupMenu);
 		sequenceJList.addMouseListener(poupMenu);
-		/*
-		for(MouseListener mouseL: sequenceJList.getMouseListeners()){
-			sequenceJList.removeMouseListener(mouseL);
-		}
-		for(MouseMotionListener mouseML: sequenceJList.getMouseMotionListeners()){
-			sequenceJList.removeMouseMotionListener(mouseML);
-		}
-		SequenceListMouseListener seqML =  new SequenceListMouseListener();
-		sequenceJList.addMouseListener(seqML);
-		sequenceJList.addMouseMotionListener(seqML);
-		 */
-		//fileSequencesChanged();
+
 
 		translationPanel = new TranslationToolPanel(aliViewWindow);
 		alignment.addAlignmentListener(translationPanel);
@@ -676,7 +778,9 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		aliToolbar.setBorder(new EmptyBorder(0,0,0,0));
 		// toolbar layout might be different in som plaf but since it is not floating doesn't matter
 		this.getContentPane().add(aliToolbar, BorderLayout.NORTH);
-		//
+		// Press default - this is because change listener is overwriting property in AlignmentPane when button is created in AliJMenuBar
+		boolean isHighlightNonCons = true;
+		aliViewMenuBar.getHighlightNonConsButtonModel().setSelected(isHighlightNonCons);
 		// End toolbar
 		//
 
@@ -925,11 +1029,15 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 	public void requestPaneRepaint(){
 		alignmentPane.revalidate();
 		alignmentPane.repaint();
+		tracePanel.revalidate();
+		tracePanel.repaint();
 	}
 
 	public void requestPaneAndRulerRepaint(){
 		alignmentPane.revalidate();
 		alignmentPane.repaintAndForceRuler();
+		tracePanel.revalidate();
+		tracePanel.repaint();
 	}
 
 	public void requestScrollToVisibleSelection(){
@@ -952,6 +1060,15 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		alignmentPane.repaintAndForceRuler();
 		sequenceJList.repaint();
 		listAndTopOffset.repaint();
+		
+		tracePanel.getCharsetRulerComponent().revalidate();
+		tracePanel.validateSequenceOrder();
+		tracePanel.validateSize();
+		tracePanel.revalidate();
+		traceSequenceJList.revalidate();
+		tracePanel.repaintAndForceRuler();
+		tracePanel.repaint();
+		//listAndTopOffset.repaint();
 	}
 
 
@@ -1370,6 +1487,8 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		
 		alignment.addAlignmentSelectionListener(sequenceJList);
 		
+		alignment.addAlignmentSelectionListener(traceSequenceJList);
+		
 		alignment.addAlignmentListener(statusPanel);
 		alignment.addAlignmentDataListener(statusPanel);
 		alignment.addAlignmentSelectionListener(statusPanel);
@@ -1386,14 +1505,10 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 
 	protected void incCharSize(){
 		alignmentPane.incCharSize();
-		sequenceJList.setCharSize(alignmentPane.getCharHeight());
 	}
 
 	protected boolean decCharSize() {
 		boolean didChange = alignmentPane.decCharSize();
-		//		if(didChange){
-		sequenceJList.setCharSize(alignmentPane.getCharHeight());
-		//		}
 		return didChange;
 	}
 
@@ -2171,6 +2286,7 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 
 	public void setHighlightNonConsensus(boolean selected) {
 		alignmentPane.setHighlightNonCons(selected);
+		tracePanel.setHighlightNonCons(selected);
 		requestPaneRepaint();
 	}
 
@@ -2185,8 +2301,6 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 	}
 
 	//private void setTranslationOnePos
-
-
 
 
 
@@ -3361,9 +3475,6 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		//requestRepaintCursor();
 	}
 
-	
-
-
 
 	public void editAlignerALLSettings() {
 		SettingsFrame settingsFrame = new SettingsFrame(this);
@@ -3480,38 +3591,6 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		return isEditMode();
 	}
 
-	public void printAlignment(){
-		PrinterJob job = PrinterJob.getPrinterJob();
-		//  
-		job.setJobName("Printing alignment from AliView");
-		PageFormat pf = job.defaultPage();
-		//	    Paper paper = new Paper();
-		//	    paper.setSize(595, 842);
-		//	    paper.setImageableArea(43, 43, 509, 756);
-
-		//	    paper.setSize(8.5 * 72, 11 * 72);
-		//	    paper.setImageableArea(0.5 * 72, 0.0 * 72, 7.5 * 72, 10.5 * 72);
-		//	    pf.setPaper(paper);
-		//	    pf.setOrientation(PageFormat.LANDSCAPE);
-
-		//	    Book book = new Book();//java.awt.print.Book
-		//	    book.append(this, pf);
-		//	    job.setPageable(book);
-		//	    
-		job.setPrintable(this);
-
-		boolean ok = job.printDialog();
-		if (ok) {
-			try {
-				job.print();
-			} catch (PrinterException ex) {
-				Messenger.showOKOnlyMessage(Messenger.ERROR_PRINTING, LF + ex.getLocalizedMessage(), aliViewWindow);
-				ex.printStackTrace();
-				/* The job did not successfully complete */
-			}
-		}
-	}
-
 	//
 	// AlignmentListener
 	//
@@ -3557,8 +3636,16 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		//requestRepaintRect(e.getBounds());
 	}
 
+	
+	//
+	//
+	//  TODO this repaint method should be changed so that pane and list automatically redraws
+	//  because of their own listening events
+	//
+	//
 	public void requestRepaintRect(Rectangle rect) {
 
+		// Repaint alipane
 		int dx =(int) (alignmentPane.getCharWidth() * 3);
 		int dy =(int) (alignmentPane.getCharHeight() * 1);
 		// if small chars, redraw at least a few pix
@@ -3566,105 +3653,36 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 			dx = 6;
 			dy = 2;
 		}
-
-		Rectangle paneBounds = alignmentPane.matrixCoordToPaneCoord(rect);
-		Rectangle grown = new Rectangle(paneBounds.x - dx, paneBounds.y - dy, paneBounds.getBounds().width + 2*dx, paneBounds.getBounds().height + 2*dy);
-
+		Rectangle aliPaneBounds = alignmentPane.matrixCoordToPaneCoord(rect);
+		Rectangle grown = new Rectangle(aliPaneBounds.x - dx, aliPaneBounds.y - dy, aliPaneBounds.getBounds().width + 2*dx, aliPaneBounds.getBounds().height + 2*dy);
 		alignmentPane.validateSize();
 		alignmentPane.validateSequenceOrder();
-
-		//alignmentPane.paintImmediately(paneBounds);
-		//aliList.paintImmediately(aliList.getVisibleRect());
-		//alignmentPane.scrollRectToVisible(paneBounds);
-		//logger.info("paneBounds" + paneBounds);
 		alignmentPane.repaint(grown);
-
-		//alignmentPane.repaint();
-		//aliList.repaint();
-
+		
+		// Repaint alilist
 		Rectangle visiRect = sequenceJList.getVisibleRect();
 		Rectangle drawListBounds = new Rectangle(visiRect.x,grown.y, visiRect.width, grown.height);
-		//		sequenceJList.scrollRectToVisible(drawListBounds);
-		logger.info("drawListBounds" + drawListBounds);
-		//		sequenceJList.repaint(visiRect.x,paneBounds.y, visiRect.width, paneBounds.height);
 		sequenceJList.repaint(drawListBounds);
-	}
-
-	public int print(Graphics graphics, PageFormat pageFormat, int pageIndex)throws PrinterException{
-		double dpi = 72;
-
-		double pixPerMM = PrintUtils.mmToPixel(1,dpi);
-
-		double imagableX = pageFormat.getImageableX();
-		double imagableY = pageFormat.getImageableY();
-		double pgHeight = pageFormat.getImageableHeight();
-		double pgWidth = pageFormat.getImageableWidth();
-
-		Dimension pageSize = new Dimension();
-		pageSize.setSize(pgWidth, pgHeight);
-
-		logger.info("x" + imagableX);
-		logger.info("y" + imagableY);
-		logger.info("width" + pgWidth);
-		logger.info("height" + pgHeight);	
-		logger.info("thiswidth" + this.getWidth());
-		logger.info("thisheight" + this.getHeight());
-
-		double scaleFactor = PrintUtils.getScaleFactorToFit(this.getSize(),pageSize);
-		logger.info(scaleFactor);
-
-		// create a copy so nothing is altered in the original one
-		Graphics2D g2 = (Graphics2D) graphics.create();
-
-		//
-		//	I tried to use a separate AffineTransform - but I didn't work out
-		//  but using the one already in the Graphics object  works fine
-		//
-
-		// keep original transform so we can translate new in between the things to draw
-		AffineTransform savedTrans = (AffineTransform) g2.getTransform().clone();
-
-		Rectangle rulerRect = alignmentPane.getRulerComponent().getVisibleRect();
-		double rulerHeight = rulerRect.getHeight();
-		logger.info("rulerHeight" + rulerHeight);
-		Rectangle listVisible = listScrollPane.getViewport().getVisibleRect();
-		// resize a little bit so list doesnt get truncated
-		listVisible.setSize(listVisible.width + 5, listVisible.height);
-		logger.info("listVisible.width" + listVisible.width);
-
-		// Print sequence List (actually the viewport of the scrollpane)
-		g2.translate(imagableX, imagableY + (rulerHeight*scaleFactor));
-		g2.scale(scaleFactor, scaleFactor);
-		g2.setClip(listVisible);
-		listScrollPane.getViewport().paint(g2);
-
-		double extraSpaceBTWListAndPane = 2;
-
-		// Print ruler
-		g2.setTransform((AffineTransform) savedTrans.clone());
-		g2.translate((listVisible.width + extraSpaceBTWListAndPane)*scaleFactor + imagableX, imagableY);		
-		g2.scale(scaleFactor, scaleFactor);
-		g2.setClip(rulerRect);     
-		alignmentPane.getRulerComponent().paint(g2);
-
-		// Print alignment (actually the viewport of the scrollpane)
-		g2.setTransform((AffineTransform) savedTrans.clone());
-		g2.translate((listVisible.width + extraSpaceBTWListAndPane)*scaleFactor + imagableX, imagableY + (rulerHeight*scaleFactor));
-		g2.scale(scaleFactor, scaleFactor);
-		g2.setClip(alignmentScrollPane.getViewport().getVisibleRect());    
-		alignmentScrollPane.getViewport().paintAll(g2);
-
-		logger.info(pageIndex);
-
-		// clean up, dispose the created graphics
-		g2.dispose();
-
-		// only print one page
-		if(pageIndex > 0){
-			return Printable.NO_SUCH_PAGE;
-		}else{
-			return Printable.PAGE_EXISTS;
+	
+		// Repaint trace
+		int tpdx =(int) (tracePanel.getCharWidth() * 3);
+		int tpdy =(int) (tracePanel.getCharHeight() * 1);
+		// if small chars, redraw at least a few pix
+		if(tpdx < 3 || tpdy < 1){
+			tpdx = 6;
+			tpdy = 2;
 		}
+		Rectangle tracePanelBounds = tracePanel.matrixCoordToPaneCoord(rect);
+		Rectangle traceGrown = new Rectangle(tracePanelBounds.x - tpdx, tracePanelBounds.y - tpdy, tracePanelBounds.getBounds().width + 2*tpdx, tracePanelBounds.getBounds().height + 2*tpdy);
+		tracePanel.validateSize();
+		tracePanel.validateSequenceOrder();
+		tracePanel.repaint(traceGrown);
+		
+		// Repaint alilist
+		Rectangle traceVisiRect = traceSequenceJList.getVisibleRect();
+		Rectangle traceListBounds = new Rectangle(traceVisiRect.x,traceGrown.y, traceVisiRect.width, traceGrown.height);
+		traceSequenceJList.repaint(traceListBounds);
+		
 	}
 
 	public Alignment getAlignment() {

@@ -1,6 +1,7 @@
 package aliview.sequencelist;
 
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -16,6 +17,7 @@ import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -45,14 +47,18 @@ import utils.OSNativeUtils;
 import aliview.Assseq;
 import aliview.AssseqWindow;
 import aliview.UndoControler;
+import aliview.gui.pane.AlignmentPane;
 import aliview.gui.pane.NotUsed_AlignmentPane_Orig;
+import aliview.gui.pane.ViewEvent;
+import aliview.gui.pane.ViewListener;
+import aliview.gui.pane.ViewModel;
 import aliview.sequences.Sequence;
 import aliview.sequences.SequenceSelectionModel;
 import aliview.settings.Settings;
 import aliview.undo.UndoSavedStateSequenceOrder;
 
 
-public class SequenceJList extends javax.swing.JList implements Autoscroll, AlignmentSelectionListener{
+public class SequenceJList extends javax.swing.JList implements Autoscroll, AlignmentSelectionListener, ViewListener{
 	private static final Logger logger = Logger.getLogger(SequenceJList.class);
 	// todo These two constants should be synchronized in one class (AlignmentPane & this)
 	private static final int MIN_CHAR_SIZE = 2;
@@ -61,8 +67,8 @@ public class SequenceJList extends javax.swing.JList implements Autoscroll, Alig
 	private ListCellRenderer storedCellRenderer;
 	private BasicListUI builist;
 	//private DefaultListModel<String> notUsed;
-	private JScrollPane alignmentScrollPane;
-	private JScrollPane listScrollPane;
+//	private JScrollPane alignmentScrollPane;
+//	private JScrollPane listScrollPane;
 
 
 	public SequenceJList(AlignmentListModel model, double charHeight, AssseqWindow aliWindow) {
@@ -149,20 +155,9 @@ public class SequenceJList extends javax.swing.JList implements Autoscroll, Alig
 		long startTime = System.currentTimeMillis();
 		super.validate();
 		long endTime = System.currentTimeMillis();
-		synchAlignmentScrollPane();
 		logger.info("Validate JList took " + (endTime - startTime) + " milliseconds");	
 	}
-
-
-	private void synchAlignmentScrollPane(){
-		logger.info("synch ScrollPanes");
-		JScrollPane source = listScrollPane;
-		JScrollPane dest = alignmentScrollPane;
-		if(source != null && dest != null){
-			Point viewPos = new Point(dest.getViewport().getViewPosition().x, source.getViewport().getViewPosition().y );
-			dest.getViewport().setViewPosition(viewPos);	
-		}
-	}
+	
 
 	@Override
 	public Dimension getPreferredScrollableViewportSize() {
@@ -175,12 +170,17 @@ public class SequenceJList extends javax.swing.JList implements Autoscroll, Alig
 
 		// And now check font size
 		float listFontSize = (int)(charHeight -1);
+		
 		if(listFontSize > 13 && !Settings.getUseCustomFontSize().getBooleanValue()){	
 			listFontSize = 13;
 		}	
 		updateCharSize(listFontSize);
 	}
-
+	
+	public double getCharHeight() {
+		return charHeight;
+	}
+	
 	@Override
 	public void revalidate(){
 		super.revalidate();
@@ -193,14 +193,18 @@ public class SequenceJList extends javax.swing.JList implements Autoscroll, Alig
 	}
 
 	private void updateCharSize(float listFontSize) {
-
-
+		
+		logger.info("updatecharsize:" + listFontSize);
+        
+		logger.info("this.getFont().getSize():" + this.getFont().getSize());
+		
+		logger.info("listFontSize:" + listFontSize);
+		
 		// Fixed cell height is needed or otherwise all items are loaded
 		this.setFixedCellHeight((int)charHeight);
 		this.setFixedCellWidth(this.getModel().getLongestSequenceName()*(int)(charHeight));
-
+		
 		this.setFont(this.getFont().deriveFont(listFontSize));
-
 
 		// Remove List cell renderer att small sizes (saves a lot of drawing speed)
 		if(charHeight < 3 && this.getCellRenderer() != null){
@@ -220,10 +224,10 @@ public class SequenceJList extends javax.swing.JList implements Autoscroll, Alig
 		getModel().moveSelectedSequencesTo(index);
 	}
 
-	public void addSynchPanes(JScrollPane listScrollPane, JScrollPane alignmentScrollPane) {
-		this.listScrollPane = listScrollPane;
-		this.alignmentScrollPane = alignmentScrollPane;	
-	}
+//	public void addSynchPanes(JScrollPane listScrollPane, JScrollPane alignmentScrollPane) {
+//		this.listScrollPane = listScrollPane;
+//		this.alignmentScrollPane = alignmentScrollPane;	
+//	}
 
 	/*
 	 * 
@@ -361,6 +365,46 @@ public class SequenceJList extends javax.swing.JList implements Autoscroll, Alig
 		logger.info("drawListBounds" + drawListBounds);
 		//		sequenceJList.repaint(visiRect.x,paneBounds.y, visiRect.width, paneBounds.height);
 		this.repaint(drawListBounds);
+	}
+	
+	private JScrollPane getParentScrollPane(){
+		JScrollPane parentScrollPane = null;
+		Container c = getParent();
+		while(c != null) {
+			if( c instanceof JScrollPane ) {
+				parentScrollPane = (JScrollPane) c;
+				break;
+			}
+			c = c.getParent();
+		}
+		return parentScrollPane;
+	}
+
+	public void viewChanged(ViewEvent event) {
+		
+		logger.info("inside viewChanged");
+
+		ViewModel model = (ViewModel)event.getSource();
+		double charHeight = model.getCharHeight();
+		Point modelPoint = model.getViewPoint();
+		
+		if(this.getCharHeight() != charHeight) {
+			
+			this.setCharSize(charHeight);
+	    }
+		final JScrollPane scrollPane = getParentScrollPane();
+		Point currentView = scrollPane.getViewport().getViewPosition();
+		if(currentView.y != modelPoint.y) {
+			Point newPoint = new Point(currentView.x, modelPoint.y);
+			scrollPane.getViewport().setViewPosition(newPoint);
+		}
+//		
+//		//AlignmentPane source = (AlignmentPane) event.getSource();
+//		//this.setCharSize(source.getCharHeight());
+//		
+//		
+	
+		
 	}
 
 

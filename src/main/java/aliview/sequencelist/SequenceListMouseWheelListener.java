@@ -47,29 +47,6 @@ public class SequenceListMouseWheelListener implements MouseWheelListener{
 			return;
 			//e.consume();
 		}
-		/*
-					else if(e.isShiftDown()){
-						int wheelRotation = e.getWheelRotation();
-						if(aliViewWindow.isReverseHorizontalRotation()){
-							wheelRotation = wheelRotation * -1;
-						}
-						if(wheelRotation > 0){
-							Rectangle preferedVisible = alignmentPane.getVisibleRect();  
-							preferedVisible.setLocation((int) (preferedVisible.x - (double)Settings.getHorizontalScrollModifier().getIntValue()/200 * preferedVisible.getWidth()), preferedVisible.y);
-							alignmentPane.scrollRectToVisible(preferedVisible);
-							alignmentPane.revalidate();
-							// break to avoid diagonal moves
-							return;
-						}
-						else if(wheelRotation < 0){	
-							Rectangle preferedVisible = alignmentPane.getVisibleRect();
-							preferedVisible.setLocation((int) (preferedVisible.x + (double)Settings.getHorizontalScrollModifier().getIntValue()/200 * preferedVisible.getWidth()), preferedVisible.y);
-							alignmentPane.scrollRectToVisible(preferedVisible);
-							alignmentPane.revalidate();
-							// break to avoid diagonal moves
-							return;
-						}
-		 */
 
 		// Else scroll pane up or down				
 		else{
@@ -82,8 +59,6 @@ public class SequenceListMouseWheelListener implements MouseWheelListener{
 			JList list = (JList) e.getSource();
 
 			if(wheelRotation > 0){
-
-
 
 				Rectangle preferedVisible = list.getVisibleRect();
 				preferedVisible.setLocation(preferedVisible.x, (int) (preferedVisible.y + (double)Settings.getVerticalScrollModifier().getIntValue()/200 * preferedVisible.getHeight()));

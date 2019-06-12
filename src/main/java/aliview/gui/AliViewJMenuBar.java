@@ -364,39 +364,7 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 
 		mnFile.add(new JSeparator());
 
-		//		JMenuItem mntmGenoPheno = new JMenuItem("Genotype > phenotype");
-		//		mntmGenoPheno.addActionListener(new ActionListener() {
-		//			public void actionPerformed(ActionEvent e) {
-		//				aliViewWindow.genotype2phenotype();
-		//			}
-		//		});
-		//		mnFile.add(mntmGenoPheno);
-		//		alwaysAvailableFunctions.add(mntmGenoPheno);
-		//		
-		//		mnFile.add(new JSeparator());
 
-		JMenuItem mntmPrint = new JMenuItem("Print");
-		mntmPrint.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.printAlignment();
-			}
-		});
-		mnFile.add(mntmPrint);
-		mntmPrint.setAccelerator(OSNativeUtils.getPrintAccelerator());
-		loadedAlignmentFunctions.add(mntmPrint);
-
-
-		mnFile.add(new JSeparator());
-		/*
-		JMenuItem mntmDebug = new JMenuItem("Start debug");
-		mntmDebug.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.startDebug();
-			}
-		});
-		mnFile.add(mntmDebug);
-		alwaysAvailableFunctions.add(mntmDebug);
-		 */
 		JMenuItem mntmLogFile = new JMenuItem("Show message log");
 		mntmLogFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -1074,18 +1042,20 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 
 		mnViewMenu.add(new JSeparator());
 
-		JCheckBoxMenuItem highlightCons = new JCheckBoxMenuItem("Highlight consensus characters");
-		highlightCons.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e){
-				JCheckBoxMenuItem  btn = (JCheckBoxMenuItem ) e.getSource();
-				aliViewWindow.setHighlightConsensus(btn.isSelected());
-			}
-		});
+//		JCheckBoxMenuItem highlightCons = new JCheckBoxMenuItem("Highlight consensus characters");
+//		highlightCons.addChangeListener(new ChangeListener() {
+//			public void stateChanged(ChangeEvent e){
+//				JCheckBoxMenuItem  btn = (JCheckBoxMenuItem ) e.getSource();
+//				aliViewWindow.setHighlightConsensus(btn.isSelected());
+//			}
+//		});
+//		highlightCons.setSelected(true);		
+//		buttonGroupOneViewAtATime.add(highlightCons);
+//		highlightConsButtonModel = highlightCons.getModel();
+//		mnViewMenu.add(highlightCons);
+//		loadedAlignmentFunctions.add(highlightCons);
+		
 		ButtonGroup buttonGroupOneViewAtATime = new NoneSelectedButtonGroup();
-		buttonGroupOneViewAtATime.add(highlightCons);
-		highlightConsButtonModel = highlightCons.getModel();
-		mnViewMenu.add(highlightCons);
-		loadedAlignmentFunctions.add(highlightCons);
 
 		JCheckBoxMenuItem highlightNonCons = new JCheckBoxMenuItem("Highlight Non-consensus characters");
 		highlightNonCons.addChangeListener(new ChangeListener() {
@@ -1099,17 +1069,17 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 		mnViewMenu.add(highlightNonCons);
 		loadedAlignmentFunctions.add(highlightNonCons);
 
-		JCheckBoxMenuItem highlightDiff = new JCheckBoxMenuItem("Highlight diff from a selected sequence");
-		highlightDiff.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e){
-				JCheckBoxMenuItem  btn = (JCheckBoxMenuItem ) e.getSource();
-				aliViewWindow.setHighlightDiff(btn.isSelected());
-			}
-		});
-		buttonGroupOneViewAtATime.add(highlightDiff);
-		highlightDiffButtonModel = highlightDiff.getModel();
-		mnViewMenu.add(highlightDiff);
-		loadedAlignmentFunctions.add(highlightDiff);
+//		JCheckBoxMenuItem highlightDiff = new JCheckBoxMenuItem("Highlight diff from a selected sequence");
+//		highlightDiff.addChangeListener(new ChangeListener() {
+//			public void stateChanged(ChangeEvent e){
+//				JCheckBoxMenuItem  btn = (JCheckBoxMenuItem ) e.getSource();
+//				aliViewWindow.setHighlightDiff(btn.isSelected());
+//			}
+//		});
+//		buttonGroupOneViewAtATime.add(highlightDiff);
+//		highlightDiffButtonModel = highlightDiff.getModel();
+//		mnViewMenu.add(highlightDiff);
+//		loadedAlignmentFunctions.add(highlightDiff);
 
 		mnViewMenu.add(new JSeparator());	
 
@@ -1162,7 +1132,7 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 		mnViewMenu.add(mntmToggleTranslation);
 		nucleotideFunctions.add(mntmToggleTranslation);
 		loadedAlignmentFunctions.add(mntmToggleTranslation);
-
+/*
 		JCheckBoxMenuItem mntmToggleTranslationOnePos = new JCheckBoxMenuItem("Show as translation (1 pos per AminoAcid)");
 		mntmToggleTranslationOnePos.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -1174,7 +1144,7 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 		mnViewMenu.add(mntmToggleTranslationOnePos);
 		nucleotideFunctions.add(mntmToggleTranslationOnePos);
 		loadedAlignmentFunctions.add(mntmToggleTranslationOnePos);
-
+*/
 
 		JCheckBoxMenuItem mntmToggleAminoAcidCode = new JCheckBoxMenuItem("Show as Amino acid code (when show translate)");
 		mntmToggleAminoAcidCode.addActionListener(new ActionListener() {
@@ -1187,7 +1157,7 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 		mnViewMenu.add(mntmToggleAminoAcidCode);
 		nucleotideFunctions.add(mntmToggleAminoAcidCode);
 		loadedAlignmentFunctions.add(mntmToggleAminoAcidCode);
-
+/*
 		JCheckBoxMenuItem mntmToggleTranslateShowBoth = new JCheckBoxMenuItem("Show both aminoacid and nucleotides when translating");
 		mntmToggleTranslateShowBoth.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -1209,7 +1179,7 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 		mnViewMenu.add(mntmToggleIgnoreGapInTranslation);
 		nucleotideFunctions.add(mntmToggleIgnoreGapInTranslation);
 		loadedAlignmentFunctions.add(mntmToggleIgnoreGapInTranslation);
-
+*/
 		JMenuItem mntmToggleDrawCodonPos = new JMenuItem("Show codonpositions on ruler");
 		mntmToggleDrawCodonPos.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {

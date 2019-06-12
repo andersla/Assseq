@@ -1,6 +1,7 @@
 package aliview.importer;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.StringReader;
@@ -146,6 +147,25 @@ public class SequencesFactory {
 						memorySequences = false;
 					}
 				}
+			}
+			
+			if(foundFormat == FileFormat.ACE){
+
+				try {
+					ACEImporter importer = new ACEImporter(alignmentFile);
+					List<Sequence> sequences = importer.importSequences();
+					model = new MemorySequenceAlignmentListModel();
+					model.setSequences(sequences);
+					MemorySequenceAlignmentListModel consensusModel = new MemorySequenceAlignmentListModel();
+					Sequence consensus = importer.importConsensus();
+					consensusModel.add(consensus);
+					model.setConsensusModel(consensusModel);
+					model.setFileFormat(FileFormat.ACE);
+				} catch (FileNotFoundException e) {
+					importErrorMessage += "Tried import as ACE but: " + e.getMessage() + LF;
+					logger.error(importErrorMessage);
+					logger.error(e);
+				}	
 			}
 
 			if(foundFormat == FileFormat.MSF){

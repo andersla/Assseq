@@ -487,7 +487,8 @@ public class BasicSequence implements Sequence, Comparable<Sequence> {
 		return false;
 	}
 
-	public void deleteSelectedBases(){	
+	public void deleteSelectedBases(){
+		logger.debug("deleteSelectedBases");
 
 		int[] toDelete = selectionModel.getSelectedPositions(0, this.getLength() - 1);	
 		getBases().delete(toDelete);	
@@ -495,6 +496,7 @@ public class BasicSequence implements Sequence, Comparable<Sequence> {
 	}
 
 	public void deleteBase(int index){	
+		logger.debug("deleteBase");
 		getBases().delete(index);
 		selectionModel.removePosition(index);
 	}
@@ -513,26 +515,42 @@ public class BasicSequence implements Sequence, Comparable<Sequence> {
 	}
 
 
+	public void rightPadSequenceWithNoData(int finalLength) {
+		rightPadSequence(finalLength, SequenceUtils.NO_DATA);
+	}
+	
 	public void rightPadSequenceWithGaps(int finalLength) {
+		rightPadSequence(finalLength, SequenceUtils.GAP_SYMBOL);
+	}
+	
+	public void rightPadSequence(int finalLength, byte symbol) {
 
 		int addCount = finalLength - getBases().getLength();
 		if(addCount > 0){
 			byte[] additional = new byte[addCount];
-			Arrays.fill(additional, SequenceUtils.GAP_SYMBOL);
+			Arrays.fill(additional, symbol);
 			getBases().append(additional);
 		}	
 	}
 
-	public void leftPadSequenceWithGaps(int finalLength) {
+	public void leftPadSequence(int finalLength, byte symbol) {
 
+		logger.debug("Padding" + finalLength);
+		
 		int addCount = finalLength - getBases().getLength();
 		if(addCount > 0){
 			byte[] additional = new byte[addCount];
-			Arrays.fill(additional, SequenceUtils.GAP_SYMBOL);
+			Arrays.fill(additional, symbol);
 			getBases().insertAt(0,additional);
 		}
-
-
+	}
+	
+	public void leftPadSequenceWithGaps(int finalLength) {
+		leftPadSequence(finalLength, SequenceUtils.GAP_SYMBOL);
+	}
+	
+	public void leftPadSequenceWithNoData(int finalLength) {
+		leftPadSequence(finalLength, SequenceUtils.NO_DATA);
 	}
 
 	public String getCitatedName() {
@@ -554,6 +572,7 @@ public class BasicSequence implements Sequence, Comparable<Sequence> {
 	}
 
 	public void deleteBasesFromMask(boolean[] mask){
+		logger.debug("deleteBasesFromMask");
 		int nTruePos = ArrayUtilities.count(mask, true);
 
 		int[] toDelete = new int[nTruePos];
@@ -794,4 +813,5 @@ public class BasicSequence implements Sequence, Comparable<Sequence> {
 			}
 		}
 	}
+
 }

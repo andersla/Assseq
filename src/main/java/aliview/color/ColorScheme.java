@@ -22,6 +22,8 @@ public interface ColorScheme {
 	public Color getBaseSelectionBackgroundColor(int baseValue);
 
 	public Color getBaseConsensusBackgroundColor();
+	
+	public Color getBaseNonConsensusBackgroundColor();
 
 	public String getName();
 
@@ -48,5 +50,12 @@ public interface ColorScheme {
 
 	public Color[] getALLCompundColors();
 
+	public Color getBaseQualityForegroundColor(int baseVal, int qualClass);
 
+	public Color getBaseQualityBackgroundColor(int baseVal, int qualClass);
+	
+	public Color getQualClipForegroundColor();
+	
+	public Color getQualClipBackgroundColor();
+	
 }

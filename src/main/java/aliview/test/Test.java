@@ -41,6 +41,12 @@ public class Test implements Cloneable{
 
 	public static void main(String[] args) throws CloneNotSupportedException {
 
+		int x = 4;
+		double xx = 0.7;
+		int result = (int)(x * xx);
+		
+		logger.info(result);
+		
 		int a = 0;
 		logger.info(a % 4);
 		a = 1;

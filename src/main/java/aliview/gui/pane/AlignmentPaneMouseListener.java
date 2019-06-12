@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 
 import aliview.AssseqWindow;
 import aliview.alignment.Alignment;
+import aliview.color.ColorScheme;
 import aliview.sequencelist.SequenceJList;
 import aliview.settings.Settings;
 import aliview.utils.Utils;
@@ -55,6 +56,8 @@ public class AlignmentPaneMouseListener implements MouseListener, MouseMotionLis
 				e1.printStackTrace();
 			}
 	 */
+	
+
 
 	public void mousePressed(MouseEvent e) {
 

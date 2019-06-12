@@ -10,7 +10,7 @@ import org.apache.log4j.Logger;
 public class ABISequence extends InMemoryTraceSequence{
 	private static final Logger logger = Logger.getLogger(ABISequence.class);
 	
-	public ABISequence(String name, Bases bases, Traces traces) {
+	public ABISequence(String name, DefaultQualCalledBases bases, Traces traces) {
 		super(name, bases, traces);
 	}
 }

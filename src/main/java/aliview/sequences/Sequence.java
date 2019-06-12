@@ -93,6 +93,8 @@ public interface Sequence extends Comparable<Sequence>{
 	public void rightPadSequenceWithGaps(int diffLen);
 
 	public void leftPadSequenceWithGaps(int diffLen);
+	
+	public void leftPadSequenceWithNoData(int diffLen);
 
 	public void insertGapRightOfSelectedBase();
 
@@ -191,5 +193,6 @@ public interface Sequence extends Comparable<Sequence>{
 	public void terminalGAPtoMissing();
 
 	public void missingToGAP();
+
 
 }

@@ -9,7 +9,7 @@ import aliview.utils.ArrayUtilities;
 public class InMemoryTraceSequence extends BasicTraceSequence{
 	private static final Logger logger = Logger.getLogger(InMemoryTraceSequence.class);
 
-	public InMemoryTraceSequence(String name, Bases bases, Traces traces) {
+	public InMemoryTraceSequence(String name, DefaultQualCalledBases bases, Traces traces) {
 		super(bases, traces);
 		this.name = name;
 	}

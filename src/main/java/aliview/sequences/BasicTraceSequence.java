@@ -2,6 +2,7 @@ package aliview.sequences;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -21,13 +22,13 @@ import aliview.sequencelist.Interval;
 import aliview.utils.ArrayUtilities;
 
 // todo can save memory by changing data implementation into byte instead of char
-public class BasicTraceSequence implements Sequence, Comparable<Sequence> {
+public class BasicTraceSequence extends BasicSequence implements TraceSequence{
 	private static final Logger logger = Logger.getLogger(BasicTraceSequence.class);
 	private boolean simpleName = false;
 
 	// TODO what is this selection offset?
 	public int selectionOffset = 0;
-	protected Bases bases;
+	protected DefaultQualCalledBases bases;
 	// TranslatedBases has to be volatile so no problems araise with the double lock in the lazy creation below
 	// see: http://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html
 	protected TranslatedBases translatedBases;
@@ -43,7 +44,7 @@ public class BasicTraceSequence implements Sequence, Comparable<Sequence> {
 		selectionModel = new DefaultSequenceSelectionModel();
 	}
 
-	public BasicTraceSequence(Bases bases, Traces traces) {
+	public BasicTraceSequence(DefaultQualCalledBases bases, Traces traces) {
 		this();
 		this.bases = bases;
 		this.traces = traces;
@@ -96,14 +97,15 @@ public class BasicTraceSequence implements Sequence, Comparable<Sequence> {
 		return getTranslatedBases().isCodonSecondPos(pos);
 	}
 
-	protected Bases getBases(){
-		if(isTranslated()){
-			return getTranslatedBases();
-		}
+	protected DefaultQualCalledBases getBases(){
+// TODO fix Translated QualCalledBases
+//		if(isTranslated()){
+//			return getTranslatedBases();
+//		}
 		return this.bases;
 	}
 
-	protected Bases getNonTranslatedBases(){
+	protected DefaultQualCalledBases getNonTranslatedBases(){
 		return this.bases;
 	}
 
@@ -144,6 +146,10 @@ public class BasicTraceSequence implements Sequence, Comparable<Sequence> {
 
 	public char getCharAtPos(int n) {
 		return (char) getBaseAtPos(n);
+	}
+	
+	public short getQualValAtPos(int seqXPos) {
+		return getBases().getQualCall(seqXPos);
 	}
 
 	// TODO 
@@ -452,16 +458,15 @@ public class BasicTraceSequence implements Sequence, Comparable<Sequence> {
 	public void moveSelectedResiduesLeftIfGapIsPresent(){
 		moveSelectionLeftIfGapIsPresent(1);
 	}
-
-
+	
 	public void insertGapAt(int n){
 		getBases().insertAt(n, SequenceUtils.GAP_SYMBOL);
-		getTraces().insertAt(n, SequenceUtils.GAP_SYMBOL);
+		getTraces().insertAt(n);
 		// do the same with selmodel
 		selectionModel.insertNewPosAt(n);
 	}
 
-	private Traces getTraces() {
+	public Traces getTraces() {
 		return traces;
 	}
 
@@ -494,15 +499,25 @@ public class BasicTraceSequence implements Sequence, Comparable<Sequence> {
 		return false;
 	}
 
-	public void deleteSelectedBases(){	
-
-		int[] toDelete = selectionModel.getSelectedPositions(0, this.getLength() - 1);	
-		getBases().delete(toDelete);	
-		createNewSelectionModel();
+	public void deleteSelectedBases(){
+		logger.debug("deleteSelectedBases");
+		int[] toDelete = selectionModel.getSelectedPositions(0, this.getLength() - 1);
+		
+		Arrays.sort(toDelete);
+		if(toDelete == null || toDelete.length == 0){
+			return;
+		}
+		
+		for(int indexToDel: toDelete) {
+			deleteBase(indexToDel);
+		}
+		
 	}
 
 	public void deleteBase(int index){	
+		logger.debug("Delete in basicSeq (index):" + index);
 		getBases().delete(index);
+		getTraces().delete(index);
 		selectionModel.removePosition(index);
 	}
 
@@ -513,33 +528,61 @@ public class BasicTraceSequence implements Sequence, Comparable<Sequence> {
 
 	public void complement() {
 		getBases().complement();
+		getTraces().complement();
 	}
 
 	public void reverse(){
 		getBases().reverse();
+		getTraces().reverse();
 	}
 
-
+	
 	public void rightPadSequenceWithGaps(int finalLength) {
-
-		int addCount = finalLength - getBases().getLength();
-		if(addCount > 0){
-			byte[] additional = new byte[addCount];
-			Arrays.fill(additional, SequenceUtils.GAP_SYMBOL);
-			getBases().append(additional);
-		}	
+		rightPadSequence(finalLength, SequenceUtils.GAP_SYMBOL);
+	}
+		
+	public void rightPadSequenceWithNoData(int finalLength) {
+		rightPadSequence(finalLength, SequenceUtils.NO_DATA);
 	}
 
-	public void leftPadSequenceWithGaps(int finalLength) {
+	public void rightPadSequence(int finalLength, byte symbol) {
 
 		int addCount = finalLength - getBases().getLength();
 		if(addCount > 0){
 			byte[] additional = new byte[addCount];
-			Arrays.fill(additional, SequenceUtils.GAP_SYMBOL);
+			Arrays.fill(additional, symbol);
+			getBases().append(additional);
+		}
+		
+		// insert into traces
+		for(int n = 0; n < addCount; n++) {
+			getTraces().insertAt(n);
+		}
+	}
+	
+	public void leftPadSequenceWithGaps(int finalLength) {
+		leftPadSequence(finalLength, SequenceUtils.GAP_SYMBOL);
+	}
+		
+	public void leftPadSequenceWithNoData(int finalLength) {
+		leftPadSequence(finalLength, SequenceUtils.NO_DATA);
+	}
+
+	public void leftPadSequence(int finalLength, byte symbol) {
+
+		int addCount = finalLength - getBases().getLength();
+		if(addCount > 0){
+			byte[] additional = new byte[addCount];
+			Arrays.fill(additional, symbol);
 			getBases().insertAt(0,additional);
 		}
-
-
+		
+		// insert into traces
+		for(int n = 0; n < addCount; n++) {
+			if(getTraces() != null) {
+			  getTraces().insertAt(n);
+			}
+		}
 	}
 
 	public String getCitatedName() {
@@ -561,6 +604,7 @@ public class BasicTraceSequence implements Sequence, Comparable<Sequence> {
 	}
 
 	public void deleteBasesFromMask(boolean[] mask){
+		logger.debug("delete from mask");
 		int nTruePos = ArrayUtilities.count(mask, true);
 
 		int[] toDelete = new int[nTruePos];
@@ -574,6 +618,7 @@ public class BasicTraceSequence implements Sequence, Comparable<Sequence> {
 		}
 
 		getBases().delete(toDelete);
+		getTraces().delete(toDelete);
 
 		// and do same for sel-model
 		for(int n = mask.length-1; n >= 0; n--){
@@ -800,5 +845,47 @@ public class BasicTraceSequence implements Sequence, Comparable<Sequence> {
 				getBases().set(n, SequenceUtils.GAP_SYMBOL);
 			}
 		}
+	}
+
+	public void trimTraces() {
+		getTraces().trim();
+	}
+
+	public void setQualClipStart(int pos) {
+		getBases().setQualClipStart(pos);
+	}
+
+	public void setQualClipEnd(int pos) {
+		getBases().setQualClipEnd(pos);
+	}
+
+	public boolean isQualClippedAtPos(int pos) {
+		return getBases().isQualClipped(pos);
+	}
+	public String qualCallsAsFastQString() {
+		//String FastQQuals = "#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+		short[] qualCalls = getBases().getQualCalls();
+		ArrayUtilities.addToArrayValuesShort(qualCalls, (short)33);
+		
+		StringWriter buffer = new StringWriter();
+		for(int n = 0; n < qualCalls.length;  n++) {	
+			buffer.append( (char) qualCalls[n] );
+		}
+		
+		return buffer.toString();
+	}
+	
+	public String toFastQ() {
+		String bases = getBasesAsString();
+		String qualQalls = qualCallsAsFastQString();
+		String fastQ = "@" + getName() + "\n" + 
+                        bases + "\n" + 
+				        "+" + "\n" + 
+                        qualQalls;
+		return fastQ;
+	}
+
+	public int getQualValAt(int x) {
+		return bases.getQualCall(x);
 	}
 }

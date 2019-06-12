@@ -37,7 +37,6 @@ import org.apache.log4j.Logger;
 import aliview.AssseqWindow;
 import aliview.HelpUtils;
 import aliview.externalcommands.CommandItem;
-import aliview.old.MyScrollPane;
 import aliview.settings.Settings;
 import aliview.settings.SettingsFrame;
 
