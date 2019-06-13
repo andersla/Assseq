@@ -10,7 +10,7 @@
   <properties>
        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-       <project.bundle.mainclass>aliview.Assseq</project.bundle.mainclass>
+       <project.bundle.mainclass>assseq.Assseq</project.bundle.mainclass>
 	   <project.organization.name>NBIS</project.organization.name>
        <project.bundle.appname>Assseq</project.bundle.appname>
        <project.bundle.icon>bla</project.bundle.icon>
@@ -77,14 +77,14 @@
      <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
            <configuration>
-                <finalName>aliview</finalName>
+                <finalName>assseq</finalName>
                 <appendAssemblyId>false</appendAssemblyId>
                 <descriptorRefs>
                     <descriptorRef>jar-with-dependencies</descriptorRef>
                 </descriptorRefs>
                 <archive>
                    <manifest>
-                      <mainClass>aliview.Assseq</mainClass>
+                      <mainClass>assseq.Assseq</mainClass>
                    </manifest>
                    <manifestEntries>
                      <SplashScreen-Image>img/splash_128x128.png</SplashScreen-Image>
@@ -99,7 +99,7 @@
 					 <goal>single</goal>
 				  </goals>
 				  <configuration>
-					   <finalName>aliview</finalName>
+					   <finalName>assseq</finalName>
 					   <fileMode>0755</fileMode>
 					   <outputDirectory>target/windows-version-${project.version}</outputDirectory>
 					   <appendAssemblyId>false</appendAssemblyId>
@@ -108,7 +108,7 @@
 					   </descriptorRefs>
 					   <archive>
 						  <manifest>
-							 <mainClass>aliview.Assseq</mainClass>
+							 <mainClass>assseq.Assseq</mainClass>
 						  </manifest>
 						  <manifestEntries>
                             <SplashScreen-Image>img/splash_128x128.png</SplashScreen-Image>
@@ -123,16 +123,16 @@
 					  <goal>single</goal>
 				   </goals>
 				   <configuration>
-					  <finalName>aliview</finalName>
+					  <finalName>assseq</finalName>
 					  <fileMode>0755</fileMode>
-					  <outputDirectory>target/linux-version-${project.version}/aliview/</outputDirectory>
+					  <outputDirectory>target/linux-version-${project.version}/assseq/</outputDirectory>
 					  <appendAssemblyId>false</appendAssemblyId>
 					  <descriptorRefs>
 						 <descriptorRef>jar-with-dependencies</descriptorRef>
 					  </descriptorRefs>
 					  <archive>
 							<manifest>
-							  <mainClass>aliview.Assseq</mainClass>
+							  <mainClass>assseq.Assseq</mainClass>
 							</manifest>
 							<manifestEntries>
                                <SplashScreen-Image>img/splash_128x128.png</SplashScreen-Image>
@@ -147,7 +147,7 @@
                          <goal>single</goal>
                      </goals>
 			         <configuration>
-						  <finalName>aliview</finalName>
+						  <finalName>assseq</finalName>
 						  <fileMode>0755</fileMode>
 						  <appendAssemblyId>false</appendAssemblyId>
 						  <descriptorRefs>
@@ -155,7 +155,7 @@
 						  </descriptorRefs>
 						  <archive>
 							<manifest>
-							  <mainClass>aliview.Assseq</mainClass>
+							  <mainClass>assseq.Assseq</mainClass>
 							</manifest>
 							<manifestEntries>
                                <SplashScreen-Image>img/splash_128x128.png</SplashScreen-Image>
@@ -179,7 +179,7 @@
             <configuration>
               <filesets>
                 <fileset>
-                    <directory>target/windows-version-${project.version}/aliview.jar</directory>
+                    <directory>target/windows-version-${project.version}/assseq.jar</directory>
                     <includes>
                         <include>muscle*linux*</include>
                         <include>muscle*darwin*</include>
@@ -198,7 +198,7 @@
             <configuration>
               <filesets>
                 <fileset>
-                    <directory>target/aliview.jar</directory>
+                    <directory>target/assseq.jar</directory>
                     <includes>
                         <include>muscle*linux*</include>
                         <include>muscle*.exe</include>
@@ -216,7 +216,7 @@
             <configuration>
               <filesets>
                 <fileset>
-                    <directory>target/linux-version-${project.version}/aliview/aliview.jar</directory>
+                    <directory>target/linux-version-${project.version}/assseq/assseq.jar</directory>
                     <includes>
                         <include>muscle*darwin*</include>
                         <include>muscle*mac*</include>
@@ -234,12 +234,12 @@
         <artifactId>osxappbundle-maven-plugin</artifactId>
         <version>1.0-alpha-2</version>
         <configuration>
-            <mainClass>aliview.AliView</mainClass>
-            <dictionaryFile>${basedir}/aliview-mac/Info.plist</dictionaryFile>
+            <mainClass>assseq.Assseq</mainClass>
+            <dictionaryFile>${basedir}/assseq-mac/Info.plist</dictionaryFile>
             <iconFile>${basedir}/src/main/resources/img/alignment_ico.icns</iconFile>
             <version>${project.version}</version>
-            <myClasspath>$JAVAROOT/repo/AliView/AliView/${project.version}/AliView-${project.version}.jar</myClasspath>
-            <javaApplicationStub>${basedir}/aliview-mac/universalJavaApplicationStub/universalJavaApplicationStub</javaApplicationStub>
+            <myClasspath>$JAVAROOT/repo/Assseq/Assseq/${project.version}/Assseq-${project.version}.jar</myClasspath>
+            <javaApplicationStub>${basedir}/assseq-mac/universalJavaApplicationStub/universalJavaApplicationStub</javaApplicationStub>
         </configuration>
         <executions>
             <execution>
@@ -266,32 +266,13 @@
 				<files>
                 <file>
                   <source>${basedir}/src/main/resources/img/splash_128x128.png</source>
-                  <outputDirectory>target/AliView-${project.version}/AliView.app/Contents/Resources/</outputDirectory>
+                  <outputDirectory>target/Assseq-${project.version}/Assseq.app/Contents/Resources/</outputDirectory>
                 </file>
                 </files>
             </configuration>
          </execution>
-         <!--
-         <execution>
-            <id>add-second-stubfile</id>
-            <goals>
-                <goal>copy</goal>
-            </goals>
-            <phase>package</phase>
-            <configuration>
 
-				<fileset>
-                  <directory>${basedir}/aliview-mac/</directory>
-                  <includes>
-                        <include>JavaApplicationStub</include>
-                   </includes>
-                  <outputDirectory>target/AliView-${project.version}/AliView.app/Contents/MacOS/</outputDirectory>
-                  <fileMode>0755</fileMode>
-                </fileset>
 
-            </configuration>
-         </execution>
-         -->
          <execution>
             <id>remove-jar-files-from-osx-bundle-since-they-are-unpacked-in-ailiview-jar-already</id>
             <goals>
@@ -329,15 +310,11 @@
               </goals>
               <configuration>
 					<headerType>gui</headerType>
-					<outfile>target/windows-version-${project.version}/AliView.exe</outfile>
-					<jar>target/windows-version-${project.version}/aliview.jar</jar>
-					<!--
-					<outfile>target/windows-version-${project.version}/AliView.exe</outfile>
-					<jar>target/windows/aliview.jar</jar>
-					-->
+					<outfile>target/windows-version-${project.version}/Assseq.exe</outfile>
+					<jar>target/windows-version-${project.version}/assseq.jar</jar>
 					<errTitle>App Err</errTitle>
 					<classPath>
-						<mainClass>aliview.AliView</mainClass>
+						<mainClass>assseq.Assseq</mainClass>
 					</classPath>
 					<icon>icon_images/win/alignment_multi.ico</icon>
 					<jre>
@@ -359,8 +336,8 @@
 						<copyright>C</copyright>
 						<productVersion>1.0.0.0</productVersion>
 						<txtProductVersion>1.0.0.0</txtProductVersion>
-						<productName>AliView</productName>
-						<internalName>AliView</internalName>
+						<productName>Assseq</productName>
+						<internalName>Assseq</internalName>
 						<originalFilename>App.exe</originalFilename>
 					</versionInfo>
 				</configuration>

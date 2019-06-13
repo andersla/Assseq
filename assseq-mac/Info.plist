@@ -30,6 +30,7 @@
         <string>GenericJavaApp.icns</string>
         <key>CFBundleTypeExtensions</key>
         <array>
+		  <string>ace</string>
           <string>nexus</string>
           <string>nex</string>
           <string>fasta</string>
