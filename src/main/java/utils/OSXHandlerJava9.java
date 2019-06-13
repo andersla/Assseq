@@ -11,7 +11,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import aliview.Assseq;
+import assseq.Assseq;
 
 /*
  * Heavily inspired by org.openstreetmap.josm.tools.PlatformHookOsx.java from JOSM project

@@ -1,0 +1,10 @@
+#!/usr/bin/env xdg-open
+
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=false
+Icon=/usr/share/assseq/aliicon_128x128.png
+Name=Assseq
+Exec=assseq %U
+Name[en]=Assseq.desktop

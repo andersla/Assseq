@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # first copy sh-bin
-install -m755 aliview /usr/bin/aliview
+install -m755 assseq /usr/bin/assseq
 if [ $? -ne 0 ]
 then
     echo "!!! could not install files, need to be sudo? e.g. sudo ./aliview.install.run"
@@ -9,18 +9,18 @@ then
 fi
 
 # make dir (install automatically checks if needed)
-install -d -m755 /usr/share/aliview/
+install -d -m755 /usr/share/assseq/
 
-install -v -m755 aliview.jar /usr/share/aliview/
-install -v -m755 aliicon_128x128.png /usr/share/aliview/
-install -v -m755 README.txt /usr/share/aliview/
-install -v -m755 install.sh /usr/share/aliview/
+install -v -m755 assseq.jar /usr/share/assseq/
+install -v -m755 aliicon_128x128.png /usr/share/assseq/
+install -v -m755 README.txt /usr/share/assseq/
+install -v -m755 install.sh /usr/share/assseq/
 
 # and program launcher
 if [ -d ~/.local/share/applications ]; then
-  install -v -m755 AliView.desktop ~/.local/share/applications/
-else 
+  install -v -m755 Assseq.desktop ~/.local/share/applications/
+else
   if [ -d /usr/share/applications ]; then
-    install -v -m755 AliView.desktop /usr/share/applications/
+    install -v -m755 Assseq.desktop /usr/share/applications/
   fi
 fi

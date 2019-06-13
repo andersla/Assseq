@@ -13,8 +13,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import aliview.alignment.Alignment;
-import aliview.gui.AliViewJMenuBarFactory;
+import assseq.Assseq;
+import assseq.AssseqWindow;
+import assseq.alignment.Alignment;
+import assseq.gui.AliViewJMenuBarFactory;
 
 public class AlignmentTest {
 

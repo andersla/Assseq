@@ -1,1 +1,1 @@
-makeself . ../aliview.install.run "Installer for AliView" ./install.sh 
+makeself . ../assseq.install.run "Installer for Assseq" ./install.sh

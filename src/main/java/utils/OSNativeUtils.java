@@ -20,7 +20,7 @@ import org.apache.log4j.Logger;
 import org.simplericity.macify.eawt.Application;
 import org.simplericity.macify.eawt.DefaultApplication;
 
-import aliview.Assseq;
+import assseq.Assseq;
 
 public class OSNativeUtils {
 	private static final Logger logger = Logger.getLogger(OSNativeUtils.class);
