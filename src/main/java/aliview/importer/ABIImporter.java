@@ -66,8 +66,6 @@ public class ABIImporter {
 			DefaultQualCalledBases basesAndCalls = new DefaultQualCalledBases(bases, shortQualCalls);
 
 			ABISequence sequence  = new ABISequence(inputFile.getName(), basesAndCalls, traces);
-			
-			logger.info(sequence.toFastQ());
 
 			sequences.add(sequence);
 

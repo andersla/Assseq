@@ -20,7 +20,7 @@ public class SettingsFrame extends JFrame {
 	public static final String TAB_EXTERNAL_COMMANDS = "External commands";
 	public static final String TAB_GENERAL = "General";
 	public static final String TAB_PRIMER = "Primer";
-	public static final String TAB_ALIGN_ALL = "Align ALL program";
+	public static final String TAB_ALIGN_ALL = "Assemble ALL program";
 	public static final String TAB_ALIGN_ADD =  "Align ADD program";
 	public static final String TAB_MEMORY = "Memory";
 
@@ -37,9 +37,9 @@ public class SettingsFrame extends JFrame {
 		tabbedPane = new JTabbedPane();
 		//		tabbedPane.setPreferredSize(new Dimension(650,500));
 		tabbedPane.add(TAB_GENERAL, new GeneralSettingsPanel(this));
-		tabbedPane.add(TAB_PRIMER, new PrimerSettingsPanel(this));
+		//tabbedPane.add(TAB_PRIMER, new PrimerSettingsPanel(this));
 		tabbedPane.add(TAB_ALIGN_ALL, new AlignerALLItemsPanel(this));
-		tabbedPane.add(TAB_ALIGN_ADD, new AlignerADDItemsPanel(this));
+		//tabbedPane.add(TAB_ALIGN_ADD, new AlignerADDItemsPanel(this));
 		tabbedPane.add(TAB_EXTERNAL_COMMANDS, new CmdItemsPanel(this));
 		tabbedPane.add(TAB_MEMORY, new MemorySettingsPanel(this));
 		this.getContentPane().add(tabbedPane);

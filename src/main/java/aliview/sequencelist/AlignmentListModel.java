@@ -1405,6 +1405,10 @@ public class AlignmentListModel implements ListModel, Iterable<Sequence>{
 	public void setFixedConsensus(Sequence seq) {
 		this.fixedConsensus = seq;
 	}
+	
+	public Sequence getFixedNucleotideConsensus() {
+		return fixedConsensus;
+	}
 
 	public int getFixedNucleotideConsensusQualityAt(int x) {
 		TraceSequence seq = (TraceSequence) fixedConsensus;
@@ -2267,4 +2271,6 @@ public class AlignmentListModel implements ListModel, Iterable<Sequence>{
 		}
 		return true;
 	}
+
+
 }

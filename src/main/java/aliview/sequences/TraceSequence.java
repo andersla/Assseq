@@ -2,11 +2,11 @@ package aliview.sequences;
 
 public interface TraceSequence extends Sequence {
 	
-	public short getQualValAtPos(int pos);
-	
 	public Traces getTraces();
 	
 	public void trimTraces();
+	
+	public short getQualValAtPos(int pos);
 	
 	public void setQualClipStart(int pos);
 	

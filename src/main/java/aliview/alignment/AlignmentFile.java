@@ -2,6 +2,9 @@ package aliview.alignment;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectInputStream.GetField;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -22,6 +25,14 @@ public class AlignmentFile extends File{
 	public static AlignmentFile createAliViewTempFile(String name, String suffix) throws IOException {
 		String nameWithTmpPrefix = TMP_FILE_PREFIX + name + "_";
 		return new AlignmentFile(File.createTempFile(nameWithTmpPrefix, suffix));
+	}
+	
+	public static File createAliViewAssemblyInputFile(AlignmentFile templateAlignmentFile) {
+		final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_hh.mm.ss");
+		String timeString = dateFormat.format(new Date());
+		String name = "assembly-" + timeString + ".fasta";
+		File assemblyInputFile = new File(templateAlignmentFile.getParent(), name);
+		return new AlignmentFile(assemblyInputFile);
 	}
 
 	public static AlignmentFile createUserHomeFile() {
@@ -63,4 +74,5 @@ public class AlignmentFile extends File{
 	public String getParent() {
 		return super.getParent();
 	}
+
 }

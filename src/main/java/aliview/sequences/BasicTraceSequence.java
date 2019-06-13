@@ -22,7 +22,7 @@ import aliview.sequencelist.Interval;
 import aliview.utils.ArrayUtilities;
 
 // todo can save memory by changing data implementation into byte instead of char
-public class BasicTraceSequence extends BasicSequence implements TraceSequence{
+public class BasicTraceSequence extends BasicSequence implements TraceSequence, QualCalledSequence{
 	private static final Logger logger = Logger.getLogger(BasicTraceSequence.class);
 	private boolean simpleName = false;
 
@@ -555,8 +555,9 @@ public class BasicTraceSequence extends BasicSequence implements TraceSequence{
 		}
 		
 		// insert into traces
+		logger.info("RightPad trace " + addCount);
 		for(int n = 0; n < addCount; n++) {
-			getTraces().insertAt(n);
+			getTraces().append();
 		}
 	}
 	
@@ -862,27 +863,30 @@ public class BasicTraceSequence extends BasicSequence implements TraceSequence{
 	public boolean isQualClippedAtPos(int pos) {
 		return getBases().isQualClipped(pos);
 	}
+
+	public void writeQualityFastQ(Writer out) throws IOException{
+		out.write(qualCallsAsFastQString());
+	}
+	
+	public void writeQuality(Writer out) throws IOException{
+		short[] qualCalls = getBases().getQualCalls();
+		StringWriter buffer = new StringWriter();
+		for(int n = 0; n < qualCalls.length;  n++) {	
+			out.write( "" + qualCalls[n] + " ");
+		}
+	}
+	
 	public String qualCallsAsFastQString() {
 		//String FastQQuals = "#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 		short[] qualCalls = getBases().getQualCalls();
 		ArrayUtilities.addToArrayValuesShort(qualCalls, (short)33);
-		
+	
 		StringWriter buffer = new StringWriter();
 		for(int n = 0; n < qualCalls.length;  n++) {	
 			buffer.append( (char) qualCalls[n] );
 		}
 		
 		return buffer.toString();
-	}
-	
-	public String toFastQ() {
-		String bases = getBasesAsString();
-		String qualQalls = qualCallsAsFastQString();
-		String fastQ = "@" + getName() + "\n" + 
-                        bases + "\n" + 
-				        "+" + "\n" + 
-                        qualQalls;
-		return fastQ;
 	}
 
 	public int getQualValAt(int x) {

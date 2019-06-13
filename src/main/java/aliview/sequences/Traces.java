@@ -163,6 +163,10 @@ public class Traces {
 	private int getBaseCalledTraceLength() {
 		return baseCalls[baseCalls.length - 1];
 	}
+	
+	public void append() {
+		insertAt(baseCalls.length -1);
+	}
 
 	public void insertAt(int basePos) {
 		
@@ -173,7 +177,6 @@ public class Traces {
 		traceC.insertAt(startPos, newTracePiece);
 		traceG.insertAt(startPos, newTracePiece);
 		traceT.insertAt(startPos, newTracePiece);
-		
 		
 		int newCallPos = (int) (startPos + 0.5 * getOneBaseLength());
 		int[] newCalls = new int[] {newCallPos};

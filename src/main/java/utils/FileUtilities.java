@@ -19,6 +19,72 @@ public class FileUtilities {
 	private static final Logger logger = Logger.getLogger(FileUtilities.class);
 	private static int preferedWidth = 650;
 	private static int preferedHeight = 450;
+	
+	public static File[] selectOpenFilesViaChooser(File suggestedFile, Component parentComponent){
+
+		File[] selectedFiles = null;
+
+		// If mac or windows open FileDialog
+		// I have skipped using Native FileUtils in mac - it is sometimes crashing
+		// Only for some Windos VM is it used
+		/*
+		if(OSNativeUtils.isRunningDefectJFilechooserJVM()) {
+			// get Frame
+			Component root = SwingUtilities.getRoot(parentComponent);
+			Frame parentFrame = null;
+			if (root instanceof Frame) {
+				parentFrame = (Frame) root;
+			}
+			// use the native file dialog
+			FileDialog dialog = new FileDialog(parentFrame, "Open",FileDialog.LOAD);
+			dialog.setMultipleMode(true);
+			dialog.setDirectory(suggestedFile.getParent());
+			dialog.setVisible(true);
+			String fileDirectory = dialog.getDirectory();
+			File[] files = dialog.getFiles();
+			if(files != null){
+				selectedFile = new File(fileDirectory, fileName);
+			}
+		}
+		else{
+		*/
+
+			// Else JFileChooser
+			// Set readOnly to avoid rename of file by slow double click
+			Boolean old = UIManager.getBoolean("FileChooser.readOnly");  
+			UIManager.put("FileChooser.readOnly", Boolean.TRUE);  
+
+			JFileChooser fc = new JFileChooser(suggestedFile);
+			fc.setPreferredSize(new Dimension(preferedWidth, preferedHeight));
+			fc.setMultiSelectionEnabled(true);
+
+			/*
+			AbstractButton button = SwingUtilities.getDescendantOfType(AbstractButton.class,
+				      fc, "Icon", UIManager.getIcon("FileChooser.detailsViewIcon"));
+			button.doClick();
+			 */
+
+			int returnVal = fc.showOpenDialog(parentComponent);
+
+
+			UIManager.put("FileChooser.readOnly", old);  
+
+
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				selectedFiles = fc.getSelectedFiles();
+			} else {
+				selectedFiles = null;
+			}
+
+			preferedWidth = fc.getSize().width;
+			preferedHeight = fc.getSize().height;
+		
+
+		System.out.println("selectedfile" + selectedFiles);
+
+		return selectedFiles;
+
+	}
 
 	public static File selectOpenFileViaChooser(File suggestedFile, Component parentComponent){
 

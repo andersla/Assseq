@@ -109,6 +109,7 @@ import javax.swing.event.ListSelectionListener;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Appender;
 import org.apache.log4j.FileAppender;
@@ -197,6 +198,9 @@ import aliview.undo.UndoSavedStateSequenceOrder;
 import aliview.utils.FileDrop;
 import aliview.utils.Utils;
 import aliview.utils.FileDrop.Listener;
+import assseq.assembler.AlignedQ;
+import assseq.assembler.Assembler;
+import assseq.assembler.MSAQ;
 
 public class AssseqWindow extends JFrame implements UndoControler, AlignmentListener, AlignmentSelectionListener, AlignmentDataListener{
 
@@ -784,7 +788,6 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		// End toolbar
 		//
 
-		aliViewMenuBar.rebuildSelectCharsetsSubmenu();
 		aliViewMenuBar.updateAllMenuEnabled();
 		alignment.addAlignmentListener(aliViewMenuBar);
 		alignment.addAlignmentDataListener(aliViewMenuBar);
@@ -1171,6 +1174,15 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		String suggestedDir = null;
 		String suggestedFileName = null;
 
+		if(alignment.getAlignmentFile() == null) {
+			try {
+				alignment.setAlignmentFile(AlignmentFile.createAliViewTempFile("files", ""));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
 		if(alignment.getAlignmentFile().isAliViewTempFile()){		
 			File lastRecent = Settings.getLastRecentFile();
 			File lastRecentDir = null;
@@ -1453,16 +1465,19 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 
 
 		alignmentPane.setAlignment(alignment);
+		tracePanel.setAlignment(alignment);
 		sequenceJList.setModel(alignment.getSequences());
 		sequenceJList.setSelectionModel(alignment.getSequences().getAlignmentSelectionModel().getSequenceListSelectionModel());
+		traceSequenceJList.setModel(alignment.getSequences());
+		traceSequenceJList.setSelectionModel(alignment.getSequences().getAlignmentSelectionModel().getSequenceListSelectionModel());
 		//		alignment.getSequences().addAlignmentDataListener(aliListener);
 		//		alignment.getSequences().addAlignmentSelectionListener(aliListener);
 		statusPanel.setAlignment(alignment);
 		statusPanel.updateAll();
 
 		alignmentPane.validateSize();
+		tracePanel.validateSize();
 		aliViewWindow.updateWindowTitle();
-		aliViewMenuBar.rebuildSelectCharsetsSubmenu();
 		aliViewMenuBar.updateAllMenuEnabled();
 
 		// Show dialog if sequence type was not detected
@@ -1694,12 +1709,7 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 
 
 
-	public void reAlignEverythingWithDefaultProgram() {
-
-		if(alignment.isTranslatedOnePos()){
-			Messenger.showOKOnlyMessage(Messenger.SUGGEST_ALIGN_AS_TRANSLATED, aliViewWindow);	
-			return;
-		}
+	public void reAssembleEverythingWithDefaultProgram() {
 
 		CommandItem firstSelected = null;
 		for(CommandItem item: Settings.getAlignALLCommands()){
@@ -1710,8 +1720,10 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 			}
 		}
 		if(firstSelected != null){
-			reAlignEverythingWithAlignCommand(firstSelected, false,false);
+			reAssembleEverythingWithAlignCommand(firstSelected, false,false);
 		}
+		
+		
 	}
 
 	public void reAlignEverythingAsTranslatedAA() {
@@ -1724,7 +1736,7 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 			}
 		}
 		if(firstSelected != null){
-			reAlignEverythingWithAlignCommand(firstSelected, true,false);
+			reAssembleEverythingWithAlignCommand(firstSelected, true,false);
 		}
 	}
 
@@ -1744,12 +1756,11 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 			}
 		}
 		if(firstSelected != null){
-			reAlignEverythingWithAlignCommand(firstSelected, false,true);
+			reAssembleEverythingWithAlignCommand(firstSelected, false,true);
 		}
 	}
-
-
-	public void reAlignEverythingWithAlignCommand(final CommandItem alignItem, final boolean asTranslatedAA, final boolean selection){
+	
+	public void reAssembleEverythingWithAlignCommand(final CommandItem alignItem, final boolean asTranslatedAA, final boolean selection){
 
 		// ask if realign everything
 		if(! selection){
@@ -1763,11 +1774,10 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 					return;
 				}
 			}
-
-
 		}
 
 		// warn if invalid characters
+		/*
 		String invalidChars = alignment.getFirstAlignmentProgInvalidCharacter();
 		if(invalidChars.length() > 0){
 			String invalCharMessage = "Some aligners (e.g. Muscle, Mafft) are sensiteive to invalid characters," + LF + "the following were found and you might need to replace them with X in your alignment: " + invalidChars;
@@ -1776,36 +1786,34 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 				return;
 			}
 		}
+		*/
 		try {
-			logger.info("alignWithDefault");
+			logger.info("assembleWithDefault");
+			
+			// Strip all padding
 
 			// Save current alignment in tempdir (to be sure all unsaved changes are there)
 			FileFormat currentTempFileFormat = alignItem.getCurrentAlignmentFileFormat();
-			final File currentAlignmentTempFile = AlignmentFile.createAliViewTempFile("current-alignment", currentTempFileFormat.getSuffix());
+			
+			final File currentAlignmentTempFile = AlignmentFile.createAliViewAssemblyInputFile(alignment.getAlignmentFile());
+		
 			// save selection if user changes it during alignment
 			final Rectangle selectionBounds = alignment.getSelectionAsMinRect();
-			if(asTranslatedAA){
-				alignment.saveAlignmentAsFile(currentAlignmentTempFile, FileFormat.FASTA_TRANSLATED_AMINO_ACID, true);
-			}else if(selection){		
-				alignment.saveSelectionAsFastaFile(currentAlignmentTempFile);
-			}else{
-				alignment.saveAlignmentAsFile(currentAlignmentTempFile, currentTempFileFormat, true);
-			}
+
+			alignment.saveAlignmentAsFile(currentAlignmentTempFile, currentTempFileFormat, false);
 
 			// Create a tempFile for new alignment
-			final File newAlignmentTempFile = AlignmentFile.createAliViewTempFile("alignment", ".fasta");
+			final File newAlignmentTempFile = new File(currentAlignmentTempFile.getAbsolutePath() + ".cap.ace");
 
 			// Replace static parameters in command
 			alignItem.setParameterCurrentFile(currentAlignmentTempFile);
 			alignItem.setParameterOutputFile(newAlignmentTempFile);
-
 
 			final SubProcessWindow subProcessWin = SubProcessWindow.getProcessProgressWindow(aliViewWindow, true);
 			subProcessWin.setCloseWhenDoneCbxSelection(Settings.getHideProcessProgressWindowWhenDone().getBooleanValue());
 			subProcessWin.setTitle("Align with " + alignItem.getName());
 			subProcessWin.setAlwaysOnTop(false);
 			subProcessWin.show();
-
 
 			Thread thread = new Thread(new Runnable(){
 				public void run(){
@@ -1822,7 +1830,7 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 								}else if(selection){
 									aliViewWindow.realignmentOfSelectionDone(wasProcessInterruptedByUser, newAlignmentTempFile, selectionBounds);
 								}else{
-									aliViewWindow.realignmentDone(wasProcessInterruptedByUser, newAlignmentTempFile);	
+									aliViewWindow.reassemblyDone(wasProcessInterruptedByUser, newAlignmentTempFile);	
 								}
 								subProcessWin.appendOutput(LF + "Done" + LF);
 								logger.info("before-set-visible-false");
@@ -1863,6 +1871,81 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 			e.printStackTrace();
 		}
 	}
+
+
+	public void reAssembleEverythingWithInternalAssemblyCommand(final CommandItem alignItem, final boolean asTranslatedAA, final boolean selection){
+
+		// ask if realign everything
+		if(! selection){
+
+			boolean hideMessage = Settings.getHideRealignEverythingMessage().getBooleanValue();
+			if(! hideMessage){
+				boolean hideMessageNextTime = Messenger.showOKCancelMessageWithCbx(Messenger.REALIGN_EVERYTHING, hideMessage, aliViewWindow);
+				Settings.getHideRealignEverythingMessage().putBooleanValue(hideMessageNextTime);
+				int choise = Messenger.getLastSelectedOption();
+				if(choise == JOptionPane.CANCEL_OPTION){
+					return;
+				}
+			}
+
+
+		}
+
+		// warn if invalid characters
+
+		
+		try {
+			logger.info("assembleWithDefault");
+
+			// Save current alignment in tempdir (to be sure all unsaved changes are there)
+			FileFormat currentTempFileFormat = FileFormat.FASTQ;
+			final File currentAlignmentTempFile = AlignmentFile.createAliViewTempFile("current-alignment", currentTempFileFormat.getSuffix());
+			// save selection if user changes it during alignment
+			final Rectangle selectionBounds = alignment.getSelectionAsMinRect();
+			
+			alignment.saveAlignmentAsFile(currentAlignmentTempFile, currentTempFileFormat, true);
+
+			// Replace static parameters in command
+
+			final SubProcessWindow subProcessWin = SubProcessWindow.getProcessProgressWindow(aliViewWindow, true);
+			subProcessWin.setCloseWhenDoneCbxSelection(Settings.getHideProcessProgressWindowWhenDone().getBooleanValue());
+			subProcessWin.setTitle("Align with " + alignItem.getName());
+			subProcessWin.setAlwaysOnTop(false);
+			subProcessWin.show();
+
+			
+			Assembler assembler = new assseq.assembler.Assembler();
+			
+			int lowestAlScore = 100;
+			//int lowestDip = 75;
+			int trim_qual = 15;
+			String output_format = "ACE";
+			ArrayList<File> inputFiles = new ArrayList<File>();
+			boolean batch = false;
+			
+			inputFiles.add(currentAlignmentTempFile);
+		
+			assembler.assemble(lowestAlScore, trim_qual, output_format, inputFiles, batch);
+			
+
+			subProcessWin.appendOutput(LF + "Done" + LF);
+								
+			if(Settings.getHideProcessProgressWindowWhenDone().getBooleanValue()){
+				subProcessWin.dispose();
+			}
+			
+			//glassPane.setVisible(false);
+			setSoftLockGUIThroughMenuDisable(false);
+
+		} catch (Exception e) {
+			Messenger.showOKOnlyMessage(Messenger.ALIGNER_SOMETHING_PROBLEM_ERROR,
+					LF + "Error message:" + e.getLocalizedMessage(),
+					aliViewWindow);	
+			e.printStackTrace();
+		}
+	}
+	
+	
 
 
 
@@ -1966,6 +2049,41 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		aliViewWindow.getUndoControler().pushUndoState();
 		loadNewAlignmentFile(alignment.getAlignmentFile(), forcedSequenceType);		
 		logger.info("Finished changeAlignmentType");
+	}
+	
+	protected void reassemblyDone(boolean wasProcessInterruptedByUser, File newRealignedTempFile) {
+		if(! wasProcessInterruptedByUser){
+
+			// Reload new alignment
+			if(newRealignedTempFile.length() > 0){
+
+				aliViewWindow.getUndoControler().pushUndoState();
+				// TODO storing this could be done slightly more unified
+				// store path to current working file
+				File storedAlignmentFile = alignment.getAlignmentFile();
+
+				// When realigning all don't keep alignment meta
+				// AlignmentMeta storedMeta = alignment.getAlignentMetaCopy();			
+
+				loadNewAlignmentFile(newRealignedTempFile);
+				// Restore
+				alignment.setAlignmentFile(storedAlignmentFile);
+				this.updateWindowTitle();
+
+				// When realigning all dont keep alignment meta
+				//alignment.setAlignentMeta(storedMeta);
+
+				//alignment.padAndTrimSequences();
+			}
+			else{
+				//glassPane.setVisible(false);
+				setSoftLockGUIThroughMenuDisable(false);
+				Messenger.showOKOnlyMessage(Messenger.ALIGNER_SOMETHING_PROBLEM_ERROR, aliViewWindow);
+			}
+		}
+
+		logger.info("Finished reAlignWithDefault");
+
 	}
 
 	protected void realignmentDone(boolean wasProcessInterruptedByUser, File newRealignedTempFile) {
@@ -2553,6 +2671,16 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 			addSequencesFromFile(selectedFile, atIndex);
 		}	
 	}
+	
+	public void addSequencesFromFiles(int atIndex){
+		// As default get last used stored directory
+		String suggestedDir = Settings.getLoadAlignmentDirectory();
+		File suggestedFile = new File(suggestedDir);
+		File[] selectedFiles = FileUtilities.selectOpenFilesViaChooser(suggestedFile,aliViewWindow);
+		if(selectedFiles != null){		
+			addSequencesFromFiles(selectedFiles, atIndex);
+		}	
+	}
 
 	public void addSequencesFromFile(File seqFile, int atIndex){
 		if(seqFile == null || !seqFile.exists()){
@@ -2572,6 +2700,35 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 			alignment.addSequences(seqFile, atIndex);
 			//alignment.addFasta(clipboardSelection);
 		}
+		//requestRepaintAndRevalidateALL();
+	}
+	
+	public void addSequencesFromFiles(File[] seqFiles, int atIndex){
+		if(seqFiles == null){
+			return;
+		}
+		aliViewWindow.getUndoControler().pushUndoState();
+		// if alignment is empty create a new one from the file
+		// TODO this should not be needed to check, but handled gracefully as one method 
+		if(alignment.getSize() == 0){
+			Alignment newAlignment = AlignmentFactory.createNewAlignment(seqFiles[0]);
+			if(newAlignment != null){
+				setupNewAlignment(newAlignment);
+			}
+			if(seqFiles.length > 1) {
+				File[] restOfFiles = new File[seqFiles.length -1];
+				for(int n = 0; n < restOfFiles.length; n++) {
+					restOfFiles[n] = seqFiles[n + 1];
+				}
+				alignment.addSequences(restOfFiles, atIndex);
+			}
+			
+		}
+		else{		
+			alignment.addSequences(seqFiles, atIndex);
+			//alignment.addFasta(clipboardSelection);
+		}	
+
 		//requestRepaintAndRevalidateALL();
 	}
 

@@ -141,7 +141,16 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 		mntmOpenFile.setAccelerator(OSNativeUtils.getOpenFileAccelerator());
 		mnFile.add(mntmOpenFile);
 		alwaysAvailableFunctions.add(mntmOpenFile);
-
+		
+		
+		JMenuItem mntmAddFromFiles = new JMenuItem("Add sequences from files");
+		mntmAddFromFiles.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				aliViewWindow.addSequencesFromFiles(0);
+			}
+		});
+		mnFile.add(mntmAddFromFiles);
+		alwaysAvailableFunctions.add(mntmAddFromFiles);
 
 		mnFile.add(new JSeparator());
 
@@ -173,113 +182,35 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 		saveFileMenu.setAccelerator(OSNativeUtils.getSaveFileAccelerator());
 		mnFile.add(saveFileMenu);
 		loadedAlignmentFunctions.add(saveFileMenu);
-
-		JMenuItem saveAlignmentAsFastaNebu = new JMenuItem("Save as Fasta");
-		saveAlignmentAsFastaNebu.addActionListener(new ActionListener() {
+		
+		JMenuItem saveAlignmentAsFastQ = new JMenuItem("Save as FastQ");
+		saveAlignmentAsFastQ.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				aliViewWindow.saveAlignmentAsFileViaChooser(FileFormat.FASTQ, false);
+			}
+		});
+		mnFile.add(saveAlignmentAsFastQ);
+		loadedAlignmentFunctions.add(saveAlignmentAsFastQ);
+		
+		JMenuItem saveAlignmentAsFasta = new JMenuItem("Save as Fasta");
+		saveAlignmentAsFasta.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				aliViewWindow.saveAlignmentAsFileViaChooser(FileFormat.FASTA, false);
 			}
 		});
-		mnFile.add(saveAlignmentAsFastaNebu);
-		loadedAlignmentFunctions.add(saveAlignmentAsFastaNebu);
+		mnFile.add(saveAlignmentAsFasta);
+		loadedAlignmentFunctions.add(saveAlignmentAsFasta);
 
 
-
-		JMenuItem mntmSaveAlignmentAsNexus = new JMenuItem("Save as Nexus");
-		mntmSaveAlignmentAsNexus.addActionListener(new ActionListener() {
+		JMenuItem mntmSaveAlignmentAsACE = new JMenuItem("Save as ACE");
+		mntmSaveAlignmentAsACE.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.saveAlignmentAsFileViaChooser(FileFormat.NEXUS, false);
+				aliViewWindow.saveAlignmentAsFileViaChooser(FileFormat.ACE, false);
 			}
 
 		});
-		mnFile.add(mntmSaveAlignmentAsNexus);
-		loadedAlignmentFunctions.add(mntmSaveAlignmentAsNexus);
-
-		JMenuItem mntmSaveAlignmentAsSimpleNexus = new JMenuItem("Save as Nexus (Illegal name chars replaced by _ (e.g. for MrBayes)");
-		mntmSaveAlignmentAsSimpleNexus.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.saveAlignmentAsFileViaChooser(FileFormat.NEXUS_SIMPLE, false);
-			}
-		});
-		mnFile.add(mntmSaveAlignmentAsSimpleNexus);
-		loadedAlignmentFunctions.add(mntmSaveAlignmentAsSimpleNexus);
-
-		JMenuItem mntmSaveAlignmentAsNexusCodon = new JMenuItem("Save as codonpos Nexus (codonpos as charsets - excluded removed)");
-		mntmSaveAlignmentAsNexusCodon.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.saveAlignmentAsFileViaChooser(FileFormat.NEXUS_CODONPOS_CHARSET, false);
-			}
-
-		});
-		mnFile.add(mntmSaveAlignmentAsNexusCodon);
-		loadedAlignmentFunctions.add(mntmSaveAlignmentAsNexusCodon);
-		nucleotideFunctions.add(mntmSaveAlignmentAsNexusCodon);
-
-		JMenuItem mntmSaveAlignmentAsPhylipRelaxedPadded = new JMenuItem("Save as Phylip (full names & padded)");
-		mntmSaveAlignmentAsPhylipRelaxedPadded.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.saveAlignmentAsFileViaChooser(FileFormat.PHYLIP_RELAXED_PADDED_AKA_LONG_NAME_SEQUENTIAL, false);
-			}
-
-		});
-		mnFile.add(mntmSaveAlignmentAsPhylipRelaxedPadded);
-		loadedAlignmentFunctions.add(mntmSaveAlignmentAsPhylipRelaxedPadded);
-
-
-		JMenu menuPhylipSubmenu = new JMenu("Save as Phylip (other format versions)");
-		mnFile.add(menuPhylipSubmenu);
-
-
-		JMenuItem mntmSaveAlignmentAsPhylipRelaxedPaddedInterleaved = new JMenuItem("Save as Phylip (full names, padded & interleaved)");
-		mntmSaveAlignmentAsPhylipRelaxedPaddedInterleaved.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.saveAlignmentAsFileViaChooser(FileFormat.PHYLIP_RELAXED_PADDED_INTERLEAVED_AKA_LONG_NAME_INTERLEAVED, false);
-			}
-
-		});
-		menuPhylipSubmenu.add(mntmSaveAlignmentAsPhylipRelaxedPaddedInterleaved);
-		loadedAlignmentFunctions.add(mntmSaveAlignmentAsPhylipRelaxedPaddedInterleaved);
-
-
-		JMenuItem mntmSaveAlignmentAsPhylip = new JMenuItem("Save as Phylip (full names)");
-		mntmSaveAlignmentAsPhylip.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.saveAlignmentAsFileViaChooser(FileFormat.PHYLIP_RELAXED, false);
-			}
-
-		});
-		menuPhylipSubmenu.add(mntmSaveAlignmentAsPhylip);
-		loadedAlignmentFunctions.add(mntmSaveAlignmentAsPhylip);
-
-		JMenuItem mntmSaveAlignmentAsPhylipStrictSequential = new JMenuItem("Save as Phylip (strict 10 char names)");
-		mntmSaveAlignmentAsPhylipStrictSequential.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.saveAlignmentAsFileViaChooser(FileFormat.PHYLIP_STRICT_SEQUENTIAL_AKA_SHORT_NAME_SEQUENTIAL, false);
-			}
-
-		});
-		menuPhylipSubmenu.add(mntmSaveAlignmentAsPhylipStrictSequential);
-		loadedAlignmentFunctions.add(mntmSaveAlignmentAsPhylipStrictSequential);
-
-		JMenuItem mntmSaveAlignmentAsClustal = new JMenuItem("Save as Clustal (aln)");
-		mntmSaveAlignmentAsClustal.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.saveAlignmentAsFileViaChooser(FileFormat.CLUSTAL, false);
-			}
-
-		});
-		mnFile.add(mntmSaveAlignmentAsClustal);
-		loadedAlignmentFunctions.add(mntmSaveAlignmentAsClustal);
-
-		JMenuItem mntmSaveAlignmentAsMSF = new JMenuItem("Save as MSF/GCG");
-		mntmSaveAlignmentAsMSF.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.saveAlignmentAsFileViaChooser(FileFormat.MSF, false);
-			}
-
-		});
-		mnFile.add(mntmSaveAlignmentAsMSF);
-		loadedAlignmentFunctions.add(mntmSaveAlignmentAsMSF);
+		mnFile.add(mntmSaveAlignmentAsACE);
+		loadedAlignmentFunctions.add(mntmSaveAlignmentAsACE);
 
 		mnFile.add(new JSeparator());
 
@@ -291,76 +222,6 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 		});
 		mnFile.add(mntmSaveSelAsFasta);
 		hasSelectionFunctions.add(mntmSaveSelAsFasta);
-
-		mnFile.add(new JSeparator());
-
-		JMenuItem mntmSaveTranslatedAlignmentAsFasta = new JMenuItem("Save Translated alignment (Amino Acid) as Fasta");
-		mntmSaveTranslatedAlignmentAsFasta.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.saveAlignmentAsFileViaChooser(FileFormat.FASTA_TRANSLATED_AMINO_ACID, false);
-			}
-
-		});
-		mnFile.add(mntmSaveTranslatedAlignmentAsFasta);
-		loadedAlignmentFunctions.add(mntmSaveTranslatedAlignmentAsFasta);
-		nucleotideFunctions.add(mntmSaveTranslatedAlignmentAsFasta);
-		/*
-		JMenuItem mntmSaveTranslatedAlignmentAsPhylip = new JMenuItem("Save Translated alignment (Amino Acid) as Phylip");
-		mntmSaveTranslatedAlignmentAsPhylip.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.saveAlignmentAsFileViaChooser(FileFormat.PHYLIP_TRANSLATED_AMINO_ACID, false);
-			}
-
-		});
-		mnFile.add(mntmSaveTranslatedAlignmentAsPhylip);
-		loadedAlignmentFunctions.add(mntmSaveTranslatedAlignmentAsPhylip);
-		nucleotideFunctions.add(mntmSaveTranslatedAlignmentAsPhylip);
-
-		JMenuItem mntmSaveTranslatedAlignmentAsNexus = new JMenuItem("Save Translated alignment (Amino Acid) as Nexus");
-		mntmSaveTranslatedAlignmentAsNexus.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.saveAlignmentAsFileViaChooser(FileFormat.NEXUS_TRANSLATED_AMINO_ACID, false);
-			}
-
-		});
-		mnFile.add(mntmSaveTranslatedAlignmentAsNexus);
-		loadedAlignmentFunctions.add(mntmSaveTranslatedAlignmentAsNexus);
-		nucleotideFunctions.add(mntmSaveTranslatedAlignmentAsNexus);
-		 */
-
-		mnFile.add(new JSeparator());
-
-		JMenuItem mntmSaveFastaIndex = new JMenuItem("Save fasta index file (.fai)");
-		mntmSaveFastaIndex.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.saveFastaIndex();
-			}
-		});
-		mnFile.add(mntmSaveFastaIndex);
-		loadedAlignmentFunctions.add(mntmSaveFastaIndex);
-
-
-		mnFile.add(new JSeparator());
-
-		JMenuItem mntmExportAlignmentAsImage = new JMenuItem("Export alignment as image");
-		mntmExportAlignmentAsImage.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.saveAlignmentAsFileViaChooser(FileFormat.IMAGE_PNG, true);
-			}
-		});
-		mnFile.add(mntmExportAlignmentAsImage);
-		loadedAlignmentFunctions.add(mntmExportAlignmentAsImage);
-
-		mnFile.add(new JSeparator());
-
-		JMenuItem mntmExportRaxMLFile = new JMenuItem("Export RaxML partition file");
-		mntmExportRaxMLFile.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.exportRaxMLFile();
-			}
-		});
-		mnFile.add(mntmExportRaxMLFile);
-		loadedAlignmentFunctions.add(mntmExportRaxMLFile);
 
 		mnFile.add(new JSeparator());
 
@@ -469,19 +330,6 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 		mnEdit.add(mntmCopyName);
 		hasSelectionFunctions.add(mntmCopyName);
 
-		JMenuItem mntmPasteClipboard = new JMenuItem("Paste (fasta-sequences)");
-		mntmPasteClipboard.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.pasteFasta();
-			}
-		});
-		mntmPasteClipboard.setAccelerator(OSNativeUtils.getPasteKeyAccelerator());
-		pasteAsFastaButtonModel = mntmPasteClipboard.getModel();
-		mnEdit.add(mntmPasteClipboard);
-		editFunctions.add(mntmPasteClipboard);
-		alwaysAvailableFunctions.add(mntmPasteClipboard);
-
-
 		mnEdit.add(new JSeparator());
 
 		JMenuItem mntmRename = new JMenuItem("Rename sequence");
@@ -495,27 +343,6 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 		mnEdit.add(mntmRename);
 		editFunctions.add(mntmRename);
 		hasSelectionFunctions.add(mntmRename);
-
-		mnEdit.add(new JSeparator());
-
-		JMenuItem mntmAddFromFile = new JMenuItem("Add sequences from file");
-		mntmAddFromFile.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.addSequencesFromFile(0);
-			}
-		});
-		mnEdit.add(mntmAddFromFile);
-		editFunctions.add(mntmAddFromFile);
-
-		JMenuItem mntmAddNewSeq = new JMenuItem("Add new empty sequence");
-		mntmAddNewSeq.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.addNewSequence();
-			}
-		});
-		addEmptySeqButtonModel = mntmAddNewSeq.getModel();
-		mnEdit.add(mntmAddNewSeq);
-		editFunctions.add(mntmAddNewSeq);
 
 		mnEdit.add(new JSeparator());
 
@@ -555,83 +382,6 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 		mnEdit.add(mntmDeleteSelectedItem);
 		reorderAndDeleteFunctions.add(mntmDeleteSelectedItem);
 
-		JMenuItem mntmRemoveVerticalGaps = new JMenuItem("Delete gap-only columns");
-		mntmRemoveVerticalGaps.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.deleteVerticalGaps();
-
-			}
-		});
-		//mntmRemoveVerticalGaps.setAccelerator(KeyStroke.getKeyStroke(??));
-		mnEdit.add(mntmRemoveVerticalGaps);
-		editFunctions.add(mntmRemoveVerticalGaps);
-		loadedAlignmentFunctions.add(mntmRemoveVerticalGaps);
-
-		JMenuItem mntmRemoveAllGaps = new JMenuItem("Delete all gaps in all sequences");
-		mntmRemoveAllGaps.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.deleteAllGaps();
-
-			}
-		});
-		mnEdit.add(mntmRemoveAllGaps);
-		editFunctions.add(mntmRemoveAllGaps);
-		loadedAlignmentFunctions.add(mntmRemoveAllGaps);
-
-		JMenuItem mntmTrim = new JMenuItem("Trim sequences");
-		mntmTrim.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.trimSequences();
-
-			}
-		});
-		mnEdit.add(mntmTrim);
-		editFunctions.add(mntmTrim);
-		loadedAlignmentFunctions.add(mntmTrim);
-
-		JMenuItem mntmDeleteExcluded = new JMenuItem("Delete excluded bases");
-		mntmDeleteExcluded.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.deleteExludedBases();
-			}
-		});
-		mnEdit.add(mntmDeleteExcluded);
-		editFunctions.add(mntmDeleteExcluded);
-		loadedAlignmentFunctions.add(mntmDeleteExcluded);
-
-		JMenuItem mntmDeleteEmpty = new JMenuItem("Delete empty sequences");
-		mntmDeleteEmpty.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.deleteEmptySequences();
-			}
-		});
-		mnEdit.add(mntmDeleteEmpty);
-		editFunctions.add(mntmDeleteEmpty);
-		loadedAlignmentFunctions.add(mntmDeleteEmpty);
-
-		mnEdit.add(new JSeparator());
-
-		JMenuItem mntmTermGapToMissing = new JMenuItem("Replace terminal GAPs into missing char (?)");
-		mntmTermGapToMissing.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.terminalGAPtoMissing();
-			}
-		});
-		mnEdit.add(mntmTermGapToMissing);
-		editFunctions.add(mntmTermGapToMissing);
-		loadedAlignmentFunctions.add(mntmTermGapToMissing);
-
-		JMenuItem mntmMissingToGap = new JMenuItem("Replace missing char (?) into GAP (-)");
-		mntmMissingToGap.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.missingToGAP();
-			}
-		});
-		mnEdit.add(mntmMissingToGap);
-		editFunctions.add(mntmMissingToGap);
-		loadedAlignmentFunctions.add(mntmMissingToGap);
-
 		mnEdit.add(new JSeparator());
 
 		JMenuItem mntmFind = new JMenuItem("Find");
@@ -643,39 +393,6 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 		});
 		mnEdit.add(mntmFind);
 		loadedAlignmentFunctions.add(mntmFind);
-
-		JMenuItem mntmFindDupes = new JMenuItem("Find and select duplicate sequences");
-		//mntmFindDupes.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-		mntmFindDupes.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				aliViewWindow.selectDuplicates();
-			}
-		});
-		mnEdit.add(mntmFindDupes);
-		loadedAlignmentFunctions.add(mntmFindDupes);
-
-		JMenuItem mntmFindClipboardNames = new JMenuItem("Find sequence names from clipboard");
-		mntmFindClipboardNames.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-		mntmFindClipboardNames.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				aliViewWindow.findNamesFromClipboard();
-			}
-		});
-		mnEdit.add(mntmFindClipboardNames);
-		loadedAlignmentFunctions.add(mntmFindClipboardNames);
-
-		mnEdit.add(new JSeparator());
-
-		JMenuItem mntmMerger = new JMenuItem("Merge 2 selected sequences");
-		mntmMerger.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
-		mntmMerger.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.merge2SelectedSequences();
-			}
-		});
-		mnEdit.add(mntmMerger);
-		editFunctions.add(mntmMerger);
-		loadedAlignmentFunctions.add(mntmMerger);
 
 		mnEdit.add(new JSeparator());		
 
@@ -692,7 +409,7 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 		loadedAlignmentFunctions.add(mntmRevCompSequences);
 
 
-		JMenuItem mntmRevCompAlignment = new JMenuItem("Reverse Complement Alignment");
+		JMenuItem mntmRevCompAlignment = new JMenuItem("Reverse Complement Assembly");
 		mntmRevCompAlignment.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				logger.info("action perf");
@@ -704,7 +421,7 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 		editFunctions.add(mntmRevCompAlignment);
 		loadedAlignmentFunctions.add(mntmRevCompAlignment);
 
-		JMenuItem mntmCompAlignment = new JMenuItem("Complement Alignment");
+		JMenuItem mntmCompAlignment = new JMenuItem("Complement Assembly");
 		mntmCompAlignment.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				logger.info("action perf");
@@ -715,57 +432,6 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 		mnEdit.add(mntmCompAlignment);
 		editFunctions.add(mntmCompAlignment);
 		loadedAlignmentFunctions.add(mntmCompAlignment);
-
-		JMenuItem mntmRevComp = new JMenuItem("Reverse Complement Clipboard");
-		mntmRevComp.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				logger.info("action perf");
-				aliViewWindow.reverseComplementClipboard();
-			}
-		});
-		mnEdit.add(mntmRevComp);
-		alwaysAvailableFunctions.add(mntmRevComp);
-
-		mnEdit.add(new JSeparator());
-
-		JMenuItem mntmEditCharsets = new JMenuItem("Edit charsets");
-		mntmEditCharsets.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				aliViewWindow.editCharsets();
-			}
-		});
-		mnEdit.add(mntmEditCharsets);
-		loadedAlignmentFunctions.add(mntmEditCharsets);
-
-		mnEdit.add(new JSeparator());
-
-		// create AlignmentType Menu and submenu
-		JMenu mnAlignmentType = new JMenu("Set Alignment Sequence Type");
-		ButtonGroup alignmentSeqTypeBG = new ButtonGroup();
-
-		JCheckBoxMenuItem sequenceTypeNucSubmenu = new JCheckBoxMenuItem("Nucleoide");
-		sequenceTypeNucSubmenu.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.changeAlignmentType(SequenceUtils.TYPE_NUCLEIC_ACID);
-			}
-		});
-		alignmentSeqTypeBG.add(sequenceTypeNucSubmenu);
-		sequenceTypeNucSubmenu.setSelected(aliViewWindow.getAlignment().isNucleotideAlignment());		
-		mnAlignmentType.add(sequenceTypeNucSubmenu);
-
-		JCheckBoxMenuItem sequenceTypeAASubmenu = new JCheckBoxMenuItem("Amino Acid");
-		sequenceTypeAASubmenu.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.changeAlignmentType(SequenceUtils.TYPE_AMINO_ACID);
-			}
-		});
-		alignmentSeqTypeBG.add(sequenceTypeAASubmenu);
-		sequenceTypeAASubmenu.setSelected(aliViewWindow.getAlignment().isAAAlignment());		
-		mnAlignmentType.add(sequenceTypeAASubmenu);
-
-		mnEdit.add(mnAlignmentType);
-		loadedAlignmentFunctions.add(mnAlignmentType);
-
 
 		mnEdit.add(new JSeparator());
 
@@ -919,86 +585,6 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 		hasSelectionFunctions.add(mntmMoveSelectionToBottom);
 		reorderAndDeleteFunctions.add(mntmMoveSelectionToBottom);
 
-		mnSelection.add(new JSeparator());
-
-		JMenuItem mntmAddExcludes = new JMenuItem("Add or Remove selection to Excludes/Exset");
-		mntmAddExcludes.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.addOrRemoveSelectionToExcludes();
-			}
-		});
-		mntmAddExcludes.setAccelerator(OSNativeUtils.getAddOrRemoveExcludesKeyAccelerator());
-		mnSelection.add(mntmAddExcludes);
-		hasSelectionFunctions.add(mntmAddExcludes);
-		/*
-		JMenuItem mntmRemoveExcludes = new JMenuItem("Remove selection from Excludes/Exset");
-		mntmRemoveExcludes.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.removeSelectionFromExcludes();
-			}
-		});
-		mnSelection.add(mntmRemoveExcludes);
-		hasSelectionFunctions.add(mntmRemoveExcludes);
-		 */
-		mnSelection.add(new JSeparator());
-
-		mnSelectCharset = new JMenu("Select Charset");
-		//		mntmSelectCharset.addActionListener(new ActionListener() {
-		//			public void actionPerformed(ActionEvent e) {
-		//				aliViewWindow.setSelectionAsCoding(0);
-		//			}
-		//		});
-		mnSelection.add(mnSelectCharset);
-		mnSelectCharset.setEnabled(false);
-
-
-		mnSelection.add(new JSeparator());
-
-		JMenuItem mntmSetSelectionAsCoding0 = new JMenuItem("Set selection as coding (selection starting with codon position=1)");
-		mntmSetSelectionAsCoding0.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.setSelectionAsCoding(1);
-			}
-		});
-		mnSelection.add(mntmSetSelectionAsCoding0);
-		coding0ButtonModel=mntmSetSelectionAsCoding0.getModel();
-		hasSelectionFunctions.add(mntmSetSelectionAsCoding0);
-		nucleotideFunctions.add(mntmSetSelectionAsCoding0);
-
-		JMenuItem mntmSetSelectionAsCoding1 = new JMenuItem("Set selection as coding (selection starting with codon position=2)");
-		mntmSetSelectionAsCoding1.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.setSelectionAsCoding(2);
-			}
-		});
-		coding1ButtonModel=mntmSetSelectionAsCoding1.getModel();
-		mnSelection.add(mntmSetSelectionAsCoding1);
-		hasSelectionFunctions.add(mntmSetSelectionAsCoding1);
-		nucleotideFunctions.add(mntmSetSelectionAsCoding1);
-
-		JMenuItem mntmSetSelectionAsCoding2 = new JMenuItem("Set selection as coding (selection starting with codon position=3)");
-		mntmSetSelectionAsCoding2.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.setSelectionAsCoding(3);
-			}
-		});
-		coding2ButtonModel=mntmSetSelectionAsCoding2.getModel();
-		mnSelection.add(mntmSetSelectionAsCoding2);
-		hasSelectionFunctions.add(mntmSetSelectionAsCoding2);
-		nucleotideFunctions.add(mntmSetSelectionAsCoding2);
-
-		JMenuItem mntmSetSelectionAsNonCoding = new JMenuItem("Set selection as Non-coding");
-		mntmSetSelectionAsNonCoding.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.setSelectionAsNonCoding();
-			}
-		});
-		nonCodingButtonModel = mntmSetSelectionAsNonCoding.getModel();
-		mnSelection.add(mntmSetSelectionAsNonCoding);
-		hasSelectionFunctions.add(mntmSetSelectionAsNonCoding);
-		nucleotideFunctions.add(mntmSetSelectionAsNonCoding);
-
-
 
 		JMenu mnViewMenu = new JMenu("View");
 		mnViewMenu.setMnemonic(KeyEvent.VK_V);
@@ -1042,18 +628,6 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 
 		mnViewMenu.add(new JSeparator());
 
-//		JCheckBoxMenuItem highlightCons = new JCheckBoxMenuItem("Highlight consensus characters");
-//		highlightCons.addChangeListener(new ChangeListener() {
-//			public void stateChanged(ChangeEvent e){
-//				JCheckBoxMenuItem  btn = (JCheckBoxMenuItem ) e.getSource();
-//				aliViewWindow.setHighlightConsensus(btn.isSelected());
-//			}
-//		});
-//		highlightCons.setSelected(true);		
-//		buttonGroupOneViewAtATime.add(highlightCons);
-//		highlightConsButtonModel = highlightCons.getModel();
-//		mnViewMenu.add(highlightCons);
-//		loadedAlignmentFunctions.add(highlightCons);
 		
 		ButtonGroup buttonGroupOneViewAtATime = new NoneSelectedButtonGroup();
 
@@ -1068,18 +642,6 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 		highlightNonConsButtonModel = highlightNonCons.getModel();
 		mnViewMenu.add(highlightNonCons);
 		loadedAlignmentFunctions.add(highlightNonCons);
-
-//		JCheckBoxMenuItem highlightDiff = new JCheckBoxMenuItem("Highlight diff from a selected sequence");
-//		highlightDiff.addChangeListener(new ChangeListener() {
-//			public void stateChanged(ChangeEvent e){
-//				JCheckBoxMenuItem  btn = (JCheckBoxMenuItem ) e.getSource();
-//				aliViewWindow.setHighlightDiff(btn.isSelected());
-//			}
-//		});
-//		buttonGroupOneViewAtATime.add(highlightDiff);
-//		highlightDiffButtonModel = highlightDiff.getModel();
-//		mnViewMenu.add(highlightDiff);
-//		loadedAlignmentFunctions.add(highlightDiff);
 
 		mnViewMenu.add(new JSeparator());	
 
@@ -1132,20 +694,8 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 		mnViewMenu.add(mntmToggleTranslation);
 		nucleotideFunctions.add(mntmToggleTranslation);
 		loadedAlignmentFunctions.add(mntmToggleTranslation);
-/*
-		JCheckBoxMenuItem mntmToggleTranslationOnePos = new JCheckBoxMenuItem("Show as translation (1 pos per AminoAcid)");
-		mntmToggleTranslationOnePos.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.mntmToggleTranslationOnePos();
-			}
-		});
-		mntmToggleTranslationOnePos.setAccelerator(OSNativeUtils.getToggleTranslationOnePosKeyAccelerator());
-		transOnePosButtonModel = mntmToggleTranslationOnePos.getModel();
-		mnViewMenu.add(mntmToggleTranslationOnePos);
-		nucleotideFunctions.add(mntmToggleTranslationOnePos);
-		loadedAlignmentFunctions.add(mntmToggleTranslationOnePos);
-*/
 
+		
 		JCheckBoxMenuItem mntmToggleAminoAcidCode = new JCheckBoxMenuItem("Show as Amino acid code (when show translate)");
 		mntmToggleAminoAcidCode.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -1157,29 +707,7 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 		mnViewMenu.add(mntmToggleAminoAcidCode);
 		nucleotideFunctions.add(mntmToggleAminoAcidCode);
 		loadedAlignmentFunctions.add(mntmToggleAminoAcidCode);
-/*
-		JCheckBoxMenuItem mntmToggleTranslateShowBoth = new JCheckBoxMenuItem("Show both aminoacid and nucleotides when translating");
-		mntmToggleTranslateShowBoth.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.toggleTranslationShowBoth();
-			}
-		});
-		mntmToggleTranslateShowBoth.setAccelerator(OSNativeUtils.getToggleTranslateShowBothKeyAccelerator());
-		mnViewMenu.add(mntmToggleTranslateShowBoth);
-		nucleotideFunctions.add(mntmToggleTranslateShowBoth);
-		loadedAlignmentFunctions.add(mntmToggleTranslateShowBoth);
 
-		JCheckBoxMenuItem mntmToggleIgnoreGapInTranslation = new JCheckBoxMenuItem("Ignore gaps when translating");
-		mntmToggleIgnoreGapInTranslation.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.toggleIgnoreGapInTranslation();
-			}
-		});
-		mntmToggleIgnoreGapInTranslation.setAccelerator(OSNativeUtils.getToggleIgnoreGapInTranslationKeyAccelerator());
-		mnViewMenu.add(mntmToggleIgnoreGapInTranslation);
-		nucleotideFunctions.add(mntmToggleIgnoreGapInTranslation);
-		loadedAlignmentFunctions.add(mntmToggleIgnoreGapInTranslation);
-*/
 		JMenuItem mntmToggleDrawCodonPos = new JMenuItem("Show codonpositions on ruler");
 		mntmToggleDrawCodonPos.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -1238,25 +766,51 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 		mntmCountStopCodons.setAccelerator(OSNativeUtils.countStopCodonsKeyAccelerator());
 		mnViewMenu.add(mntmCountStopCodons);
 		loadedAlignmentFunctions.add(mntmCountStopCodons);
-
-		mnViewMenu.add(new JSeparator());
-
-		JCheckBoxMenuItem mntmShowCharsetsRuler = new JCheckBoxMenuItem("Show charsets ruler (if charsets are defined)");
-		boolean isShowCharsetRuler = Settings.getShowCharsetRuler().getBooleanValue();
-		if(isShowCharsetRuler){
-			mntmShowCharsetsRuler.setSelected(true);
-		}
-		mntmShowCharsetsRuler.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e){
-				JCheckBoxMenuItem btn = (JCheckBoxMenuItem ) e.getSource();
-				aliViewWindow.showCharsetsRuler(btn.isSelected());	
+		
+		
+		JMenuItem mntmSetSelectionAsCoding0 = new JMenuItem("Set selection as coding (selection starting with codon position=1)");
+		mntmSetSelectionAsCoding0.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				aliViewWindow.setSelectionAsCoding(1);
 			}
 		});
-		//mntmFontCase.setAccelerator(OSNativeUtils.getToggleTranslationKeyAccelerator());
-		//buttonGroupOneViewAtATime.add(highlightNonCons);
-		//toggleTranslationButtonModel = mntmToggleTranslation.getModel();
-		mnViewMenu.add(mntmShowCharsetsRuler);
-		alwaysAvailableFunctions.add(mntmShowCharsetsRuler);
+		mnSelection.add(mntmSetSelectionAsCoding0);
+		coding0ButtonModel=mntmSetSelectionAsCoding0.getModel();
+		hasSelectionFunctions.add(mntmSetSelectionAsCoding0);
+		nucleotideFunctions.add(mntmSetSelectionAsCoding0);
+
+		JMenuItem mntmSetSelectionAsCoding1 = new JMenuItem("Set selection as coding (selection starting with codon position=2)");
+		mntmSetSelectionAsCoding1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				aliViewWindow.setSelectionAsCoding(2);
+			}
+		});
+		coding1ButtonModel=mntmSetSelectionAsCoding1.getModel();
+		mnSelection.add(mntmSetSelectionAsCoding1);
+		hasSelectionFunctions.add(mntmSetSelectionAsCoding1);
+		nucleotideFunctions.add(mntmSetSelectionAsCoding1);
+
+		JMenuItem mntmSetSelectionAsCoding2 = new JMenuItem("Set selection as coding (selection starting with codon position=3)");
+		mntmSetSelectionAsCoding2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				aliViewWindow.setSelectionAsCoding(3);
+			}
+		});
+		coding2ButtonModel=mntmSetSelectionAsCoding2.getModel();
+		mnSelection.add(mntmSetSelectionAsCoding2);
+		hasSelectionFunctions.add(mntmSetSelectionAsCoding2);
+		nucleotideFunctions.add(mntmSetSelectionAsCoding2);
+
+		JMenuItem mntmSetSelectionAsNonCoding = new JMenuItem("Set selection as Non-coding");
+		mntmSetSelectionAsNonCoding.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				aliViewWindow.setSelectionAsNonCoding();
+			}
+		});
+		nonCodingButtonModel = mntmSetSelectionAsNonCoding.getModel();
+		mnSelection.add(mntmSetSelectionAsNonCoding);
+		hasSelectionFunctions.add(mntmSetSelectionAsNonCoding);
+		nucleotideFunctions.add(mntmSetSelectionAsNonCoding);
 
 		mnViewMenu.add(new JSeparator());
 
@@ -1280,7 +834,7 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 		alwaysAvailableFunctions.add(mntmFontCase);
 
 
-		// create ColorMenu and submenu
+		// create ColorMenu and submenu		
 		JMenu mnColorScheme = new JMenu("Colors");
 		JMenu mnNucleotideSub = new JMenu("Nucleotide");
 		mnColorScheme.add(mnNucleotideSub);
@@ -1300,103 +854,19 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 			}
 			mnNucleotideSub.add(colorSubmenu);
 		}
-		JMenu mnAASub = new JMenu("Amino Acid");
-		mnColorScheme.add(mnAASub);
-		ButtonGroup colorSchemeGroupAA = new ButtonGroup();
-		ColorScheme settingsColorSchemeAA = Settings.getColorSchemeAminoAcid();
-		for(final ColorScheme aScheme: ColorSchemeFactory.getAAColorSchemes()){
-			JCheckBoxMenuItem colorSubmenu = new JCheckBoxMenuItem(aScheme.getName());
-			colorSubmenu.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					aliViewWindow.setColorSchemeAminoAcid(aScheme);
-				}
-			});
-			colorSchemeGroupAA.add(colorSubmenu);
-			// if this is the one from settings then select button
-			if(settingsColorSchemeAA == aScheme){
-				colorSubmenu.setSelected(true);
-			}
-			mnAASub.add(colorSubmenu);
-		}
 		mnColorScheme.setIcon(AppIcons.getColorsIcon());
 		mnViewMenu.add(mnColorScheme);
 		alwaysAvailableFunctions.add(mnColorScheme);
 
 
-		JMenu mnAlign = new JMenu("Align");
+		JMenu mnAlign = new JMenu("Assemble");
 		mnAlign.setMnemonic(KeyEvent.VK_A);
 		this.add(mnAlign);
 
-
-
-		//
-		//	    Automatic alignment functions
-		//
-		JMenuItem mntmAlignInCurrent = new JMenuItem("Add and align sequences from clipboard (fasta)");
-		mntmAlignInCurrent.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-
-				aliViewWindow.addAndAlignSeqFromClipboard();
-			}
-		});
-		mnAlign.add(mntmAlignInCurrent);
-		editFunctions.add(mntmAlignInCurrent);
-		loadedAlignmentFunctions.add(mntmAlignInCurrent);
-
-		/*
-		 * 
-		 * TODO This has to be looked over so it works with thread
-		 * 
-		 */
-		//
-		//		JMenuItem mntmAlignInMultiple = new JMenuItem("Add and align multiplesequences from clipboard one by one (fasta)");
-		//		mntmAlignInMultiple.addActionListener(new ActionListener() {
-		//			public void actionPerformed(ActionEvent e) {
-		//
-		//				aliViewWindow.addAndAlignMultipleSeqFromClipOneByOne();
-		//
-		//			}
-		//		});
-		//		mnAlign.add(mntmAlignInMultiple);
-		//		editFunctions.add(mntmAlignInMultiple);
-
-		JMenuItem mntmAlignInFromFile = new JMenuItem("Add and align sequences from file (fasta)");
-		mntmAlignInFromFile.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.addAndAlignSeqFromFile();
-			}
-		});
-		mnAlign.add(mntmAlignInFromFile);
-		editFunctions.add(mntmAlignInFromFile);
-		loadedAlignmentFunctions.add(mntmAlignInFromFile);
-
-
-		JMenuItem mntmReAlignSelection = new JMenuItem("Realign selected block");
-		mntmReAlignSelection.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e){
-				aliViewWindow.reAlignSelectionInSeparateThread();
-			}
-		});
-		mnAlign.add(mntmReAlignSelection);
-		realignSelectedBlockButtonModel = mntmReAlignSelection.getModel();
-		editFunctions.add(mntmReAlignSelection);
-		hasSelectionFunctions.add(mntmReAlignSelection);
-
-		JMenuItem mntmReAlignSelectedSequence = new JMenuItem("Realign selected sequence(s)");
-		mntmReAlignSelectedSequence.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.reAlignSelectedSequences();
-			}
-		});
-		mnAlign.add(mntmReAlignSelectedSequence);
-		realignSelectedSequencesButtonModel = mntmReAlignSelectedSequence.getModel();
-		editFunctions.add(mntmReAlignSelectedSequence);
-		loadedAlignmentFunctions.add(mntmReAlignSelectedSequence);
-
-		JMenuItem mntmAlign = new JMenuItem("Realign everything");
+		JMenuItem mntmAlign = new JMenuItem("Reassemble everything");
 		mntmAlign.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.reAlignEverythingWithDefaultProgram();
+				aliViewWindow.reAssembleEverythingWithDefaultProgram();
 			}
 		});
 		//mntmAlign.setIcon(AppIcons.getAlignIcon());
@@ -1404,41 +874,18 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 		editFunctions.add(mntmAlign);
 		loadedAlignmentFunctions.add(mntmAlign);
 
-		JMenuItem mntmAlignAsAA = new JMenuItem("Realign everything as Translated Amino Acids");
-		mntmAlignAsAA.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.reAlignEverythingAsTranslatedAA();
-			}
-		});
-		//mntmAlign.setIcon(AppIcons.getAlignIcon());
-		mnAlign.add(mntmAlignAsAA);
-		editFunctions.add(mntmAlignAsAA);
-		loadedAlignmentFunctions.add(mntmAlignAsAA);
-		nucleotideFunctions.add(mntmAlignAsAA);
-
-		mnAlign.add(new JSeparator());
-
-		JMenu mnuAlignerSettings = new JMenu("Change default Aligner program");
+		JMenu mnuAlignerSettings = new JMenu("Change default Assembly program");
 		mnAlign.add(mnuAlignerSettings);
 		alwaysAvailableFunctions.add(mnuAlignerSettings);
-
+		
 		// Create submenu 1
-		JMenuItem mntmALLAlignerSettings = new JMenuItem("for realigning all (or selected blocks)");
+		JMenuItem mntmALLAlignerSettings = new JMenuItem("for reassembly all");
 		mntmALLAlignerSettings.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				aliViewWindow.editAlignerALLSettings();
 			}
 		});
 		mnuAlignerSettings.add(mntmALLAlignerSettings);
-		// Create submenu 2
-		JMenuItem mntmADDAlignerSettings = new JMenuItem("when pasting new sequences (profile-alignment)");
-		mntmADDAlignerSettings.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.editAlignerADDSettings();
-			}
-		});
-		mnuAlignerSettings.add(mntmADDAlignerSettings);
-
 
 
 		//
@@ -1557,59 +1004,6 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 		editFunctions.add(mntmDeleteGapMoveRight);
 		hasSelectionFunctions.add(mntmDeleteGapMoveRight);
 
-
-		/*
-
-	JMenuItem mntmReAlignSelectionMafft = new JMenuItem("Realign selection with mafft");
-	mntmReAlignSelectionMafft.addActionListener(new ActionListener() {
-		public void actionPerformed(ActionEvent e) {
-			aliView.pushUndoState();
-			aliView.reAlignSelectionWithMafft();
-		}
-	});
-	mnAlign.add(mntmReAlignSelectionMafft);
-
-		 */
-		//
-		// TOOLS menu
-		//
-		JMenu mnTools = new JMenu("Tools");
-		mnTools.setMnemonic(KeyEvent.VK_T);
-		this.add(mnTools);	
-
-		JMenu mnPrimer = new JMenu("Primer");
-		mnPrimer.setMnemonic(KeyEvent.VK_P);
-		mnTools.add(mnPrimer);
-
-		JMenuItem mntmPrimerInCurrent = new JMenuItem("Find primer in current selection");
-		mntmPrimerInCurrent.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.findPrimerInCurrentSelection();
-			}
-		});
-		mnPrimer.add(mntmPrimerInCurrent);
-		hasSelectionFunctions.add(mntmPrimerInCurrent);
-		nucleotideFunctions.add(mntmPrimerInCurrent);
-
-		JMenuItem mntmFindPrimerSettings = new JMenuItem("Find primer settings");
-		mntmFindPrimerSettings.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.findPrimerSettings();
-			}
-		});
-		mnPrimer.add(mntmFindPrimerSettings);
-		alwaysAvailableFunctions.add(mntmFindPrimerSettings);
-
-		//		JMenuItem mntmMinimizeStop = new JMenuItem("Minimize stop codons");
-		//		mntmMinimizeStop.addActionListener(new ActionListener() {
-		//			public void actionPerformed(ActionEvent e) {
-		//				aliViewWindow.adjustReadingFrameMinimizeStop();
-		//			}
-		//		});
-		//		mnTools.add(mntmMinimizeStop);
-		//		loadedAlignmentFunctions.add(mntmMinimizeStop);
-		//		nucleotideFunctions.add(mntmMinimizeStop);
-
 		//
 		// Menu with External Commands
 		//
@@ -1641,16 +1035,7 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 		});
 		mnHelp.add(mntmCheckNew);
 		alwaysAvailableFunctions.add(mntmCheckNew);
-		/*
-		JMenuItem mntmVersionHistory = new JMenuItem("Check version history");
-		mntmVersionHistory.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.displayVersionHistory();
-			}
-		});
-		mnHelp.add(mntmVersionHistory);
-		alwaysAvailableFunctions.add(mntmVersionHistory);
-		 */
+
 		JMenuItem mntmReportBug = new JMenuItem("Report bug/feature request");
 		mntmReportBug.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -1722,32 +1107,6 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 		}
 		mnRecentFiles.invalidate();
 		mnRecentFiles.repaint();
-	}
-
-
-	public void rebuildSelectCharsetsSubmenu(){
-		logger.info("rebuildSelectCharsetsSubmenu()" + aliViewWindow.getAlignment().getAlignmentMeta().getCharsets());
-		mnSelectCharset.removeAll();
-
-		CharSets charsets = aliViewWindow.getAlignment().getAlignmentMeta().getCharsets();
-		// submenu
-		for(final CharSet aCharset: charsets){
-			JMenuItem nextItem = new JMenuItem(aCharset.getName());
-			nextItem.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					aliViewWindow.selectAll(aCharset);
-				}
-			});
-			mnSelectCharset.add(nextItem);
-		}
-		if(charsets != null && charsets.size() > 0){
-			mnSelectCharset.setEnabled(true);
-		}else{
-			mnSelectCharset.setEnabled(false);
-		}
-
-		mnSelectCharset.invalidate();
-		mnSelectCharset.repaint();
 	}
 
 
@@ -1926,10 +1285,6 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 		return drawCoonPosOnRulerButtonModel;
 	}
 
-	public ButtonModel getTransOnePosButtonModel() {
-		return transOnePosButtonModel;
-	}
-
 	public ButtonModel getCountCodonButtonModel() {
 		return countCodonButtonModel;
 	}
@@ -1998,9 +1353,6 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 	public void alignAllCmdsChanged() {
 	}
 
-	public void alignAddCmdsChanged() {
-	}
-
 	public void externalCmdsChanged() {
 		rebuildExternalCommandsSubmenu();
 	}
@@ -2011,14 +1363,6 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 
 	public ButtonModel getCopyAsCharactersButtonModel() {
 		return copyAsCharatersButtonModel;
-	}
-
-	public ButtonModel getRealignSelectedBlock() {
-		return realignSelectedBlockButtonModel;
-	}
-
-	public ButtonModel getRealignSelectedSequences() {
-		return realignSelectedSequencesButtonModel;
 	}
 
 	public ButtonModel getPasteAsFastaButtonModel() {
@@ -2044,6 +1388,9 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 
 	public ButtonModel getAddNewSequenceButtonModel() {
 		return addEmptySeqButtonModel;
+	}
+
+	public void alignAddCmdsChanged() {
 	}
 
 }

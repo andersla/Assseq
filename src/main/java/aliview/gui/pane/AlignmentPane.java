@@ -1948,7 +1948,6 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener,
 			if(charWidth >= 1){
 
 				offsetDueToScrollPanePosition = paneClip.x % (int)charWidth;
-				offsetDueToScrollPanePosition = offsetDueToScrollPanePosition;
 
 				// NUMBERS
 
@@ -1966,27 +1965,29 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener,
 				int pos = 0;
 				for(int x = matrixClip.x ; x < matrixClip.getMaxX() + 1; x++){
 				
-					//char consensusResidue = alignment.getNucleotideConsensusAt(x);
-					char consensusResidue = alignment.getFixedNucleotideConsensusAt(x);
-					int qualVal = alignment.getFixedNucleotideConsensusQualityAt(x);
-					String stringToDraw = String.valueOf(consensusResidue);
-					
-					
-					int posX = (int)((pos) * charWidth - offsetDueToScrollPanePosition -1); // -1 just beause it looks good since it is exact lining up with alignment
-
-					
-					double textXOffset = (double)charWidth * 0.2;
-					
-					// Draq quality background color // new Color((int)(Math.random() * 0x1000000));
-					Color qualValColor = colorSchemeNucleotide.getBaseQualityBackgroundColor(consensusResidue, CharPixelsContainerNucQuality.getQualClassFromQualVal(qualVal));
-					g2d.setColor(qualValColor);
-					g2d.fillRect(posX, 0, (int)charWidth, paneClip.height);
-					
-					// Draw base
-					g2d.setColor(Color.black);
-					g2d.drawString(stringToDraw, posX + (int)textXOffset, textPosY);
-
-					pos ++;
+					if(alignment != null && alignment.getFixedNucleotideConsensus() != null && alignment.getFixedNucleotideConsensus().getLength() > x) {
+						//char consensusResidue = alignment.getNucleotideConsensusAt(x);
+						char consensusResidue = alignment.getFixedNucleotideConsensusAt(x);
+						int qualVal = alignment.getFixedNucleotideConsensusQualityAt(x);
+						String stringToDraw = String.valueOf(consensusResidue);
+						
+						
+						int posX = (int)((pos) * charWidth - offsetDueToScrollPanePosition -1); // -1 just beause it looks good since it is exact lining up with alignment
+	
+						
+						double textXOffset = (double)charWidth * 0.2;
+						
+						// Draq quality background color // new Color((int)(Math.random() * 0x1000000));
+						Color qualValColor = colorSchemeNucleotide.getBaseQualityBackgroundColor(consensusResidue, CharPixelsContainerNucQuality.getQualClassFromQualVal(qualVal));
+						g2d.setColor(qualValColor);
+						g2d.fillRect(posX, 0, (int)charWidth, paneClip.height);
+						
+						// Draw base
+						g2d.setColor(Color.black);
+						g2d.drawString(stringToDraw, posX + (int)textXOffset, textPosY);
+	
+						pos ++;
+					}
 				}	
 			}
 

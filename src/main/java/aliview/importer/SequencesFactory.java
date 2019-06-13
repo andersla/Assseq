@@ -158,7 +158,9 @@ public class SequencesFactory {
 					model = new MemorySequenceAlignmentListModel();
 					model.setSequences(sequences);
 					model.setFixedConsensus(consensus);
+					model.rightPadWithGapUntilEqualLength();
 					model.setFileFormat(FileFormat.ACE);
+					
 				} catch (FileNotFoundException e) {
 					importErrorMessage += "Tried import as ACE but: " + e.getMessage() + LF;
 					logger.error(importErrorMessage);

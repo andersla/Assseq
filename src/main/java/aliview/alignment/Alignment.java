@@ -59,6 +59,7 @@ import aliview.sequencelist.FileSequenceLoadListener;
 import aliview.sequences.FastaFileSequence;
 import aliview.sequences.InMemorySequence;
 import aliview.sequences.PhylipSequence;
+import aliview.sequences.QualCalledSequence;
 import aliview.sequences.Sequence;
 import aliview.sequences.SequenceUtils;
 import aliview.settings.Settings;
@@ -218,6 +219,51 @@ public class Alignment implements FileSequenceLoadListener {
 			out.write(LF);
 
 		}		
+		out.flush();
+		out.close();
+	}
+	
+	public void storeAlignmetAsFastaQuals(Writer out) throws IOException{
+		int longest = sequences.getLongestSequenceLength();
+		for(Sequence seq: sequences){
+			String name = seq.getName();
+
+			out.write('>');
+			out.write(seq.getName());
+			out.write(LF);
+			if(seq instanceof QualCalledSequence) {
+				QualCalledSequence qualSeq = (QualCalledSequence) seq;
+				qualSeq.writeQuality(out);
+			    out.write(LF);
+			}
+
+		}		
+		out.flush();
+		out.close();
+	}
+	
+	public void storeAlignmetAsFastQ(Writer out) throws IOException{
+		int longest = sequences.getLongestSequenceLength();
+		for(Sequence seq: sequences){
+
+			out.write('@');
+			out.write(seq.getName());
+			out.write(LF);
+			seq.writeBases(out);
+			out.write(LF);
+			
+			if(seq instanceof QualCalledSequence) {
+				QualCalledSequence qualSeq = (QualCalledSequence) seq;
+				out.write('+');
+				out.write(LF);
+				qualSeq.writeQualityFastQ(out);
+			    out.write(LF);
+			}
+			
+			out.write(LF);
+
+		    }		
+			
 		out.flush();
 		out.close();
 	}
@@ -451,7 +497,6 @@ public class Alignment implements FileSequenceLoadListener {
 
 		out.flush();
 		out.close();	
-
 	}
 
 	private String escapeSeqName(String name) {
@@ -609,6 +654,11 @@ public class Alignment implements FileSequenceLoadListener {
 				BufferedWriter outMeta = new BufferedWriter(new FileWriter(new File(outFile.getAbsoluteFile() + ".meta")));
 				storeMetaData(outMeta);
 			}
+			// save meta if exset it is set
+			if(sequences.get(0) instanceof QualCalledSequence){
+				BufferedWriter outQuals = new BufferedWriter(new FileWriter(new File(outFile.getAbsoluteFile() + ".qual")));
+				storeAlignmetAsFastaQuals(outQuals);
+			}
 		}else if(fileFormat == FileFormat.PHYLIP || fileFormat == FileFormat.PHYLIP_RELAXED ||
 				fileFormat == FileFormat.PHYLIP_RELAXED_PADDED_AKA_LONG_NAME_SEQUENTIAL || fileFormat == FileFormat.PHYLIP_STRICT_SEQUENTIAL_AKA_SHORT_NAME_SEQUENTIAL ||
 				fileFormat == FileFormat.PHYLIP_RELAXED_PADDED_INTERLEAVED_AKA_LONG_NAME_INTERLEAVED){
@@ -619,7 +669,15 @@ public class Alignment implements FileSequenceLoadListener {
 				BufferedWriter outMeta = new BufferedWriter(new FileWriter(new File(outFile.getAbsoluteFile() + ".meta")));
 				storeMetaData(outMeta);
 			}
-
+			
+		}else if(fileFormat == FileFormat.FASTQ){
+			setTranslationOnePos(false);
+			storeAlignmetAsFastQ(out);
+			// save meta if exset it is set
+			if(this.alignmentMeta.isMetaOutputNeeded()){
+				BufferedWriter outMeta = new BufferedWriter(new FileWriter(new File(outFile.getAbsoluteFile() + ".meta")));
+				storeMetaData(outMeta);
+			}
 
 		}else if(fileFormat == FileFormat.PHYLIP_TRANSLATED_AMINO_ACID){
 			setTranslationOnePos(true);
@@ -1016,6 +1074,10 @@ public class Alignment implements FileSequenceLoadListener {
 		return sequences.getFixedNucleotideConsensusAt(pos);
 	}
 	
+	public Sequence getFixedNucleotideConsensus() {
+		return sequences.getFixedNucleotideConsensus();
+	}
+	
 	public int getFixedNucleotideConsensusQualityAt(int x) {
 		return sequences.getFixedNucleotideConsensusQualityAt(x);
 	}
@@ -1093,6 +1155,19 @@ public class Alignment implements FileSequenceLoadListener {
 
 	public void addSequences(File additionalFile) {
 		addSequences(additionalFile, 0);
+	}
+	
+	public void addSequences(File[] additionalFiles, int index) {
+		try {
+			for(File addFile: additionalFiles) {
+				AlignmentListModel additionalSequences = seqFactory.createSequences(addFile);
+				sequences.addAll(index, additionalSequences);
+			}
+
+		} catch (AlignmentImportException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void addSequences(File additionalFile, int index) {

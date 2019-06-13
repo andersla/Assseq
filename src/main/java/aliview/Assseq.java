@@ -365,10 +365,10 @@ public class Assseq implements ApplicationListener{
 				//alignmentFile = new File("/home/anders/projekt/alignments/gold_strains_gg16S_aligned.fasta");
 				//alignmentFile = new File("/home/anders/projekt/alignments/woodsia_chloropl_excl_hybrid.selection2.fasta");
 				//alignmentFile = new File("/home/anders/projekt/Assseq_no_sync/testalign3/7MT9B7MATK_KF.ab1");
-				alignmentFile = new File("/home/anders/projekt/alignments/ace/9documentsAssembly.ace");
+				//alignmentFile = new File("/home/anders/projekt/alignments/ace/9documentsAssembly.ace");
 				
 
-				if(! alignmentFile.exists()){
+				if(alignmentFile != null && !alignmentFile.exists()){
 					logger.info("Alignment file not exists: " + alignmentFile);
 					alignmentFile = null;
 				}

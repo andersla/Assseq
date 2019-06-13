@@ -46,14 +46,6 @@ public class AlignmentPopupMenu extends JPopupMenu implements MouseListener {
 		copyNameItem.setModel(aliViewMenuBar.getCopyNameButtonModel());
 		add(copyNameItem);
 
-		JMenuItem pasteItem = new JMenuItem("Paste sequence(s) from clipboard");	
-		pasteItem.setModel(aliViewMenuBar.getPasteAsFastaButtonModel());
-		add(pasteItem);
-
-		JMenuItem addEmptyItem = new JMenuItem("Add new empty sequence");	
-		addEmptyItem.setModel(aliViewMenuBar.getAddNewSequenceButtonModel());
-		add(addEmptyItem);
-		
 		add(new JSeparator());
 
         JMenuItem renameItem = new JMenuItem("Rename sequence");
@@ -68,27 +60,6 @@ public class AlignmentPopupMenu extends JPopupMenu implements MouseListener {
 		
 		add(new JSeparator());
 
-		JMenuItem alignBlock = new JMenuItem("Realign selected block");
-		alignBlock.setModel(aliViewMenuBar.getRealignSelectedBlock());
-		add(alignBlock);
-
-		JMenuItem alignSelectedSeq = new JMenuItem("Realign selected sequence(s)");
-		alignSelectedSeq.setModel(aliViewMenuBar.getRealignSelectedSequences());
-		add(alignSelectedSeq);
-
-		//add(new JSeparator());
-		/*
-			JMenuItem renameSeqItem = new JMenuItem("Rename sequence");
-			renameSeqItem.addActionListener(new ActionListener() {		
-				public void actionPerformed(ActionEvent e) {
-					TextEditDialog editDialog = new TextEditDialog();
-					editDialog.showOKCancelTextEditor("this is seq", TextEditDialog.EDIT_SEQUENCE_NAME, aliViewWindow);
-					logger.info("done");
-
-				}
-			});
-			add(renameSeqItem);
-		 */
 
 	}
 

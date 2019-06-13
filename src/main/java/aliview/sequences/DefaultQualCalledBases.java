@@ -19,7 +19,7 @@ public class DefaultQualCalledBases implements Bases {
 	byte[] backend;
 	short[] qualCalls;
 	boolean[] qualClipped;
-	short NONE_QUALCALL = 100;
+	short NONE_QUALCALL = 93;
 
 	public DefaultQualCalledBases(byte[] bytes, short[] qualCalls) {
 		this.backend = bytes;
