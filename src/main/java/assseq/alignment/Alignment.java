@@ -1070,8 +1070,12 @@ public class Alignment implements FileSequenceLoadListener {
 		return sequences.getNucleotideConsensusAt(pos);
 	}
 	
-	public char getFixedNucleotideConsensusAt(int pos) {
-		return sequences.getFixedNucleotideConsensusAt(pos);
+	public char getFixedNucleotideConsensusCharAt(int pos) {
+		return sequences.getFixedNucleotideConsensusCharAt(pos);
+	}
+	
+	public byte getFixedNucleotideConsensusBaseValAt(int pos) {
+		return sequences.getFixedNucleotideConsensusBaseValAt(pos);
 	}
 	
 	public Sequence getFixedNucleotideConsensus() {

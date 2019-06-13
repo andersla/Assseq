@@ -82,95 +82,106 @@ public class TracePanel extends AlignmentPane{
 		paintAlignment(g);
 	}
 
-
 	public void paintAlignment(Graphics g){
-		drawCounter ++;
-		long startTime = System.currentTimeMillis();	
-		if(Assseq.isDebugMode() && drawCounter % DRAWCOUNT_LOF_INTERVAL == 0){
-			logger.info("Inside paintAlignment: Time from last endTim " + (startTime - endTime) + " milliseconds");
-			System.out.println("Inside paintAlignment: Time from last endTim " + (startTime - endTime) + " milliseconds");
+		try {
+			drawCounter ++;
+			long startTime = System.currentTimeMillis();	
+			if(Assseq.isDebugMode() && drawCounter % DRAWCOUNT_LOF_INTERVAL == 0){
+				logger.info("Inside paintAlignment: Time from last endTim " + (startTime - endTime) + " milliseconds");
+				System.out.println("Inside paintAlignment: Time from last endTim " + (startTime - endTime) + " milliseconds");
+			}
+
+			Graphics2D g2d = (Graphics2D) g;
+
+			// What part of alignment matrix is in view (what part of matrix is in graphical view)
+			Rectangle clip = g2d.getClipBounds();
+
+			Rectangle matrixClip = paneCoordToMatrixCoord(clip);
+
+			//		 logger.info(matrixClip);
+
+			int xMin = matrixClip.x - 1;
+			int yMin = matrixClip.y - 1;
+			int xMax = (int) matrixClip.getMaxX() + 1;
+			int yMax = (int) matrixClip.getMaxY() + 1;
+			//
+			//				logger.info("yMin" + yMin);
+			//				logger.info("yMin" + yMax);
+			//				logger.info("xMin" + xMin);
+			//				logger.info("xMax" + xMax);
+			//
+			// add one extra position when drawing translated
+			// otherwise there could be some white borders when scrolling
+			if(showTranslation){
+				xMin --;
+				xMax ++;
+			}
+
+			// adjust for part of matrix that exists
+			xMin = Math.min(getAlignment().getMaxX(), xMin);
+			xMin = Math.max(0, xMin);
+
+			yMin = Math.min(getAlignment().getMaxY(), yMin);
+			yMin = Math.max(0, yMin);
+
+			xMax = Math.min(getAlignment().getMaxX(), xMax);
+			yMax = Math.min(getAlignment().getMaxY(), yMax);
+
+			//				logger.info("yMin" + yMin);
+			//				logger.info("yMax" + yMax);
+			//				logger.info("xMin" + xMin);
+			//				logger.info("xMax" + xMax);
+
+			// Extra because pixelCopyDraw
+			int height = (yMax - yMin) * (int)charHeight;
+			int width = (xMax - xMin) * (int)charWidth;
+			//
+			//				logger.info("width" + width);
+			//				logger.info("height" + height);
+			//
+			// Small chars
+			if(charWidth < 1){
+				height = clip.height;
+				width = clip.width;
+			}
+			//
+			//				logger.info("yMax" + yMax);
+			//				logger.info("yMin" + yMin);
+			//				logger.info("width" + width);
+			//				logger.info("clipHeight" + clip.height);
+			//				logger.info("width" + width);
+			//				logger.info("height" + height);
+
+
+
+
+			// HERE FILL RGB-ARRAY DRAW...
+			//		fillRGBArrayAndPaint(xMin, xMax, yMin, yMax, clipRGB, clip, g2d);
+			
+			try {
+			paintMultithreaded(xMin, xMax, yMin, yMax, clip, g2d);
+			
+		}catch (Exception e) {
+					logger.error( e.getStackTrace() );
+					logger.error( e.getMessage() );
+				}
+
+
+			if(drawCounter % DRAWCOUNT_LOF_INTERVAL == 0){
+				endTime = System.currentTimeMillis();
+				logger.info("TracePanel paintAlignment took " + (endTime - startTime) + " milliseconds");
+			}
+
+			// repaint ruler also if needed
+			if(clip.x != lastClip.x || clip.width != lastClip.width || rulerIsDirty){
+				alignmentRuler.repaint();
+				rulerIsDirty = false;
+			}
+			lastClip = clip;
+		} catch (Exception e) {
+			logger.error( e.getStackTrace() );
+			logger.error( e.getMessage() );
 		}
-
-		Graphics2D g2d = (Graphics2D) g;
-
-		// What part of alignment matrix is in view (what part of matrix is in graphical view)
-		Rectangle clip = g2d.getClipBounds();
-
-		Rectangle matrixClip = paneCoordToMatrixCoord(clip);
-
-		//		 logger.info(matrixClip);
-
-		int xMin = matrixClip.x - 1;
-		int yMin = matrixClip.y - 1;
-		int xMax = (int) matrixClip.getMaxX() + 1;
-		int yMax = (int) matrixClip.getMaxY() + 1;
-		//
-		//				logger.info("yMin" + yMin);
-		//				logger.info("yMin" + yMax);
-		//				logger.info("xMin" + xMin);
-		//				logger.info("xMax" + xMax);
-		//
-		// add one extra position when drawing translated
-		// otherwise there could be some white borders when scrolling
-		if(showTranslation){
-			xMin --;
-			xMax ++;
-		}
-
-		// adjust for part of matrix that exists
-		xMin = Math.min(getAlignment().getMaxX(), xMin);
-		xMin = Math.max(0, xMin);
-
-		yMin = Math.min(getAlignment().getMaxY(), yMin);
-		yMin = Math.max(0, yMin);
-
-		xMax = Math.min(getAlignment().getMaxX(), xMax);
-		yMax = Math.min(getAlignment().getMaxY(), yMax);
-
-		//				logger.info("yMin" + yMin);
-		//				logger.info("yMax" + yMax);
-		//				logger.info("xMin" + xMin);
-		//				logger.info("xMax" + xMax);
-
-		// Extra because pixelCopyDraw
-		int height = (yMax - yMin) * (int)charHeight;
-		int width = (xMax - xMin) * (int)charWidth;
-		//
-		//				logger.info("width" + width);
-		//				logger.info("height" + height);
-		//
-		// Small chars
-		if(charWidth < 1){
-			height = clip.height;
-			width = clip.width;
-		}
-		//
-		//				logger.info("yMax" + yMax);
-		//				logger.info("yMin" + yMin);
-		//				logger.info("width" + width);
-		//				logger.info("clipHeight" + clip.height);
-		//				logger.info("width" + width);
-		//				logger.info("height" + height);
-
-
-
-
-		// HERE FILL RGB-ARRAY DRAW...
-		//		fillRGBArrayAndPaint(xMin, xMax, yMin, yMax, clipRGB, clip, g2d);
-		
-		paintMultithreaded(xMin, xMax, yMin, yMax, clip, g2d);
-
-		if(drawCounter % DRAWCOUNT_LOF_INTERVAL == 0){
-			endTime = System.currentTimeMillis();
-			logger.info("TracePanel paintAlignment took " + (endTime - startTime) + " milliseconds");
-		}
-
-		// repaint ruler also if needed
-		if(clip.x != lastClip.x || clip.width != lastClip.width || rulerIsDirty){
-			alignmentRuler.repaint();
-			rulerIsDirty = false;
-		}
-		lastClip = clip;
 
 	}
 

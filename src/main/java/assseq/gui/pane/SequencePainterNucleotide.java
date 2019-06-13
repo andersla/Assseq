@@ -31,7 +31,7 @@ public class SequencePainterNucleotide extends SequencePainter {
 		if(residue == 0){
 			residue = ' ';
 		}
-		
+
 		short qualVal = 100;
 		if(seq instanceof TraceSequence){
 			qualVal = ((TraceSequence) seq).getQualValAtPos(seqXPos);
@@ -55,14 +55,17 @@ public class SequencePainterNucleotide extends SequencePainter {
 
 		// adjustment if non-cons is to be highlighted
 		if(aliPane.isHighlightNonCons()){
-			NucleotideHistogram nucHistogram = (NucleotideHistogram) alignment.getHistogram();
-			if(baseVal == NucleotideUtilities.GAP){
-				// no color on gap even if they are in maj.cons
-			}
-			else if(! nucHistogram.isMajorityRuleConsensus(seqXPos,baseVal)){
+			byte cons = alignment.getFixedNucleotideConsensusBaseValAt(seqXPos);
+			// no color on gap even if they are in maj.cons
+			if(baseVal == NucleotideUtilities.UNKNOWN ||
+					cons == NucleotideUtilities.UNKNOWN ||
+					baseVal == NucleotideUtilities.GAP){
+
+			}else if(residue != cons){
 				pixContainerToUse = aliPane.charPixNonConsensusNuc;
 			}
 		}
+
 		if(aliPane.isHighlightCons()){
 			NucleotideHistogram nucHistogram = (NucleotideHistogram) alignment.getHistogram();
 			if(baseVal == NucleotideUtilities.GAP){
@@ -72,7 +75,7 @@ public class SequencePainterNucleotide extends SequencePainter {
 				pixContainerToUse = aliPane.charPixConsensusNuc;
 			}
 		}
-		
+
 		if(seq instanceof TraceSequence){
 			ABISequence abiSeq = (ABISequence) seq;
 			if(abiSeq.isQualClippedAtPos(seqXPos)){
@@ -93,7 +96,7 @@ public class SequencePainterNucleotide extends SequencePainter {
 		}
 
 
-	
+
 		RGBArray newPiece = pixContainerToUse.getRGBArray(byteToDraw, qualVal);
 
 		try {

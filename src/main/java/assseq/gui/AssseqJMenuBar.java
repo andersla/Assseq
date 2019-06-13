@@ -131,18 +131,6 @@ public class AssseqJMenuBar extends JMenuBar implements AlignmentListener, Align
 		mnFile.add(mntmNew);
 		alwaysAvailableFunctions.add(mntmNew);
 
-		JMenuItem mntmOpenFile = new JMenuItem("Open File");
-		mntmOpenFile.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				Assseq.openAlignmentFileViaChooser(aliViewWindow.getParent());
-			}
-
-		});
-		mntmOpenFile.setAccelerator(OSNativeUtils.getOpenFileAccelerator());
-		mnFile.add(mntmOpenFile);
-		alwaysAvailableFunctions.add(mntmOpenFile);
-		
-		
 		JMenuItem mntmAddFromFiles = new JMenuItem("Add sequences from files");
 		mntmAddFromFiles.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -151,6 +139,16 @@ public class AssseqJMenuBar extends JMenuBar implements AlignmentListener, Align
 		});
 		mnFile.add(mntmAddFromFiles);
 		alwaysAvailableFunctions.add(mntmAddFromFiles);
+		
+		JMenuItem mntmOpenFile = new JMenuItem("Open Assembly File");
+		mntmOpenFile.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Assseq.openAlignmentFileViaChooser(aliViewWindow.getParent());
+			}
+		});
+		mntmOpenFile.setAccelerator(OSNativeUtils.getOpenFileAccelerator());
+		mnFile.add(mntmOpenFile);
+		alwaysAvailableFunctions.add(mntmOpenFile);
 
 		mnFile.add(new JSeparator());
 
@@ -420,7 +418,7 @@ public class AssseqJMenuBar extends JMenuBar implements AlignmentListener, Align
 		mnEdit.add(mntmRevCompAlignment);
 		editFunctions.add(mntmRevCompAlignment);
 		loadedAlignmentFunctions.add(mntmRevCompAlignment);
-
+/*
 		JMenuItem mntmCompAlignment = new JMenuItem("Complement Assembly");
 		mntmCompAlignment.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -432,6 +430,7 @@ public class AssseqJMenuBar extends JMenuBar implements AlignmentListener, Align
 		mnEdit.add(mntmCompAlignment);
 		editFunctions.add(mntmCompAlignment);
 		loadedAlignmentFunctions.add(mntmCompAlignment);
+*/
 
 		mnEdit.add(new JSeparator());
 

@@ -139,6 +139,18 @@ public class TracePainter implements Runnable{
 				// no color on gap even if they are in maj.cons
 			}
 			else if(! nucHistogram.isMajorityRuleConsensus(seqXPos,baseVal)){
+				//bgColor = colorScheme.getBaseNonConsensusBackgroundColor();
+			}
+		}
+
+		if(tracePanel.isHighlightNonCons()){
+			byte cons = alignment.getFixedNucleotideConsensusBaseValAt(seqXPos);
+			if(baseVal == NucleotideUtilities.UNKNOWN ||
+					cons == NucleotideUtilities.UNKNOWN ||
+					baseVal == NucleotideUtilities.GAP){
+				// no color on gap even if they are in maj.cons
+			}
+			else if(residue != cons){
 				bgColor = colorScheme.getBaseNonConsensusBackgroundColor();
 			}
 		}
@@ -180,6 +192,17 @@ public class TracePainter implements Runnable{
 				isPointWithinSelectionRect = true;
 			}
 		}
+
+		if(seq.isQualClippedAtPos(seqXPos)){
+			bgColor = colorScheme.getBaseBackgroundColor(NucleotideUtilities.GAP);
+
+			colorTraceG = colorScheme.getQualClipForegroundColor();
+			colorTraceC = colorScheme.getQualClipForegroundColor();
+			colorTraceT = colorScheme.getQualClipForegroundColor();
+			colorTraceA = colorScheme.getQualClipForegroundColor();
+
+		}
+
 		if(seq.isBaseSelected(seqXPos) || (alignment.getTempSelection() != null && isPointWithinSelectionRect)){
 			bgColor = colorScheme.getBaseSelectionBackgroundColor(baseVal);
 
@@ -191,15 +214,7 @@ public class TracePainter implements Runnable{
 
 		}
 
-		if(seq.isQualClippedAtPos(seqXPos)){
-			bgColor = colorScheme.getBaseBackgroundColor(NucleotideUtilities.GAP);
 
-			colorTraceG = colorScheme.getQualClipForegroundColor();
-			colorTraceC = colorScheme.getQualClipForegroundColor();
-			colorTraceT = colorScheme.getQualClipForegroundColor();
-			colorTraceA = colorScheme.getQualClipForegroundColor();
-
-		}
 
 		try {
 

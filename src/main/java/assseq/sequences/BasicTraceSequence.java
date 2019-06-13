@@ -528,12 +528,18 @@ public class BasicTraceSequence extends BasicSequence implements TraceSequence, 
 
 	public void complement() {
 		getBases().complement();
-		getTraces().complement();
+		Traces traces = getTraces();
+		if(traces != null) {
+			traces.complement();
+		}
 	}
 
 	public void reverse(){
 		getBases().reverse();
-		getTraces().reverse();
+		Traces traces = getTraces();
+		if(traces != null) {
+			traces.reverse();
+		}
 	}
 
 	
@@ -557,7 +563,10 @@ public class BasicTraceSequence extends BasicSequence implements TraceSequence, 
 		// insert into traces
 		logger.info("RightPad trace " + addCount);
 		for(int n = 0; n < addCount; n++) {
-			getTraces().append();
+			Traces traces = getTraces();
+			if(traces != null) {
+				traces.append();
+			}
 		}
 	}
 	

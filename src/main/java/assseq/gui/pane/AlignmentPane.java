@@ -561,6 +561,14 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener,
 		int columnIndex = getColumnAt(pos);
 		getAlignment().selectColumn(columnIndex);
 	}
+	
+	public void selectConsensusAt(Point pos) {
+		
+		Sequence seq = getAlignment().getFixedNucleotideConsensus();
+		if(seq != null) {
+			seq.setSelectionAt(pos.x);
+		}
+	}
 
 
 	public Base getBaseAt(Point pos) throws InvalidAlignmentPositionException{
@@ -1963,12 +1971,12 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener,
 				// position numbers
 				int lastTextEndPos = 0;
 				int pos = 0;
-				for(int x = matrixClip.x ; x < matrixClip.getMaxX() + 1; x++){
+				for(int matrixX = matrixClip.x ; matrixX < matrixClip.getMaxX() + 1; matrixX++){
 				
-					if(alignment != null && alignment.getFixedNucleotideConsensus() != null && alignment.getFixedNucleotideConsensus().getLength() > x) {
+					if(alignment != null && alignment.getFixedNucleotideConsensus() != null && alignment.getFixedNucleotideConsensus().getLength() > matrixX) {
 						//char consensusResidue = alignment.getNucleotideConsensusAt(x);
-						char consensusResidue = alignment.getFixedNucleotideConsensusAt(x);
-						int qualVal = alignment.getFixedNucleotideConsensusQualityAt(x);
+						char consensusResidue = alignment.getFixedNucleotideConsensusCharAt(matrixX);
+						int qualVal = alignment.getFixedNucleotideConsensusQualityAt(matrixX);
 						String stringToDraw = String.valueOf(consensusResidue);
 						
 						
@@ -1980,6 +1988,11 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener,
 						// Draq quality background color // new Color((int)(Math.random() * 0x1000000));
 						Color qualValColor = colorSchemeNucleotide.getBaseQualityBackgroundColor(consensusResidue, CharPixelsContainerNucQuality.getQualClassFromQualVal(qualVal));
 						g2d.setColor(qualValColor);
+						
+						if(alignment.getFixedNucleotideConsensus().isBaseSelected(matrixX)){
+							g2d.setColor(colorSchemeNucleotide.getBaseSelectionBackgroundColor(NucleotideUtilities.GAP));
+						}
+						
 						g2d.fillRect(posX, 0, (int)charWidth, paneClip.height);
 						
 						// Draw base
@@ -2239,6 +2252,8 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener,
 		}
 
 	}
+
+
 
 
 }

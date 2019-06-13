@@ -453,6 +453,11 @@ public class AlignmentListModel implements ListModel, Iterable<Sequence>{
 		for(Sequence seq : seqs){
 			seq.reverseComplement();
 		}
+		
+		if(fixedConsensus != null) {
+			fixedConsensus.reverseComplement();
+		}
+		
 		if(seqs.size() > 0){
 			fireSequencesChanged(seqs);
 		}
@@ -1257,6 +1262,11 @@ public class AlignmentListModel implements ListModel, Iterable<Sequence>{
 				paddedSeqs.add(sequence);
 			}
 		}
+		
+		if(fixedConsensus != null) {
+			fixedConsensus.rightPadSequenceWithGaps(longLen);
+		}
+		
 		if(paddedSeqs.size() > 0){
 			fireSequencesChanged(paddedSeqs);
 			return true;
@@ -1276,6 +1286,11 @@ public class AlignmentListModel implements ListModel, Iterable<Sequence>{
 			}
 
 		}
+		
+		if(fixedConsensus != null) {
+			fixedConsensus.leftPadSequenceWithGaps(longLen);
+		}
+		
 		if(paddedSeqs.size() > 0){
 			fireSequencesChanged(paddedSeqs);
 			return true;
@@ -1398,9 +1413,35 @@ public class AlignmentListModel implements ListModel, Iterable<Sequence>{
 		return NucleotideUtilities.charFromBaseVal(consVal);
 	}
 	
-	public char getFixedNucleotideConsensusAt(int pos){
-		return fixedConsensus.getCharAtPos(pos);
+	public char getFixedNucleotideConsensusCharAt(int pos){
+		if(fixedConsensus != null) {
+			return fixedConsensus.getCharAtPos(pos);
+		}
+		else {
+			return NucleotideUtilities.charFromBaseVal(NucleotideUtilities.UNKNOWN);
+		}
 	}
+	
+	public byte getFixedNucleotideConsensusBaseValAt(int pos){
+		if(fixedConsensus != null) {
+			return fixedConsensus.getBaseAtPos(pos);
+		}
+		else {
+			return NucleotideUtilities.UNKNOWN;
+		}
+	}
+	
+	
+	public int getFixedNucleotideConsensusQualityAt(int x) {
+		if(fixedConsensus != null) {
+			TraceSequence seq = (TraceSequence) fixedConsensus;
+			return seq.getQualValAt(x);
+		}
+		else {
+			return 0;
+		}	
+	}
+
 	
 	public void setFixedConsensus(Sequence seq) {
 		this.fixedConsensus = seq;
@@ -1410,14 +1451,12 @@ public class AlignmentListModel implements ListModel, Iterable<Sequence>{
 		return fixedConsensus;
 	}
 
-	public int getFixedNucleotideConsensusQualityAt(int x) {
-		TraceSequence seq = (TraceSequence) fixedConsensus;
-		return seq.getQualValAt(x);
-	}
-
 	public void reverseComplement() {
 		for(Sequence seq : delegateSequences){
 			seq.reverseComplement();
+		}
+		if(fixedConsensus != null) {
+			fixedConsensus.reverseComplement();
 		}
 
 		fireSequencesChangedAll();
@@ -1437,6 +1476,10 @@ public class AlignmentListModel implements ListModel, Iterable<Sequence>{
 	public void complement() {
 		for(Sequence seq : delegateSequences){
 			seq.complement();	
+		}
+		
+		if(fixedConsensus != null) {
+			fixedConsensus.complement();
 		}
 
 		fireSequencesChangedAll();

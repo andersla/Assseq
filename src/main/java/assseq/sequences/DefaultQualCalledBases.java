@@ -117,17 +117,6 @@ public class DefaultQualCalledBases implements Bases {
 		logger.debug("backend.length=" + backend.length);		
 	}
 
-	public void append(byte[] newBytes) {
-		backend = ArrayUtils.addAll(backend, newBytes);
-		
-		// QualCalls
-		short[] additionalQual = new short[newBytes.length];
-		Arrays.fill(additionalQual, NONE_QUALCALL);
-		qualCalls = ArrayUtils.addAll(qualCalls, additionalQual);
-		//qualClipped = ArrayUtilities.add(qualClipped, newBytes.length);
-		//qualClipped.
-	}
-
 	public void moveBaseLeft(int n) {
 		set(n - 1, get(n));	
 	}
@@ -135,7 +124,10 @@ public class DefaultQualCalledBases implements Bases {
 	public void moveBaseRight(int n) {
 		set(n + 1, get(n));	
 	}
-
+	
+	public void append(byte[] newBytes) {			
+		insertAt(backend.length, newBytes);
+	}
 
 	public void insertAt(int n, byte[] newBytes) {
 		assureSize(n - 1);	

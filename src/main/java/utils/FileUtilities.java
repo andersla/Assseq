@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.log4j.Logger;
 
@@ -19,6 +20,8 @@ public class FileUtilities {
 	private static final Logger logger = Logger.getLogger(FileUtilities.class);
 	private static int preferedWidth = 650;
 	private static int preferedHeight = 450;
+	private static FileNameExtensionFilter FILTER_ABI = new FileNameExtensionFilter("abi, ab1", "abi", "ab1");
+	private static FileNameExtensionFilter FILTER_ACE = new FileNameExtensionFilter("ace", "ace");
 	
 	public static File[] selectOpenFilesViaChooser(File suggestedFile, Component parentComponent){
 
@@ -57,6 +60,9 @@ public class FileUtilities {
 			JFileChooser fc = new JFileChooser(suggestedFile);
 			fc.setPreferredSize(new Dimension(preferedWidth, preferedHeight));
 			fc.setMultiSelectionEnabled(true);
+			
+	        fc.addChoosableFileFilter(FILTER_ABI);
+	        fc.addChoosableFileFilter(FILTER_ACE);
 
 			/*
 			AbstractButton button = SwingUtilities.getDescendantOfType(AbstractButton.class,
@@ -119,6 +125,9 @@ public class FileUtilities {
 
 			JFileChooser fc = new JFileChooser(suggestedFile);
 			fc.setPreferredSize(new Dimension(preferedWidth, preferedHeight));
+
+	        fc.addChoosableFileFilter(FILTER_ABI);
+	        fc.addChoosableFileFilter(FILTER_ACE);
 
 			/*
 			AbstractButton button = SwingUtilities.getDescendantOfType(AbstractButton.class,

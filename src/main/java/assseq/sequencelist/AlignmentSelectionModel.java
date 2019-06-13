@@ -82,8 +82,6 @@ public class AlignmentSelectionModel{
 		return sequences.get(y).isBaseSelected(x);
 	}
 
-
-
 	public void selectSequenceWithIndex(int index){
 		setSequenceSelection(index, index);
 	}
@@ -111,7 +109,6 @@ public class AlignmentSelectionModel{
 		//delegateLSM.setLeadSelectionIndex(yPos);
 		changeSelection(xPos, yPos, xPos, yPos, clearFirst);
 	}
-
 
 	private void changeSelection(int x1, int y1, int x2, int y2, boolean clearFirst){
 
@@ -282,9 +279,6 @@ public class AlignmentSelectionModel{
 		seq.setSelection(foundPos.startPos, foundPos.endPos, false);
 		fireSelectionChanged(seq, true);
 	}
-
-
-
 
 
 

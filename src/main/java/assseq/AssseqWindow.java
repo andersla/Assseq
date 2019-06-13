@@ -553,7 +553,7 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		alignmentAndRulerPanel.add(consensusRuler, BorderLayout.SOUTH);
 
 		// consensus label
-		JPanel consensusLabelPanel = new JPanel();
+		JPanel consensusLabelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		consensusLabelPanel.add(new JLabel("Consensus:"));
 		consensusLabelPanel.setPreferredSize(new Dimension(100, consensusRuler.getPreferredSize().height));
 
@@ -815,14 +815,18 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		AlignmentKeyListener kl = new AlignmentKeyListener();
 		alignmentPane.addKeyListener(kl);
 		
+		AlignmentRulerMouseListener rl = new AlignmentRulerMouseListener();
+		alignmentPane.getRulerComponent().addMouseListener(rl);
+		alignmentPane.getRulerComponent().addMouseMotionListener(rl);
+		
 		AlignmentPaneMouseListener tracePanelML = new AlignmentPaneMouseListener(alignment, tracePanel, this, traceSequenceJList);
 		tracePanel.addMouseListener(tracePanelML);
 		tracePanel.addMouseMotionListener(tracePanelML);
 		tracePanel.addMouseWheelListener(tracePanelML); 
-
-		AlignmentRulerMouseListener rl = new AlignmentRulerMouseListener();
-		tracePanel.getRulerComponent().addMouseListener(rl);
-		tracePanel.getRulerComponent().addMouseMotionListener(rl);
+		
+		AlignmentConsensusRulerMouseListener crl = new AlignmentConsensusRulerMouseListener();
+		alignmentPane.getConsensusRulerComponent().addMouseListener(crl);
+		alignmentPane.getConsensusRulerComponent().addMouseMotionListener(crl);
 
 		AlignmentKeyListener tracePanelKL = new AlignmentKeyListener();
 		tracePanel.addKeyListener(tracePanelKL);
@@ -3066,6 +3070,9 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		alignmentPane.setBackground(color);
 		alignmentPane.getRulerComponent().setBackground(color);
 		alignmentPane.getCharsetRulerComponent().setBackground(color);
+		//alignmentPane.getConsensusRulerComponent().setBackground(color);
+		traceSequenceJList.setBackground(color);
+		tracePanel.setBackground(color);
 	}
 
 	public void setColorSchemeNucleotide(ColorScheme aScheme){
@@ -3387,6 +3394,149 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 				sequenceJList.clearSelection();
 				alignment.clearSelection();
 				alignmentPane.selectColumnAt(startPointOnAlignmentPane);
+				//requestPaneRepaint();
+			}
+
+		}
+
+		public void mouseReleased(MouseEvent e){
+
+			if(startPoint != null){
+				// if shift is down something is selected already make a new rect selection
+				if(e.isShiftDown()){
+					Point firstPos = alignment.getFirstSelectedPosition();
+					Point paneFirstPoint = alignmentPane.matrixCoordToPaneCoord(firstPos);
+
+					Rectangle selectRect = new Rectangle(paneFirstPoint);	
+					Point endPointOnAlignmentPane = new Point(alignmentPane.getVisibleRect().x + e.getPoint().x,alignmentPane.getHeight());	
+					selectRect.add(endPointOnAlignmentPane);
+
+					int selectionSize = alignmentPane.selectWithin(selectRect);
+
+				}
+				else{
+					Point endPointOnAlignmentPane = new Point(alignmentPane.getVisibleRect().x + e.getPoint().x,alignmentPane.getHeight());
+					Rectangle selectRect = new Rectangle(startPointOnAlignmentPane);
+					selectRect.add(endPointOnAlignmentPane);
+
+					logger.info(selectRect);
+
+					int selectionSize = 0;
+
+
+					alignment.clearSelection();
+					if(startPointOnAlignmentPane.x == endPointOnAlignmentPane.x){
+						alignmentPane.selectColumnAt(endPointOnAlignmentPane);
+						int x = alignmentPane.getColumnAt(e.getPoint());
+//						logger.info(aliCursor);
+//						logger.info(aliCursor.x);
+//						logger.info(aliCursor.y);
+						alignment.getAliCursor().setPosition(x,0);
+					}else{
+						selectionSize = alignmentPane.selectColumnsWithin(selectRect);
+						int x = alignmentPane.getColumnAt(e.getPoint());
+//						logger.info(aliCursor);
+//						logger.info(aliCursor.x);
+//						logger.info(aliCursor.y);
+						alignment.getAliCursor().setPosition(x,0);
+					}
+
+					alignment.clearTempSelection();
+				}
+
+			}
+
+			Point posOnPaneNotRuler = new Point(alignmentPane.getVisibleRect().x + e.getPoint().x,0);
+			Point matrixPoint = alignmentPane.paneCoordToMatrixCoord(posOnPaneNotRuler);
+			logger.info("x=" + matrixPoint.x);
+			alignment.getAliCursor().setPosition(matrixPoint.x,0);
+			// request focus after aliCursor change otherwise not really working
+			alignmentPane.requestFocus();
+
+			// Clear startpoint
+			startPoint = null;
+			startPointOnAlignmentPane = null;
+			maxRepaintRect = null;
+			//requestPaneRepaint();
+
+		}
+
+		public void mouseEntered(MouseEvent e) {
+		}
+
+		public void mouseExited(MouseEvent e) {
+		}
+
+		public void mouseClicked(MouseEvent e) {
+		}
+
+		public void mouseDragged(MouseEvent e) {
+			// Theese lines makes sure pane is scrolling when user selects
+			// and moves outside current visible rect
+			int alignmentYPos = alignmentPane.getVisibleRect().y;
+			int alignmentXPos = alignmentPane.getVisibleRect().x + e.getPoint().x;
+			Rectangle preferredVisisble = new Rectangle(new Point(alignmentXPos,alignmentYPos));
+			if(! alignmentPane.getVisibleRect().contains(e.getPoint())){	
+				// grow little extra so it scrolls quickly in beginning
+				preferredVisisble.grow(30,0);
+				alignmentPane.scrollRectToVisible(preferredVisisble);
+			}
+
+
+			if(startPoint != null){
+
+				Point endPointOnAlignmentPane = new Point(alignmentPane.getVisibleRect().x + e.getPoint().x,alignmentPane.getHeight());
+				Rectangle selectRect = new Rectangle(startPointOnAlignmentPane);
+				selectRect.add(endPointOnAlignmentPane);
+				Rectangle selectRectMatrixCoords = alignmentPane.paneCoordToMatrixCoord(selectRect);
+				alignment.setTempSelection(selectRectMatrixCoords);
+
+				if(maxRepaintRect == null){	
+					maxRepaintRect = new Rectangle(selectRect);
+				}else{
+					maxRepaintRect.add(selectRect);
+				}
+				//requestPaneRepaintRect(new Rectangle(maxRepaintRect));
+
+			}
+		}
+
+		public void mouseMoved(MouseEvent e) {
+			// TODO Auto-generated method stub
+
+		}	
+	}
+	//
+	//          END AlignmentRulerMouseListener
+	//
+	
+	//
+	//
+	//
+	//
+	// TODO could be moved to alignment ruler (but it is ok here)
+	private class AlignmentConsensusRulerMouseListener implements MouseListener, MouseMotionListener{
+		private Point startPoint;	
+		private Point startPointOnAlignmentPane;
+		private Rectangle maxRepaintRect;
+
+		public void mousePressed(MouseEvent e) {
+
+			// Save some startpoints
+			startPoint = e.getPoint();
+			startPointOnAlignmentPane = new Point(alignmentPane.getVisibleRect().x + e.getPoint().x,0);
+
+			// if shift is down something is selected already make a new rect selection
+			if(e.isShiftDown()){
+
+			}
+			// clear and make new single point select
+			else{
+				alignment.clearTempSelection();
+				sequenceJList.clearSelection();
+				alignment.clearSelection();
+				alignmentPane.selectConsensusAt(startPointOnAlignmentPane);
+				//alignmentPane.selectColumnAt(startPointOnAlignmentPane);
 				//requestPaneRepaint();
 			}
 
