@@ -15,7 +15,7 @@ import utils.nexus.NexusUtilities;
  * TODO maybe generalize this so it could be in general NexusUtilities
  * 
  */
-public class AliViewExtraNexusUtilities {
+public class AssseqExtraNexusUtilities {
 	private static final String LF = System.getProperty("line.separator");
 	public static final int DATATYPE_PROTEIN = 1;
 	public static final int DATATYPE_DNA = 7;

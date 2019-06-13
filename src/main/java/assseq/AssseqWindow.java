@@ -139,9 +139,9 @@ import assseq.color.ColorScheme;
 import assseq.exporter.ImageExporter;
 import assseq.externalcommands.CommandItem;
 import assseq.externalcommands.ExternalCommandExecutor;
-import assseq.gui.AliToolBar;
-import assseq.gui.AliViewJMenuBar;
-import assseq.gui.AliViewJMenuBarFactory;
+import assseq.gui.AssseqToolBar;
+import assseq.gui.AssseqJMenuBar;
+import assseq.gui.AssseqJMenuBarFactory;
 import assseq.gui.AlignmentPopupMenu;
 import assseq.gui.AppIcons;
 import assseq.gui.GlassPaneKeyListener;
@@ -236,16 +236,16 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 
 	private boolean hasUnsavedUndoableEdits;
 	private static Component glassPane;
-	private AliViewJMenuBarFactory menuBarFactory;
+	private AssseqJMenuBarFactory menuBarFactory;
 	private JMenu mnFilePages;
 	private UndoControler undoControler;
 	private FindObject findObj;
 	private JScrollPane listScrollPane;
 	private ButtonModel editModeModel;
-	private AliViewJMenuBar aliViewMenuBar;
+	private AssseqJMenuBar aliViewMenuBar;
 	//	private AlignmentDataAndSelectionListener aliListener;
 	private TranslationToolPanel translationPanel;
-	private AliToolBar aliToolbar;
+	private AssseqToolBar aliToolbar;
 	private ListTopOffsetJPanel listTopOffset;
 	private boolean hasNotifiedUserAboutLimitedUndo;
 	/*
@@ -263,7 +263,7 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 	}
 
 
-	public AssseqWindow(File alignmentFile,AliViewJMenuBarFactory menuBarFactory) {
+	public AssseqWindow(File alignmentFile,AssseqJMenuBarFactory menuBarFactory) {
 		this.aliViewWindow = this;
 		this.menuBarFactory = menuBarFactory;
 
@@ -777,7 +777,7 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 			}
 		});
 
-		aliToolbar = new AliToolBar(aliViewMenuBar, searchPanel, translationPanel);
+		aliToolbar = new AssseqToolBar(aliViewMenuBar, searchPanel, translationPanel);
 		aliToolbar.setFloatable(false);
 		aliToolbar.setBorder(new EmptyBorder(0,0,0,0));
 		// toolbar layout might be different in som plaf but since it is not floating doesn't matter
@@ -832,7 +832,7 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 	}
 
 
-	public AliViewJMenuBar getAliMenuBar() {
+	public AssseqJMenuBar getAliMenuBar() {
 		return aliViewMenuBar;
 	}
 

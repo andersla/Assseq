@@ -12,14 +12,14 @@ import assseq.AssseqWindow;
  * 
  */
 
-public class AliViewJMenuBarFactory{
-	private static final Logger logger = Logger.getLogger(AliViewJMenuBarFactory.class);
+public class AssseqJMenuBarFactory{
+	private static final Logger logger = Logger.getLogger(AssseqJMenuBarFactory.class);
 	//private JMenuBar macMenuBar;
 
-	public AliViewJMenuBarFactory() {		
+	public AssseqJMenuBarFactory() {		
 	}
 
-	public AliViewJMenuBar create(AssseqWindow aliViewWin){
-		return new AliViewJMenuBar(aliViewWin);
+	public AssseqJMenuBar create(AssseqWindow aliViewWin){
+		return new AssseqJMenuBar(aliViewWin);
 	}
 }

@@ -16,7 +16,7 @@ import org.junit.Test;
 import assseq.Assseq;
 import assseq.AssseqWindow;
 import assseq.alignment.Alignment;
-import assseq.gui.AliViewJMenuBarFactory;
+import assseq.gui.AssseqJMenuBarFactory;
 
 public class AlignmentTest {
 

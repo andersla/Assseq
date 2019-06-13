@@ -17,7 +17,7 @@ import org.apache.log4j.Logger;
 import assseq.AminoAcid;
 import assseq.Assseq;
 import assseq.AssseqWindow;
-import assseq.gui.AliViewJMenuBar;
+import assseq.gui.AssseqJMenuBar;
 import assseq.settings.Settings;
 import utils.DialogUtils;
 

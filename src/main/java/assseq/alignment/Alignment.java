@@ -28,7 +28,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import assseq.AliViewExtraNexusUtilities;
+import assseq.AssseqExtraNexusUtilities;
 import assseq.AminoAcid;
 import assseq.Base;
 import assseq.GeneticCode;
@@ -641,9 +641,9 @@ public class Alignment implements FileSequenceLoadListener {
 
 		BufferedWriter out = new BufferedWriter(new FileWriter(outFile));
 
-		int nexusDatatype = AliViewExtraNexusUtilities.DATATYPE_DNA;
+		int nexusDatatype = AssseqExtraNexusUtilities.DATATYPE_DNA;
 		if(sequences.getSequenceType() == SequenceUtils.TYPE_AMINO_ACID){
-			nexusDatatype = AliViewExtraNexusUtilities.DATATYPE_PROTEIN;
+			nexusDatatype = AssseqExtraNexusUtilities.DATATYPE_PROTEIN;
 		}
 
 		if(fileFormat == FileFormat.FASTA){
@@ -705,17 +705,17 @@ public class Alignment implements FileSequenceLoadListener {
 			storeAlignmetAsMSF(out);
 		}else if(fileFormat == FileFormat.NEXUS){
 			setTranslationOnePos(false);
-			AliViewExtraNexusUtilities.exportAlignmentAsNexus(new BufferedWriter(new FileWriter(outFile)), this, false,nexusDatatype);
+			AssseqExtraNexusUtilities.exportAlignmentAsNexus(new BufferedWriter(new FileWriter(outFile)), this, false,nexusDatatype);
 		}else if(fileFormat == FileFormat.NEXUS_TRANSLATED_AMINO_ACID){
 			// make sure it is translated
 			setTranslationOnePos(true);
-			AliViewExtraNexusUtilities.exportAlignmentAsNexus(new BufferedWriter(new FileWriter(outFile)), this, false, AliViewExtraNexusUtilities.DATATYPE_PROTEIN);
+			AssseqExtraNexusUtilities.exportAlignmentAsNexus(new BufferedWriter(new FileWriter(outFile)), this, false, AssseqExtraNexusUtilities.DATATYPE_PROTEIN);
 		}else if(fileFormat == FileFormat.NEXUS_SIMPLE){
 			setTranslationOnePos(false);
-			AliViewExtraNexusUtilities.exportAlignmentAsNexus(new BufferedWriter(new FileWriter(outFile)), this, true, nexusDatatype);
+			AssseqExtraNexusUtilities.exportAlignmentAsNexus(new BufferedWriter(new FileWriter(outFile)), this, true, nexusDatatype);
 		}else if(fileFormat == FileFormat.NEXUS_CODONPOS_CHARSET){
 			setTranslationOnePos(false);
-			AliViewExtraNexusUtilities.exportAlignmentAsNexusCodonpos(new BufferedWriter(new FileWriter(outFile)), this, AliViewExtraNexusUtilities.DATATYPE_DNA);
+			AssseqExtraNexusUtilities.exportAlignmentAsNexusCodonpos(new BufferedWriter(new FileWriter(outFile)), this, AssseqExtraNexusUtilities.DATATYPE_DNA);
 		}
 		// revert translation
 		setTranslationOnePos(wasTranslated);

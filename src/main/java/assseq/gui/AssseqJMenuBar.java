@@ -56,8 +56,8 @@ import utils.OSNativeUtils;
 import utils.nexus.CharSet;
 import utils.nexus.CharSets;
 
-public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, AlignmentDataListener, AlignmentSelectionListener, SettingsListener{
-	private static final Logger logger = Logger.getLogger(AliViewJMenuBar.class);
+public class AssseqJMenuBar extends JMenuBar implements AlignmentListener, AlignmentDataListener, AlignmentSelectionListener, SettingsListener{
+	private static final Logger logger = Logger.getLogger(AssseqJMenuBar.class);
 	private AssseqWindow aliViewWindow;
 	private ArrayList<AbstractButton> editFunctions = new ArrayList<AbstractButton>();
 	private ArrayList<AbstractButton> alwaysAvailableFunctions = new ArrayList<AbstractButton>();
@@ -109,7 +109,7 @@ public class AliViewJMenuBar extends JMenuBar implements AlignmentListener, Alig
 	 * 
 	 * 
 	 */
-	public AliViewJMenuBar(AssseqWindow aliViewWin){
+	public AssseqJMenuBar(AssseqWindow aliViewWin){
 		super();
 		aliViewWindow = aliViewWin;
 

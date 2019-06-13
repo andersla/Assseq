@@ -43,7 +43,7 @@ import org.simplericity.macify.eawt.ApplicationEvent;
 import org.simplericity.macify.eawt.ApplicationListener;
 import org.simplericity.macify.eawt.DefaultApplication;
 
-import assseq.gui.AliViewJMenuBarFactory;
+import assseq.gui.AssseqJMenuBarFactory;
 import assseq.gui.RepeatingKeyEventsFixer;
 import assseq.messenges.Messenger;
 import assseq.settings.Settings;
@@ -55,7 +55,7 @@ import utils.OSNativeUtils;
 public class Assseq implements ApplicationListener{
 
 	private static final String LF = System.getProperty("line.separator");
-	private static final AliViewJMenuBarFactory menuBarFactory = new AliViewJMenuBarFactory();
+	private static final AssseqJMenuBarFactory menuBarFactory = new AssseqJMenuBarFactory();
 	private static Assseq aliView;
 	private static ArrayList<AssseqWindow> aliViewWindows = new ArrayList<AssseqWindow>();
 	private static AssseqWindow activeWindow = null;

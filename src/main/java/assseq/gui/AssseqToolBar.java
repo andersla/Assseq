@@ -17,9 +17,9 @@ import utils.OSNativeUtils;
 
 
 
-public class AliToolBar extends JToolBar{
+public class AssseqToolBar extends JToolBar{
 
-	public AliToolBar(final AliViewJMenuBar aliMenuBar, SearchPanel searchPanel, JPanel translationPanel){
+	public AssseqToolBar(final AssseqJMenuBar aliMenuBar, SearchPanel searchPanel, JPanel translationPanel){
 
 		this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 

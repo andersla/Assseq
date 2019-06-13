@@ -17,10 +17,10 @@ import assseq.AssseqWindow;
 public class AlignmentPopupMenu extends JPopupMenu implements MouseListener {
 
 	private AssseqWindow aliViewWin;
-	private AliViewJMenuBar aliViewMenuBar;
+	private AssseqJMenuBar aliViewMenuBar;
 	private MouseEvent mouseActivationEvent;
 
-	public AlignmentPopupMenu(final AssseqWindow aliViewWin, final AliViewJMenuBar aliViewMenuBar){
+	public AlignmentPopupMenu(final AssseqWindow aliViewWin, final AssseqJMenuBar aliViewMenuBar){
 		this.aliViewWin = aliViewWin;
 		this.aliViewMenuBar = aliViewMenuBar;
 
