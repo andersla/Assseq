@@ -21,6 +21,7 @@ import assseq.sequencelist.AlignmentListModel;
 import assseq.sequencelist.FileSequenceAlignmentListModel;
 import assseq.sequencelist.MemorySequenceAlignmentListModel;
 import assseq.sequences.ConvertedJEBLSequence;
+import assseq.sequences.QualCalledSequence;
 import assseq.sequences.Sequence;
 
 public class SequencesFactory {
@@ -154,7 +155,7 @@ public class SequencesFactory {
 				try {
 					ACEImporter importer = new ACEImporter(alignmentFile);
 					List<Sequence> sequences = importer.importSequences();
-					Sequence consensus = importer.importConsensus();
+					QualCalledSequence consensus = importer.importConsensus();
 					model = new MemorySequenceAlignmentListModel();
 					model.setSequences(sequences);
 					model.setFixedConsensus(consensus);

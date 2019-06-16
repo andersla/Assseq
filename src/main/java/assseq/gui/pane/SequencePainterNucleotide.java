@@ -6,6 +6,7 @@ import assseq.NucleotideUtilities;
 import assseq.alignment.Alignment;
 import assseq.alignment.NucleotideHistogram;
 import assseq.sequences.ABISequence;
+import assseq.sequences.QualCalledSequence;
 import assseq.sequences.Sequence;
 import assseq.sequences.TraceSequence;
 
@@ -33,8 +34,8 @@ public class SequencePainterNucleotide extends SequencePainter {
 		}
 
 		short qualVal = 100;
-		if(seq instanceof TraceSequence){
-			qualVal = ((TraceSequence) seq).getQualValAtPos(seqXPos);
+		if(seq instanceof QualCalledSequence){
+			qualVal = ((QualCalledSequence) seq).getQualValAtPos(seqXPos);
 		}
 
 		// set defaults

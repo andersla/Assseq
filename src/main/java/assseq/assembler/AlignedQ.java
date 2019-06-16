@@ -87,7 +87,7 @@ public class AlignedQ {
 	//System.err.println(getConSequence(rev));
     }
     AlignedQ(SequenceQ one, int trimQual) {
-	this(one,false, trimQual);
+	this(one, false, trimQual);
     }
     AlignedQ(SequenceQ one) {
 	this(one,false, 0);
@@ -190,15 +190,6 @@ public class AlignedQ {
                     qual = sequences[i].getQualScore(positions[i][pos]);
                 }
 		if (revComp) { base = SequenceQ.compBase(base); }
-		/*//System.err.print(positions[i][pos] + " ");
-		if ((revcomp[i] && !comp) || (!revcomp[i] && comp)) { 
-		    base = sequences[i].getRevCompBase(positions[i][pos]);
-		    qual = sequences[i].getRevQualScore(positions[i][pos]);
-		}
-		else {
-		    base = sequences[i].getBase(positions[i][pos]);
-		    qual = sequences[i].getQualScore(positions[i][pos]);
-		}*/
 		
 		if (base=='G' || base=='g') {
 		    G+=qual;
@@ -213,9 +204,9 @@ public class AlignedQ {
 		    A+=qual;
 		}
 		else {
-		    System.err.print("Unknown char '" + base + "' at position " + positions[i][pos]);
-		    if ((revcomp[i] && !revComp) || (!revcomp[i] && revComp)) System.err.print(" (revcomp)");
-		    System.err.println(" in sequence " + sequences[i].getFileName());
+		    //System.err.print("Unknown char '" + base + "' at position " + positions[i][pos]);
+		    //if ((revcomp[i] && !revComp) || (!revcomp[i] && revComp)) System.err.print(" (revcomp)");
+		    //System.err.println(" in sequence " + sequences[i].getFileName());
 		}
 	    }
 	    else {
@@ -360,7 +351,7 @@ public class AlignedQ {
 		AlignedQ.Base oneBase = sequenceOne.getConBase(i); 
 		AlignedQ.Base twoBase = sequenceTwo.getConBase(j);
 		AlignedQ.Base twoRevBase = sequenceTwo.getConBase(j,true);
-		if (oneBase.qual < 1) {
+		/*if (oneBase.qual < 1) {
 		    System.out.println("No qual score for first seq at pos " + i);
 		}
 		if (twoBase.qual < 1) {
@@ -368,7 +359,7 @@ public class AlignedQ {
 		}
 		if (twoRevBase.qual < 1) {
 		    System.out.println("No qual score for second seq (revcomp) at pos " + j);
-		}
+		}*/
 		if (oneBase.nuc == twoBase.nuc) {
 		    match += oneBase.qual + twoBase.qual;
 		}
@@ -600,4 +591,3 @@ public class AlignedQ {
 	return accQual;
     }
 }
-

@@ -861,8 +861,19 @@ public class AssseqJMenuBar extends JMenuBar implements AlignmentListener, Align
 		JMenu mnAlign = new JMenu("Assemble");
 		mnAlign.setMnemonic(KeyEvent.VK_A);
 		this.add(mnAlign);
+		
+		JMenuItem mntmAlignAssseq = new JMenuItem("Reassemble everything with internal assembler");
+		mntmAlignAssseq.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				aliViewWindow.reAssembleEverythingWithAssseqAssembler();
+			}
+		});
+		//mntmAlign.setIcon(AppIcons.getAlignIcon());
+		mnAlign.add(mntmAlignAssseq);
+		editFunctions.add(mntmAlignAssseq);
+		loadedAlignmentFunctions.add(mntmAlignAssseq);
 
-		JMenuItem mntmAlign = new JMenuItem("Reassemble everything");
+		JMenuItem mntmAlign = new JMenuItem("Reassemble everything with CAP3 external assembler plugin");
 		mntmAlign.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				aliViewWindow.reAssembleEverythingWithDefaultProgram();

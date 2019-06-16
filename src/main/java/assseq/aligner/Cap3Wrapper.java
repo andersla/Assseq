@@ -59,6 +59,28 @@ public class Cap3Wrapper {
 					}
 				}
 
+				// on win also copy dll	
+				if(OSNativeUtils.isWindows()) {
+					fileISOK = false;
+					nTries = 0;
+					File localDLLFile = new File(getAliViewUserDataDirectory(), "/binaries" + File.separator + getWindowsDllBinName());
+					while(! fileISOK && nTries <=3){
+						nTries ++;
+						InputStream binStreamFromJar = cl.getResourceAsStream(localDLLFile.getName());
+						logger.info(binStreamFromJar);
+						copyBinFileToLocalDir(binStreamFromJar, localDLLFile);
+						// reopen stream
+						binStreamFromJar = cl.getResourceAsStream(localDLLFile.getName());
+						fileISOK = verifyMD5(binStreamFromJar, localDLLFile);
+						if(! fileISOK){
+							FileUtils.deleteQuietly(localDLLFile);
+						}else{
+							localDLLFile.setExecutable(true);
+						}
+					}
+				}
+
+
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -104,36 +126,40 @@ public class Cap3Wrapper {
 		// 64-bit
 		if(OSNativeUtils.is64BitOS()){
 			if(OSNativeUtils.isMac()){
-				binName = "muscle3.8.31_i86darwin64";
+				binName = "cap3.macosx.intel64";
 			}
 			else if(OSNativeUtils.isLinuxOrUnix()){
 				binName = "cap3.linux.x86_64";
 			}
 			// default
 			else{
-				binName = "muscle3.8.425_win32.exe";
+				binName = "cap3.exe";
 			}
 			// 32-bit
 		}else{
 			if(OSNativeUtils.isMac()){
 				if(OSNativeUtils.isPowerPC()){
-					binName = "muscle3.8.31_macppc";
+					binName = "not-going-to-work";
 				}
 				else{
-					binName = "muscle3.8.31_i86darwin32";
+					binName = "cap3.macosx.intel32";
 				}
 			}
 			else if(OSNativeUtils.isLinuxOrUnix()){
-				binName = "muscle3.8.425_i86linux32";
+				binName = "cap3.linux.32bit";
 			}
 			// default
 			else{
-				binName = "muscle3.8.425_win32.exe";
+				binName = "cap3.exe";
 			}
 		}
 
 		return binName;
 
+	}
+	
+	public static final String getWindowsDllBinName() {
+		return "cygwin1.dll";
 	}
 
 	/*

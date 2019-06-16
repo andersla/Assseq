@@ -148,7 +148,7 @@ public class Traces {
 	}
 	
 	private void resize(int n) {
-		logger.info("resize=" + n);
+		//logger.info("resize=" + n);
 		int additionalCount = n - baseCalls.length;
 		int[] additional = new int[additionalCount];
 		Arrays.fill(additional, INSERTED_BASECALL);

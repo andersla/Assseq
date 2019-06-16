@@ -425,24 +425,24 @@ public class Settings {
 		// raxmlHPC -f a -x 1465421654 -# 1 -m PROTGAMMAGTR -n RAXML_ALIGN -s /tmp/aliview-tmp-current-alignment3189140589076301400phy 
 
 		if(OSNativeUtils.isMac()){			
-			CommandItem MAC_DEFAULT_1 = new CommandItem("FastTree + FigTree", "", "/usr/local/bin/FastTree -nt -gtr -out TEMP_OUT_FILE CURRENT_ALIGNMENT_FASTA" + LF + "open -a \"FigTree v1.4.2.app\" TEMP_OUT_FILE", false, true);
-			CommandItem MAC_DEFAULT_2 = new CommandItem("Textedit", "", "open -a TextEdit CURRENT_ALIGNMENT_FASTA", false,false);
+			CommandItem MAC_DEFAULT_1 = new CommandItem("Textedit", "", "open -a TextEdit CURRENT_ALIGNMENT_FASTA", false,false);
+			CommandItem MAC_DEFAULT_2 = new CommandItem("", "", "", false,false);
 			CommandItem MAC_DEFAULT_3 = new CommandItem("", "", "", false,false);
 			CommandItem MAC_DEFAULT_4 = new CommandItem("", "", "", false,false);
 			CommandItem MAC_DEFAULT_5 = new CommandItem("", "", "", false,false);
 			CommandItem[] MAC_COMMAND_ITEM_DEFAULTS = new CommandItem[]{MAC_DEFAULT_1, MAC_DEFAULT_2, MAC_DEFAULT_3, MAC_DEFAULT_4, MAC_DEFAULT_5};
 			return MAC_COMMAND_ITEM_DEFAULTS;
 		}else if(OSNativeUtils.isWindows()){
-			CommandItem WIN_DEFAULT_1 = new CommandItem("FastTree + FigTree", "", "\"C:\\Program Files\\FastTree\\FastTree.exe\" -nt -gtr -out TEMP_OUT_FILE CURRENT_ALIGNMENT_FASTA" + LF + "\"C:\\Program Files\\FigTree\\FigTree v1.4.2.exe\" TEMP_OUT_FILE", true, true);
-			CommandItem WIN_DEFAULT_2 = new CommandItem("notepad++(Texteditor)", "", "\"C:\\Program Files (x86)\\Notepad++\\Notepad++.exe\" CURRENT_ALIGNMENT_FASTA", false,false);
+			CommandItem WIN_DEFAULT_1 = new CommandItem("notepad++(Texteditor)", "", "\"C:\\Program Files (x86)\\Notepad++\\Notepad++.exe\" CURRENT_ALIGNMENT_FASTA", false,false);
+			CommandItem WIN_DEFAULT_2 = new CommandItem("", "", "", false,false);
 			CommandItem WIN_DEFAULT_3 = new CommandItem("", "", "", false,false);
 			CommandItem WIN_DEFAULT_4 = new CommandItem("", "", "", false,false);
 			CommandItem WIN_DEFAULT_5 = new CommandItem("", "", "", false,false);
 			CommandItem[] WIN_COMMAND_ITEM_DEFAULTS = new CommandItem[]{WIN_DEFAULT_1, WIN_DEFAULT_2, WIN_DEFAULT_3, WIN_DEFAULT_4, WIN_DEFAULT_5};
 			return WIN_COMMAND_ITEM_DEFAULTS;
 		}else{
-			CommandItem DEFAULT_1 = new CommandItem("FastTree + FigTree", "", "FastTree -nt -gtr -out TEMP_OUT_FILE CURRENT_ALIGNMENT_FASTA" + LF + "figtree TEMP_OUT_FILE", false, true);
-			CommandItem DEFAULT_2 = new CommandItem("Geany(Texteditor)", "", "geany CURRENT_ALIGNMENT_FASTA", false,false);
+			CommandItem DEFAULT_1 = new CommandItem("Geany(Texteditor)", "", "geany CURRENT_ALIGNMENT_FASTA", false,false);
+			CommandItem DEFAULT_2 = new CommandItem("", "", "", false,false);
 			CommandItem DEFAULT_3 = new CommandItem("", "", "", false,false);
 			CommandItem DEFAULT_4 = new CommandItem("", "", "", false,false);
 			CommandItem DEFAULT_5 = new CommandItem("", "", "", false,false);
@@ -482,24 +482,24 @@ public class Settings {
 	private static CommandItem[] getAlignerALLDefaultItems() {
 		if(OSNativeUtils.isMac()){
 			CommandItem MAC_DEFAULT_ALL_ALIGNER_ITEM_1 = new CommandItem("Cap3", Cap3Wrapper.getBinPath().getAbsolutePath(), "CURRENT_ALIGNMENT_FASTA -c 25", true, true);
-			CommandItem MAC_DEFAULT_ALL_ALIGNER_ITEM_2 = new CommandItem("Mafft-localpair", "/usr/local/bin/mafft", "--localpair --reorder --maxiterate 1000 --out TEMP_OUT_FILE CURRENT_ALIGNMENT_FASTA", false,true);
-			CommandItem MAC_DEFAULT_ALL_ALIGNER_ITEM_3 = new CommandItem("Mafft-globalpair", "/usr/local/bin/mafft", "--globalpair --thread 2 --out TEMP_OUT_FILE CURRENT_ALIGNMENT_FASTA", false,true);
+			CommandItem MAC_DEFAULT_ALL_ALIGNER_ITEM_2 = new CommandItem("", "", "", false,true);
+			CommandItem MAC_DEFAULT_ALL_ALIGNER_ITEM_3 = new CommandItem("", "", "", false,true);
 			CommandItem MAC_DEFAULT_ALL_ALIGNER_ITEM_4 = new CommandItem("", "", "", false,true);
 			CommandItem MAC_DEFAULT_ALL_ALIGNER_ITEM_5 = new CommandItem("", "", "", false,true);
 			CommandItem[] MAC_ALIGNER_ALL_ITEM_DEFAULTS = new CommandItem[]{MAC_DEFAULT_ALL_ALIGNER_ITEM_1, MAC_DEFAULT_ALL_ALIGNER_ITEM_2, MAC_DEFAULT_ALL_ALIGNER_ITEM_3, MAC_DEFAULT_ALL_ALIGNER_ITEM_4, MAC_DEFAULT_ALL_ALIGNER_ITEM_5};
 			return MAC_ALIGNER_ALL_ITEM_DEFAULTS;
 		}else if(OSNativeUtils.isWindows()){
 			CommandItem WIN_DEFAULT_ALL_ALIGNER_ITEM_1 = new CommandItem("Cap3", Cap3Wrapper.getBinPath().getAbsolutePath(), "CURRENT_ALIGNMENT_FASTA -c 25", true, true);
-			CommandItem WIN_DEFAULT_ALL_ALIGNER_ITEM_2 = new CommandItem("Mafft", "cmd.exe", "/C \"C:\\Program Files\\mafft-win\\mafft.bat\" --localpair --reorder --maxiterate 1000 --out TEMP_OUT_FILE CURRENT_ALIGNMENT_FASTA", false,true);
-			CommandItem WIN_DEFAULT_ALL_ALIGNER_ITEM_3 = new CommandItem("Mafft--globalpair", "cmd.exe", "/C \"C:\\Program Files\\mafft-win\\mafft.bat\" --globalpair --thread 2 --out TEMP_OUT_FILE CURRENT_ALIGNMENT_FASTA", false,true);
+			CommandItem WIN_DEFAULT_ALL_ALIGNER_ITEM_2 = new CommandItem("", "", "", false,true);
+			CommandItem WIN_DEFAULT_ALL_ALIGNER_ITEM_3 = new CommandItem("", "", "", false,true);
 			CommandItem WIN_DEFAULT_ALL_ALIGNER_ITEM_4 = new CommandItem("", "", "", false,true);
 			CommandItem WIN_DEFAULT_ALL_ALIGNER_ITEM_5 = new CommandItem("", "", "", false,true);
 			CommandItem[] WIN_ALIGNER_ALL_ITEM_DEFAULTS = new CommandItem[]{WIN_DEFAULT_ALL_ALIGNER_ITEM_1, WIN_DEFAULT_ALL_ALIGNER_ITEM_2, WIN_DEFAULT_ALL_ALIGNER_ITEM_3, WIN_DEFAULT_ALL_ALIGNER_ITEM_4, WIN_DEFAULT_ALL_ALIGNER_ITEM_5};
 			return WIN_ALIGNER_ALL_ITEM_DEFAULTS;
 		}else{
 			CommandItem DEFAULT_ALL_ALIGNER_ITEM_1 = new CommandItem("Cap3", Cap3Wrapper.getBinPath().getAbsolutePath(), "CURRENT_ALIGNMENT_FASTA -c 25", true, true);
-			CommandItem DEFAULT_ALL_ALIGNER_ITEM_2 = new CommandItem("Mafft", "mafft", "--localpair --reorder --maxiterate 1000 --out TEMP_OUT_FILE CURRENT_ALIGNMENT_FASTA", false,true);
-			CommandItem DEFAULT_ALL_ALIGNER_ITEM_3 = new CommandItem("Mafft", "mafft", "--globalpair --thread 2 --out TEMP_OUT_FILE CURRENT_ALIGNMENT_FASTA", false,true);
+			CommandItem DEFAULT_ALL_ALIGNER_ITEM_2 = new CommandItem("", "", "", false,true);
+			CommandItem DEFAULT_ALL_ALIGNER_ITEM_3 = new CommandItem("", "", "", false,true);
 			CommandItem DEFAULT_ALL_ALIGNER_ITEM_4 = new CommandItem("", "", "", false,true);
 			CommandItem DEFAULT_ALL_ALIGNER_ITEM_5 = new CommandItem("", "", "", false,true);
 			CommandItem[] ALIGNER_ALL_ITEM_DEFAULTS = new CommandItem[]{DEFAULT_ALL_ALIGNER_ITEM_1, DEFAULT_ALL_ALIGNER_ITEM_2, DEFAULT_ALL_ALIGNER_ITEM_3, DEFAULT_ALL_ALIGNER_ITEM_4, DEFAULT_ALL_ALIGNER_ITEM_5};

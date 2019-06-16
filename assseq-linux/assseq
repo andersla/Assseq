@@ -2,9 +2,9 @@
 
 set -euo pipefail
 
-jarfile="aliview.jar"
-defprogdir="/usr/share/aliview"
-minjavamem="512M"
+jarfile="assseq.jar"
+defprogdir="/usr/share/assseq"
+minjavamem="128M"
 maxjavamem="1024M"
 debug=0
 version=0
@@ -13,12 +13,12 @@ function show_help () {
 cat <<HEREDOC
 File:
 
-    `basename $0` - Launcher script for aliview.jar
+    `basename $0` - Launcher script for assseq.jar
 
 Version:
 
     Wrapper script version 29 Jan 2018
-    (to see aliview.jar version, use the '-v' option)
+    (to see assseq.jar version, use the '-v' option)
 
 By:
 
@@ -26,21 +26,21 @@ By:
 
 Description:
 
-    AliView: a fast and lightweight alignment viewer
-    and editor for large data sets.
-    Citation: Larsson, A. (2014). Bioinformatics30(22): 3276-3278.
-    http://dx.doi.org/10.1093/bioinformatics/btu531
+    Assseq: a easy to use assembl.....
+    a
+    Citation: xxxxxxxxxxxxx
+    http://dx.doi.org/1xxxxxxxxxxxxxx
 
-    See http://ormbunkar.se/aliview for documentation
+    See http://ormbunkar.se/assseq for documentation
     and downloads.
 
-    Source: https://github.com/AliView/AliView
+    Source: https://github.com/andersla/Assseq
 
 Options:
 
     -?, -h    -- show this help
     -d        -- show debug info in terminal
-    -v        -- show aliview.jar version
+    -v        -- show assseq.jar version
     -x <size> -- set max mem size for java
 
 Usage:
@@ -110,38 +110,38 @@ shift $((OPTIND-1))
 ## then always use this jar - otherwise confusing
 absolute_file="$(resolve_links $0)"
 progdir=$(dirname $absolute_file)
-aliview="$progdir/$jarfile"
-if [ ! -f "$aliview" ]; then
+assseq="$progdir/$jarfile"
+if [ ! -f "$assseq" ]; then
     progdir="$defprogdir"
-    aliview="$progdir/$jarfile"
-    if [ ! -x "$aliview" ] ; then
+    assseq="$progdir/$jarfile"
+    if [ ! -x "$assseq" ] ; then
         echo "$0: Error: Cannot find \'$progdir/$jarfile\'"
         echo "This script is just a wrapper for $jarfile."
-        echo "See the aliview documentation for more information."
+        echo "See the assseq documentation for more information."
         exit 1
     fi
 fi
 
-## Try to get aliview version (experimental)
+## Try to get assseq version (experimental)
 if [ "$version" -eq 1 ]; then
-    nr=$("$myjava" -Djava.awt.headless=true -jar "$aliview" | grep -m1 'version' | awk '{print $NF}')
+    nr=$("$myjava" -Djava.awt.headless=true -jar "$assseq" | grep -m1 'version' | awk '{print $NF}')
     echo "$jarfile v.$nr"
     exit 0
 fi
 
-## Launch aliview on all input
+## Launch assseq on all input
 if [ $# -eq 0 ]; then
     if [ "$debug" -eq 0 ]; then
-        $myjava -Xmx$maxjavamem -Xms$minjavamem -jar $aliview &> /dev/null &
+        $myjava -Xmx$maxjavamem -Xms$minjavamem -jar $assseq &> /dev/null &
     else
-        $myjava -Xmx$maxjavamem -Xms$minjavamem -jar $aliview
+        $myjava -Xmx$maxjavamem -Xms$minjavamem -jar $assseq
     fi
 else
     for fil in "$@" ; do
         if [ "$debug" -eq 0 ]; then
-            $myjava -Xmx$maxjavamem -Xms$minjavamem -jar $aliview "$fil" &> /dev/null &
+            $myjava -Xmx$maxjavamem -Xms$minjavamem -jar $assseq "$fil" &> /dev/null &
         else
-            $myjava -Xmx$maxjavamem -Xms$minjavamem -jar $aliview "$fil" &
+            $myjava -Xmx$maxjavamem -Xms$minjavamem -jar $assseq "$fil" &
         fi
     done
 fi

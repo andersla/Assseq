@@ -37,12 +37,12 @@ public class Trace {
 	}
 	
 	private void resize(int n) {
-		logger.info("resize=" + n);
+		logger.debug("resize=" + n);
 		int additionalCount = n - backend.length;
 		int[] additional = new int[additionalCount];
 		Arrays.fill(additional, NO_TRACE_VAL);
 		backend = ArrayUtils.addAll(backend, additional);
-		logger.info("backend.length=" + backend.length);
+		logger.debug("backend.length=" + backend.length);
 	}
 	
 	public int getMaxVal() {
@@ -63,9 +63,9 @@ public class Trace {
 	}
 
 	public void trim(int length) {
-		logger.info("Trim trace current length:" + backend.length);
+		logger.debug("Trim trace current length:" + backend.length);
 		backend = ArrayUtils.subarray(backend, 0, length);
-		logger.info("Trim trace:" + length);
+		logger.debug("Trim trace:" + length);
 	}
 
 }

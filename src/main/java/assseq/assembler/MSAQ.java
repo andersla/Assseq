@@ -40,15 +40,18 @@ public class MSAQ {
 	scoreOrder[0] = 0;
  	for (int i=0; i < sequences.length; ++i) {
 	    for (int j=i+1; j < sequences.length; ++j) {
-		pairs[pos] = AlignedQ.align(new AlignedQ(sequences[i],trim_qual), new AlignedQ(sequences[j],trim_qual));
-		for (int k = pos; k > 0; --k) {
-		    if (pairs[scoreOrder[k-1]].getScore() > pairs[pos].getScore()) { scoreOrder[k] = pos; }
-		    else {
-			scoreOrder[k] = scoreOrder[k-1];
-			scoreOrder[k-1] = pos;
+		//System.err.println(i + " " + j);
+		if (sequences[i] != null && sequences[j] != null) {
+		    pairs[pos] = AlignedQ.align(new AlignedQ(sequences[i],trim_qual), new AlignedQ(sequences[j],trim_qual));
+		    for (int k = pos; k > 0; --k) {
+			if (pairs[scoreOrder[k-1]].getScore() > pairs[pos].getScore()) { scoreOrder[k] = pos; }
+			else {
+			    scoreOrder[k] = scoreOrder[k-1];
+			    scoreOrder[k-1] = pos;
+			}
 		    }
+		    ++pos;
 		}
-		++pos;
 	    }
 	}
 	//for (int i=0; i < scoreOrder.length; ++i) { System.err.println("Order: " + scoreOrder[i]); }
@@ -59,7 +62,7 @@ public class MSAQ {
 	int[][] included_seq = null;
 	for (int i=0; i < scoreOrder.length; ++i) {
 	    if (scoreOrder[i] >= 0) {
-		System.err.println("Processing pairwise alignment: " + scoreOrder[i]+1);
+		System.err.println("Processing pairwise alignment: " + (scoreOrder[i]+1));
 		if (return_alignments == null) { // if first alignment
 		    //System.err.println("Add first alignment: " + scoreOrder[i]);
 		    return_alignments = new AlignedQ[1];
@@ -140,7 +143,8 @@ public class MSAQ {
 			return_alignments[includeIn] = AlignedQ.align(return_alignments[includeIn],new AlignedQ(sequences[includeSeq],trim_qual));
 			int [] tempSeqs = new int [included_seq[includeIn].length+1];
 			System.arraycopy(included_seq[includeIn],0,tempSeqs,0,included_seq[includeIn].length);
-			tempSeqs[included_seq[includeIn].length] = inAliToAdd[includeSeq];
+			//System.err.println("Temp: " + tempSeqs.length + " " + included_seq[includeIn].length + " In Ali: " + inAliToAdd.length + " " + includeSeq);
+			tempSeqs[included_seq[includeIn].length] = /*inAliToAdd[*/includeSeq/*]*/;
 			included_seq[includeIn] = tempSeqs;
 		    }
 		}

@@ -18,10 +18,12 @@ import org.apache.log4j.Logger;
 
 import assseq.MemoryUtils;
 import assseq.sequences.ABISequence;
+import assseq.sequences.BasicQualCalledSequence;
 import assseq.sequences.BasicTraceSequence;
 import assseq.sequences.DefaultQualCalledBases;
 import assseq.sequences.MSFSequence;
 import assseq.sequences.PhylipSequence;
+import assseq.sequences.QualCalledSequence;
 import assseq.sequences.Sequence;
 import assseq.utils.ArrayUtilities;
 
@@ -49,9 +51,9 @@ public class ACEImporter {
 		this.inputFile = inputFile;
 	}
 
-	public Sequence importConsensus() throws AlignmentImportException, FileNotFoundException {
+	public QualCalledSequence importConsensus() throws AlignmentImportException, FileNotFoundException {
 
-		Sequence seq = null;
+		BasicQualCalledSequence seq = null;
 		try {
 			ACEparser parser = new ACEparser();
 			parser.parsACE(new FileInputStream(inputFile));
@@ -66,7 +68,7 @@ public class ACEImporter {
 			
 			DefaultQualCalledBases basesAndCalls = new DefaultQualCalledBases(bases, shortQualCalls);
 			
-			seq = new BasicTraceSequence(basesAndCalls, null);
+			seq = new BasicQualCalledSequence(basesAndCalls);
 			
 			int minLeftStart = parser.getContigReadsMinLeftStart(contigIndex);
 			
@@ -142,6 +144,66 @@ public class ACEImporter {
 						// (there should be a qual-called-sequence that are not Trace sequence, e.g. QualCalled seq (or I just add it to all via BasicSequence...)
 						// For now it is in traceSequence
 						//
+						if(seq instanceof BasicQualCalledSequence) {
+							BasicQualCalledSequence basicQualCalledSeq = (BasicQualCalledSequence) seq;
+							int qualStart = parser.getReadQualStartForContig(contigIndex, readIndex);
+							// Adjust to internal 0 index sequence position
+							qualStart = qualStart -1;
+							basicQualCalledSeq.setQualClipStart(qualStart);
+							int qualEnd = parser.getReadQualEndForContig(contigIndex, readIndex);
+							// Adjust to internal 0 index sequence position
+							basicQualCalledSeq.setQualClipEnd(qualEnd);
+						}
+
+						logger.debug(seq.getBasesAsString());
+
+						// insert gaps
+						logger.debug("readSeq:" + readSeq);
+						for(int n = 0; n < readSeq.length(); n++) {
+							if(readSeq.charAt(n) == '*') {
+								logger.debug("insert gap at:" + n);
+								seq.insertGapAt(n);
+							}
+						}
+
+						int padSize = 0;
+
+						padSize = Math.abs(minLeftStart) + readAlignStart;
+
+						logger.info("LeftPad" + padSize);
+
+						seq.leftPadSequenceWithGaps( padSize + seq.getLength());
+
+						sequences.add(seq);
+					}	
+					else {
+						
+						ABIImporter importer = new ABIImporter(origReadFile);
+						List<Sequence> abiSeqs = importer.importSequences();	
+						Sequence seq = abiSeqs.get(0);
+
+						// Trim trace part that are not base-called
+						if(seq instanceof ABISequence) {
+							ABISequence abiSeq = (ABISequence) seq;
+							abiSeq.trimTraces();
+						}
+
+
+						// Check if revcomp (this is done by string comparison instead of 
+						String readSeq = parser.getReadSeqForContig(contigIndex, readIndex);
+						String compare = StringUtils.substring(readSeq,0, 20);
+						boolean isUncomplemented = seq.getBasesAsString().toLowerCase().startsWith(compare.toLowerCase());
+						logger.info("" + seq + " is uncomplemented" + isUncomplemented);
+						if(! isUncomplemented) {
+							seq.reverseComplement();
+						}
+
+						// Add qualClip to sequences
+						//
+						// The classes and interfaces are not fully wotking here
+						// (there should be a qual-called-sequence that are not Trace sequence, e.g. QualCalled seq (or I just add it to all via BasicSequence...)
+						// For now it is in traceSequence
+						//
 						if(seq instanceof BasicTraceSequence) {
 							BasicTraceSequence basicTraceSeq = (BasicTraceSequence) seq;
 							int qualStart = parser.getReadQualStartForContig(contigIndex, readIndex);
@@ -156,10 +218,10 @@ public class ACEImporter {
 						logger.debug(seq.getBasesAsString());
 
 						// insert gaps
-						logger.info("readSeq:" + readSeq);
+						logger.debug("readSeq:" + readSeq);
 						for(int n = 0; n < readSeq.length(); n++) {
 							if(readSeq.charAt(n) == '*') {
-								logger.info("insert gap at:" + n);
+								logger.debug("insert gap at:" + n);
 								seq.insertGapAt(n);
 							}
 						}
@@ -173,8 +235,8 @@ public class ACEImporter {
 						seq.leftPadSequenceWithGaps( padSize + seq.getLength());
 
 						sequences.add(seq);
-
-					}	
+					}
+					
 				}		
 			}
 			

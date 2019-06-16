@@ -23,16 +23,16 @@ import assseq.utils.ArrayUtilities;
 // todo can save memory by changing data implementation into byte instead of char
 public class BasicSequence implements Sequence, Comparable<Sequence> {
 	private static final Logger logger = Logger.getLogger(BasicSequence.class);
-	private boolean simpleName = false;
+	protected boolean simpleName = false;
 
 	// TODO what is this selection offset?
-	public int selectionOffset = 0;
+	protected int selectionOffset = 0;
 	protected Bases bases;
 	// TranslatedBases has to be volatile so no problems araise with the double lock in the lazy creation below
 	// see: http://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html
 	protected TranslatedBases translatedBases;
 	protected SequenceSelectionModel selectionModel;
-	private AlignmentListModel alignmentModel;
+	protected AlignmentListModel alignmentModel;
 	protected String name;
 	protected int id;
 

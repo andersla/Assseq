@@ -384,6 +384,14 @@ public class ArrayUtilities {
 		}
 		return output;
 	}
+	
+	public static int[] shortArray2IntArray(short[] input) {
+		int[] output = new int[input.length];
+		for(int n = 0; n < output.length; n++) {
+			output[n] = (int)input[n];
+		}
+		return output;
+	}
 
 	public static byte[] intArray2ByteArray(int[] input) {
 		byte[] output = new byte[input.length];

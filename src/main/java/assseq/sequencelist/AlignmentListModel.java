@@ -48,6 +48,7 @@ import assseq.importer.FileFormat;
 import assseq.sequences.BasicSequence;
 import assseq.sequences.FileSequence;
 import assseq.sequences.InMemorySequence;
+import assseq.sequences.QualCalledSequence;
 import assseq.sequences.Sequence;
 import assseq.sequences.SequenceUtils;
 import assseq.sequences.TraceSequence;
@@ -76,7 +77,7 @@ public class AlignmentListModel implements ListModel, Iterable<Sequence>{
 	private volatile int cachedLongestSequenceLength = -1;
 	private boolean isTranslated;
 	private Alignment alignment;
-	private Sequence fixedConsensus;
+	private QualCalledSequence fixedConsensus;
 
 
 	public AlignmentListModel() {
@@ -1434,8 +1435,7 @@ public class AlignmentListModel implements ListModel, Iterable<Sequence>{
 	
 	public int getFixedNucleotideConsensusQualityAt(int x) {
 		if(fixedConsensus != null) {
-			TraceSequence seq = (TraceSequence) fixedConsensus;
-			return seq.getQualValAt(x);
+			return fixedConsensus.getQualValAt(x);
 		}
 		else {
 			return 0;
@@ -1443,7 +1443,7 @@ public class AlignmentListModel implements ListModel, Iterable<Sequence>{
 	}
 
 	
-	public void setFixedConsensus(Sequence seq) {
+	public void setFixedConsensus(QualCalledSequence seq) {
 		this.fixedConsensus = seq;
 	}
 	
@@ -1900,9 +1900,17 @@ public class AlignmentListModel implements ListModel, Iterable<Sequence>{
 			seq.replaceSelectedBasesWithChar(newChar);
 			wasReplaced = true;
 		}
+		
 		if(wasReplaced){
 			fireSequencesChanged(selectionModel.getSelectionBounds());
 		}
+		
+		if(fixedConsensus != null) {
+			fixedConsensus.replaceSelectedBasesWithChar(newChar);
+			fireSequencesChangedAll();
+		}
+		
+
 		return editedSequences;
 	}
 
@@ -2164,6 +2172,8 @@ public class AlignmentListModel implements ListModel, Iterable<Sequence>{
 	// ****************** SEQUENCES CHANGED EVENTS
 	//
 
+	
+	
 	private void fireSequencesChanged(Sequence seq) {
 		int index = delegateSequences.indexOf(seq);
 		fireSequencesChanged(index, index);
@@ -2315,5 +2325,11 @@ public class AlignmentListModel implements ListModel, Iterable<Sequence>{
 		return true;
 	}
 
+	public void clearConsensusSelection() {
+		if(fixedConsensus != null) {
+			fixedConsensus.clearAllSelection();
+		}
+		
+	}
 
 }

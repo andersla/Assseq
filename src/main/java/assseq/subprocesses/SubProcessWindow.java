@@ -108,7 +108,7 @@ public class SubProcessWindow{
 					subProcess.destroy();		
 					logger.info("now after destroy");
 					
-					Messenger.showOKOnlyMessage(Messenger.SUBPROCESS_CANCELLED_SUCCESSFULLY, parentFrame);
+					//Messenger.showOKOnlyMessage(Messenger.SUBPROCESS_CANCELLED_SUCCESSFULLY, parentFrame);
 					
 				}
 				// and close window

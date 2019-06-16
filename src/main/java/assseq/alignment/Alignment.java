@@ -50,6 +50,7 @@ import assseq.sequencelist.FileSequenceAlignmentListModel;
 import assseq.sequencelist.FileSequenceLoadListener;
 import assseq.sequencelist.FindObject;
 import assseq.sequencelist.MemorySequenceAlignmentListModel;
+import assseq.sequences.BasicTraceSequence;
 import assseq.sequences.FastaFileSequence;
 import assseq.sequences.InMemorySequence;
 import assseq.sequences.PhylipSequence;
@@ -244,6 +245,57 @@ public class Alignment implements FileSequenceLoadListener {
 	
 	public void storeAlignmetAsFastQ(Writer out) throws IOException{
 		int longest = sequences.getLongestSequenceLength();
+		for(Sequence seq: sequences){
+
+			out.write('@');
+			out.write(seq.getName());
+			out.write(LF);
+			seq.writeBases(out);
+			out.write(LF);
+			
+			if(seq instanceof QualCalledSequence) {
+				QualCalledSequence qualSeq = (QualCalledSequence) seq;
+				out.write('+');
+				out.write(LF);
+				qualSeq.writeQualityFastQ(out);
+			    out.write(LF);
+			}
+			
+			out.write(LF);
+
+		    }		
+			
+		out.flush();
+		out.close();
+	}
+	
+	public void storeAlignmetAsACE(Writer out) throws IOException{
+		int longest = sequences.getLongestSequenceLength();
+		BasicTraceSequence consensus = (BasicTraceSequence) sequences.getFixedNucleotideConsensus();
+
+        // AS <number of contigs> <total number of reads in ace file>
+		int nContigs = 1;
+		int nReads = sequences.size();
+		out.write("AS " + nContigs + " " + nReads + LF);
+		out.write(LF);
+		
+		// CO <contig name> <# of bases> <# of reads in contig> <# of base segments in contig> <U or C>
+		String contigName = getFileName();
+		int length = consensus.getLength();
+		int nReadsInContig = sequences.size();
+		int nBaseSeg = 0;
+		out.write("CO " + contigName + " " + length + " " + nReadsInContig + " " + nBaseSeg + " U" + LF);
+		out.write(consensus.getBasesAsString());
+		out.write(LF);
+		
+		// BQ
+		out.write("BQ" + LF);
+		out.write(consensus.qualCallsAsString() + LF);
+		out.write(LF);
+		
+		
+		
+		
 		for(Sequence seq: sequences){
 
 			out.write('@');
@@ -673,6 +725,15 @@ public class Alignment implements FileSequenceLoadListener {
 		}else if(fileFormat == FileFormat.FASTQ){
 			setTranslationOnePos(false);
 			storeAlignmetAsFastQ(out);
+			// save meta if exset it is set
+			if(this.alignmentMeta.isMetaOutputNeeded()){
+				BufferedWriter outMeta = new BufferedWriter(new FileWriter(new File(outFile.getAbsoluteFile() + ".meta")));
+				storeMetaData(outMeta);
+			}
+
+		}else if(fileFormat == FileFormat.ACE){
+			setTranslationOnePos(false);
+			storeAlignmetAsACE(out);
 			// save meta if exset it is set
 			if(this.alignmentMeta.isMetaOutputNeeded()){
 				BufferedWriter outMeta = new BufferedWriter(new FileWriter(new File(outFile.getAbsoluteFile() + ".meta")));
@@ -1610,6 +1671,7 @@ public class Alignment implements FileSequenceLoadListener {
 	}
 
 	public boolean replaceSelectedWithChar(char newChar) {
+		boolean wasReplaced = false;
 		List<Sequence> replacedSeqs = sequences.replaceSelectedWithChar(newChar, isUndoable());
 		if(replacedSeqs.size() > 0){
 			return true;

@@ -564,9 +564,13 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener,
 	
 	public void selectConsensusAt(Point pos) {
 		
+		logger.info("Select Consensus at:" + pos);
+		
 		Sequence seq = getAlignment().getFixedNucleotideConsensus();
 		if(seq != null) {
+			seq.clearAllSelection();
 			seq.setSelectionAt(pos.x);
+			consensusRuler.repaint();
 		}
 	}
 
@@ -1381,7 +1385,17 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener,
 	//
 	public void selectionChanged(AlignmentSelectionEvent e) {
 		logger.info("selectionChanged");
+		if(alignment.hasSelection()) {
+			alignment.getSequences().clearConsensusSelection();
+		}
 		requestRepaintRect(e.getBounds());
+		requestRepaintRulers();
+	}
+
+	private void requestRepaintRulers() {
+		alignmentRuler.repaint();
+		charsetRuler.repaint();
+		consensusRuler.repaint();
 	}
 
 	public void requestRepaintRect(Rectangle rect) {
