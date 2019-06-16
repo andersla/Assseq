@@ -8,7 +8,6 @@ import assseq.alignment.NucleotideHistogram;
 import assseq.sequences.ABISequence;
 import assseq.sequences.QualCalledSequence;
 import assseq.sequences.Sequence;
-import assseq.sequences.TraceSequence;
 
 public class SequencePainterNucleotide extends SequencePainter {
 
@@ -77,9 +76,9 @@ public class SequencePainterNucleotide extends SequencePainter {
 			}
 		}
 
-		if(seq instanceof TraceSequence){
-			ABISequence abiSeq = (ABISequence) seq;
-			if(abiSeq.isQualClippedAtPos(seqXPos)){
+		if(seq instanceof QualCalledSequence){
+			QualCalledSequence qualCalledSeq = (QualCalledSequence) seq;
+			if(qualCalledSeq.isQualClippedAtPos(seqXPos)){
 				pixContainerToUse = aliPane.charPixQualClipNuc;
 			}
 		}

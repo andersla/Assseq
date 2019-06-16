@@ -219,6 +219,11 @@ public class ACEparser {
 		if (testContigRead(n,read)) return contigs[n].reads[read].qualEnd;
 		else return 0;
 	}
+	
+	public boolean getReadRevcompForContig (int n, int read) {
+		return contigs[n].readsRevcomp[read];
+	}
+	
 	public int getReadAlignStartForContig (int n, int read) {
 		if (testContigRead(n,read)) return contigs[n].starts[read];
 		else return 0;

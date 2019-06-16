@@ -21,6 +21,14 @@ public class DefaultQualCalledBases implements Bases {
 	boolean[] qualClipped;
 	short NONE_QUALCALL = 93;
 
+	public DefaultQualCalledBases(byte[] bytes) {
+		this.backend = bytes;
+		short[] qualCalls = new short[bytes.length];
+		Arrays.fill(qualCalls, NONE_QUALCALL);
+		this.qualCalls = qualCalls;
+		this.qualClipped = new boolean[bytes.length];
+	}
+	
 	public DefaultQualCalledBases(byte[] bytes, short[] qualCalls) {
 		this.backend = bytes;
 		this.qualCalls = qualCalls;
