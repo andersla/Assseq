@@ -92,7 +92,7 @@ public class ACEImporter {
 
 	public List<Sequence> importSequences() throws AlignmentImportException, FileNotFoundException {
 
-        logger.info("Inside ACE importer");
+		logger.info("Inside ACE importer");
 		ArrayList<Sequence> sequences = new ArrayList<Sequence>();
 		try {
 
@@ -117,9 +117,9 @@ public class ACEImporter {
 					File origReadFile = new File(aceDir, readName);
 					logger.info("File: " + origReadFile + " exists: " + origReadFile.exists());
 
-					// TODO check also that orig file is of ABI
-					if(origReadFile.exists()) {
-
+					if(origReadFile.exists() && FileFormat.ABI == FileFormat.isFileOfAlignmentFormat(origReadFile)) {
+						logger.info("Found ABI-file");
+						FileFormat origFileFormat = FileFormat.isFileOfAlignmentFormat(origReadFile);
 						ABIImporter importer = new ABIImporter(origReadFile);
 						List<Sequence> abiSeqs = importer.importSequences();	
 						Sequence seq = abiSeqs.get(0);
@@ -174,7 +174,7 @@ public class ACEImporter {
 						sequences.add(seq);
 					}	
 					else {
-
+						logger.info("Is Basic ACE seq");
 						String readSeqName = parser.getReadNameForContig(contigIndex, readIndex);
 						String readSeq = parser.getReadSeqForContig(contigIndex, readIndex);
 						byte[] bases = readSeq.getBytes();
@@ -200,7 +200,7 @@ public class ACEImporter {
 						// Adjust to internal 0 index sequence position
 						seq.setQualClipEnd(qualEnd);
 
-                        // pad seqs
+						// pad seqs
 						int padSize = 0;
 						padSize = Math.abs(minLeftStart) + readAlignStart;
 						//logger.debug("LeftPad" + padSize);

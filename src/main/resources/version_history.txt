@@ -1,7 +1,11 @@
 Version history
 
+0.3
+- Still only demo version
+- Added some function stubs
+
 0.2
-- Not released yet
+- Added cap3 assemble functionality
 
 0.1
 - First demo version

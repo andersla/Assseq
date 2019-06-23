@@ -77,6 +77,7 @@ public class Messenger {
 			"Another solution is if you can increase memory for AliView so that alignment is" + LF +
 			"loaded into memory and not residing on file. See setting memory in Program Preferences.", "Problem");
 	public static final Message FILE_ERROR = new Message("Error when reading file:", "Problem");
+	public static final Message NOT_IMPLEMENTED = new Message("Function not implemented yet, will be available in version 0.4", "Function stub only");
 	public static final Message ALIGNMENT_META_READ_ERROR = new Message("Error during import alignment metadata: ", "Problem");
 	public static final Message ALIGNMENT_IMPORT_ERROR = new Message("Could not Import alignment: ", "Import problem");
 	public static final Message TO_BIG_SELECTION_FOR_COPY = new Message("Selection is to big to Copy", "To bil selection");

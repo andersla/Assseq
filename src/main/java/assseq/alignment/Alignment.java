@@ -1147,7 +1147,7 @@ public class Alignment implements FileSequenceLoadListener {
 		return sequences.getFixedNucleotideConsensusQualityAt(x);
 	}
 	
-	public void setFixedConsensus(Sequence seq) {
+	public void setFixedConsensus(QualCalledSequence seq) {
 		sequences.setFixedConsensus(seq);
 	}
 

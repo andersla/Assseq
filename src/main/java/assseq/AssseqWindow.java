@@ -1882,6 +1882,11 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 
 	public void reAssembleEverythingWithAssseqAssembler() {
 
+		Messenger.showOKOnlyMessage(Messenger.NOT_IMPLEMENTED);
+		if(true) {
+			return;
+		}
+		
 		// ask if realign everything
 
 

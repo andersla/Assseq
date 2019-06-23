@@ -43,6 +43,7 @@ import assseq.color.ColorSchemeFactory;
 import assseq.externalcommands.CommandItem;
 import assseq.gui.pane.CharPixels;
 import assseq.importer.FileFormat;
+import assseq.messenges.Messenger;
 import assseq.sequencelist.AlignmentDataEvent;
 import assseq.sequencelist.AlignmentDataListener;
 import assseq.sequencelist.AlignmentSelectionEvent;
@@ -203,6 +204,12 @@ public class AssseqJMenuBar extends JMenuBar implements AlignmentListener, Align
 		JMenuItem mntmSaveAlignmentAsACE = new JMenuItem("Save as ACE");
 		mntmSaveAlignmentAsACE.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				
+				Messenger.showOKOnlyMessage(Messenger.NOT_IMPLEMENTED);
+				if(true) {
+					return;
+				}
+				
 				aliViewWindow.saveAlignmentAsFileViaChooser(FileFormat.ACE, false);
 			}
 
@@ -211,6 +218,21 @@ public class AssseqJMenuBar extends JMenuBar implements AlignmentListener, Align
 		loadedAlignmentFunctions.add(mntmSaveAlignmentAsACE);
 
 		mnFile.add(new JSeparator());
+		
+		JMenuItem mntmSaveConsAsFasta = new JMenuItem("Save consensus as Fasta");
+		mntmSaveConsAsFasta.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Messenger.showOKOnlyMessage(Messenger.NOT_IMPLEMENTED);
+				if(true) {
+					return;
+				}
+			}
+		});
+		mnFile.add(mntmSaveConsAsFasta);
+		loadedAlignmentFunctions.add(mntmSaveConsAsFasta);
+
+		mnFile.add(new JSeparator());
+
 
 		JMenuItem mntmSaveSelAsFasta = new JMenuItem("Save selection as Fasta");
 		mntmSaveSelAsFasta.addActionListener(new ActionListener() {
