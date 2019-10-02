@@ -11,6 +11,7 @@ public class Traces {
 	private static final Logger logger = Logger.getLogger(Traces.class);
 
 	int INSERTED_BASECALL = 0;
+	int NO_DATA_TRACEVAL = -1;
 
 	private Trace traceA;
 	private Trace traceG;
@@ -165,23 +166,34 @@ public class Traces {
 	}
 	
 	public void append() {
-		insertAt(baseCalls.length -1);
+		append(1);
 	}
-
-	public void insertAt(int basePos) {
+	
+	public void append(int size) {
+		insertAt(baseCalls.length -1, size);
+	}
+	
+	public void insertAt(int basePos, int addCount) {
 		
+		logger.debug("Insert at");
+
 		int startPos = getTraceStartPos(basePos);
 		
-		int[] newTracePiece = new int[getOneBaseLength()];
+		int[] newTracePiece = new int[getOneBaseLength() * addCount];
+		Arrays.fill(newTracePiece, NO_DATA_TRACEVAL);
 		traceA.insertAt(startPos, newTracePiece);
 		traceC.insertAt(startPos, newTracePiece);
 		traceG.insertAt(startPos, newTracePiece);
 		traceT.insertAt(startPos, newTracePiece);
 		
-		int newCallPos = (int) (startPos + 0.5 * getOneBaseLength());
-		int[] newCalls = new int[] {newCallPos};
+		// Create newCalls for the new trace piece
+		int[] newCalls = new int[addCount];
+		for(int n = 0; n < addCount; n++) {
+			int newCallStartPos = (int) (startPos + n * getOneBaseLength() + 0.5 * getOneBaseLength());
+			newCalls[n] = newCallStartPos;
+		}
 		
-		assureSize(basePos - 1);
+		// assureSize(basePos - 1);
 		int[] newArray = ArrayUtilities.insertAt(baseCalls, basePos, newCalls);
 		
 		// offset basecalls after inserted position with the inserted baseLength

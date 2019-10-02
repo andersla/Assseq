@@ -52,7 +52,7 @@ public class BasicTraceSequence extends BasicQualCalledSequence implements Trace
 
 	public void insertGapAt(int n){
 		getBases().insertAt(n, SequenceUtils.GAP_SYMBOL);
-		getTraces().insertAt(n);
+		getTraces().insertAt(n, 1);
 		// do the same with selmodel
 		selectionModel.insertNewPosAt(n);
 	}
@@ -80,12 +80,17 @@ public class BasicTraceSequence extends BasicQualCalledSequence implements Trace
 
 		// insert into traces
 		logger.info("RightPad trace " + addCount);
-		for(int n = 0; n < addCount; n++) {
-			Traces traces = getTraces();
-			if(traces != null) {
-				traces.append();
-			}
+		
+		if(getTraces() != null) {
+			getTraces().append(addCount);
 		}
+		
+//		for(int n = 0; n < addCount; n++) {
+//			Traces traces = getTraces();
+//			if(traces != null) {
+//				traces.append();
+//			}
+//		}
 	}
 
 
@@ -99,11 +104,12 @@ public class BasicTraceSequence extends BasicQualCalledSequence implements Trace
 		}
 
 		// insert into traces
-		for(int n = 0; n < addCount; n++) {
+		if(addCount > 0){
 			if(getTraces() != null) {
-				getTraces().insertAt(n);
+				getTraces().insertAt(0, addCount);
 			}
 		}
+
 	}
 
 	public void deleteBasesFromMask(boolean[] mask){
