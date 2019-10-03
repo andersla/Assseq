@@ -10,8 +10,8 @@ import assseq.utils.ArrayUtilities;
 public class Traces {
 	private static final Logger logger = Logger.getLogger(Traces.class);
 
-	int INSERTED_BASECALL = 0;
-	int NO_DATA_TRACEVAL = -1;
+	public static int INSERTED_BASECALL = 0;
+	public static int NO_DATA_TRACEVAL = -1;
 
 	private Trace traceA;
 	private Trace traceG;
@@ -111,8 +111,6 @@ public class Traces {
 			// Set end pos to be in the middle between this and next call
 			int nextCallVal = baseCalls[basePos + 1];
 			endPos = baseCallVal + (nextCallVal - baseCallVal)/2;
-			// add one to endpos to make it connect to first point of next pos when line is drawn
-			endPos += 1;
 		}
 
 		return endPos;
@@ -284,8 +282,17 @@ public class Traces {
 		traceC.trim(maxBaseCallPos + oneBaseLength/2);
 		traceG.trim(maxBaseCallPos + oneBaseLength/2);
 		traceT.trim(maxBaseCallPos + oneBaseLength/2);
-		
-		
+	}
+
+	public boolean hasDataAtPos(int basePos) {
+		int startPos = getTraceStartPos(basePos);
+		int endPos = getTraceEndPos(basePos) - 1;
+		for(int n = startPos; n < endPos; n++) {
+			if(traceA.backend[n] != NO_DATA_TRACEVAL) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

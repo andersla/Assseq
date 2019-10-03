@@ -19,6 +19,7 @@ import assseq.sequences.AminoAcidAndPosition;
 import assseq.sequences.Sequence;
 import assseq.sequences.SequenceUtils;
 import assseq.sequences.TraceSequence;
+import assseq.sequences.Traces;
 import assseq.utils.ArrayUtilities;
 
 public class TracePainter implements Runnable{
@@ -228,12 +229,8 @@ public class TracePainter implements Runnable{
 			g2d.fillRect(drawPixelXPos, drawPixelYPos, (int)charWidth, (int)charHeight);
 
 //			// Only draw if some vals are there
-//			if(! ArrayUtilities.allSame(traceA) || 
-//					! ArrayUtilities.allSame(traceG) || 
-//					! ArrayUtilities.allSame(traceC) || 
-//					! ArrayUtilities.allSame(traceT)) {
-
-				//	if(residue != SequenceUtils.NO_DATA) {
+			//if(! ArrayUtils.contains(traceA, Traces.NO_DATA_TRACEVAL)){
+			if(seq.getTraces().hasDataAtPos(seqXPos)) {
 
 				g2d.setColor(colorTraceG);
 				g2d.drawPolyline(traceXpos, traceG, traceXpos.length);
@@ -246,7 +243,7 @@ public class TracePainter implements Runnable{
 
 				g2d.setColor(colorTraceA);
 				g2d.drawPolyline(traceXpos, traceA, traceXpos.length);
-//			}
+			}
 
 		} catch (Exception e) {
 			logger.info("x" + seqXPos);
