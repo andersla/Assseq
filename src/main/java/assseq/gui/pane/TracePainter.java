@@ -227,7 +227,7 @@ public class TracePainter implements Runnable{
 			g2d.setColor(bgColor);
 			g2d.fillRect(drawPixelXPos, drawPixelYPos, (int)charWidth, (int)charHeight);
 
-			// Only draw if some vals are there
+//			// Only draw if some vals are there
 //			if(! ArrayUtilities.allSame(traceA) || 
 //					! ArrayUtilities.allSame(traceG) || 
 //					! ArrayUtilities.allSame(traceC) || 
