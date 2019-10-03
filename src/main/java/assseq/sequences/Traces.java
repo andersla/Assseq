@@ -175,11 +175,16 @@ public class Traces {
 	
 	public void insertAt(int basePos, int addCount) {
 		
-		logger.debug("Insert at");
+		logger.debug("Insert at " + basePos);
 
 		int startPos = getTraceStartPos(basePos);
 		
+		logger.debug("startpos " + startPos);
+		
 		int[] newTracePiece = new int[getOneBaseLength() * addCount];
+		
+		logger.debug("newTracePiece.length" + newTracePiece.length);
+		
 		Arrays.fill(newTracePiece, NO_DATA_TRACEVAL);
 		traceA.insertAt(startPos, newTracePiece);
 		traceC.insertAt(startPos, newTracePiece);
@@ -193,11 +198,15 @@ public class Traces {
 			newCalls[n] = newCallStartPos;
 		}
 		
+		logger.debug("newCalls.length" + newCalls.length);
+		logger.debug("Arrays.toString(newCalls)" + Arrays.toString(newCalls));
+		
 		// assureSize(basePos - 1);
 		int[] newArray = ArrayUtilities.insertAt(baseCalls, basePos, newCalls);
 		
 		// offset basecalls after inserted position with the inserted baseLength
-		ArrayUtilities.addToArrayValues(newArray, getOneBaseLength(), basePos + 1);
+		int offsetOldValues = getOneBaseLength() * addCount;
+		ArrayUtilities.addToArrayValues(newArray, offsetOldValues, basePos + addCount);
 		
 		
 		baseCalls = newArray;
