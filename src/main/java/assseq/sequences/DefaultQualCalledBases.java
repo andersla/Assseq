@@ -62,7 +62,7 @@ public class DefaultQualCalledBases implements Bases {
 		return qualCalls[n];
 	}
 	
-	public boolean isQualClipped(int n) {
+	public boolean isQualClipped(int n){
 		return qualClipped[n];
 	}
 

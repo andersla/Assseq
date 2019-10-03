@@ -20,8 +20,8 @@ import assseq.sequences.MSFSequence;
 import assseq.sequences.PhylipSequence;
 import assseq.sequences.Sequence;
 
-public class ACEImporter_v2 {
-	private static final Logger logger = Logger.getLogger(ACEImporter_v2.class);
+public class ACEImporter_v2_no_use {
+	private static final Logger logger = Logger.getLogger(ACEImporter_v2_no_use.class);
 
 	private Reader reader;
 	public static final int UNKNOWN = -1;
@@ -30,12 +30,12 @@ public class ACEImporter_v2 {
 
 	public static void main(String[] args) throws FileNotFoundException, AlignmentImportException {
 		File alignmentFile = new File("/home/anders/projekt/alignments/ace/9documentsAssembly.ace");
-		ACEImporter_v2 importer = new ACEImporter_v2(new FileReader(alignmentFile));
+		ACEImporter_v2_no_use importer = new ACEImporter_v2_no_use(new FileReader(alignmentFile));
 		importer.importSequences();
 	}
 	
 
-	public ACEImporter_v2(Reader reader) {
+	public ACEImporter_v2_no_use(Reader reader) {
 		this.reader = reader;
 	}
 

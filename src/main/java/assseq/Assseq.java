@@ -366,6 +366,7 @@ public class Assseq implements ApplicationListener{
 				//alignmentFile = new File("/home/anders/projekt/alignments/woodsia_chloropl_excl_hybrid.selection2.fasta");
 				//alignmentFile = new File("/home/anders/projekt/Assseq_no_sync/testalign3/7MT9B7MATK_KF.ab1");
 				alignmentFile = new File("/home/anders/projekt/alignments/ace/9documentsAssembly.ace");
+				                          
 				
 
 				if(alignmentFile != null && !alignmentFile.exists()){
