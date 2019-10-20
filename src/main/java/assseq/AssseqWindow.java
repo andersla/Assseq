@@ -387,12 +387,12 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 
 
 		// Action_MOVE = shift-drop = add file as fasta instead 
-		if(dropAction  == DnDConstants.ACTION_COPY){
+		if(dropAction  == DnDConstants.ACTION_MOVE){
 			for(File droppedFile: files){
 				logger.info("file dropped");
 				addSequencesFromFile(droppedFile,0);
-				// TODO only open one for now
-				break;
+				//// TODO only open one for now
+				//break;
 			}
 		}
 		// Action_COPY = open new window

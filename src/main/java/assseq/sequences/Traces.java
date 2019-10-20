@@ -111,6 +111,8 @@ public class Traces {
 			// Set end pos to be in the middle between this and next call
 			int nextCallVal = baseCalls[basePos + 1];
 			endPos = baseCallVal + (nextCallVal - baseCallVal)/2;
+			// add one to endpos to make it connect to first point of next pos when line is drawn
+			endPos += 1;
 		}
 
 		return endPos;
