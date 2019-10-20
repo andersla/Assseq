@@ -72,7 +72,7 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener,
 	private static final double MIN_CHAR_SIZE = 1;
 	private static final int MAX_CHAR_SIZE = 26;
 	private static final double CHAR_HEIGHT_RATIO = 2.5; //2.5;
-	private static final double CHAR_ZOOM_CHANGE_RATIO = 0.12;
+	private static final double CHAR_ZOOM_CHANGE_RATIO = 0.2;
 	public static final int MAX_CHARSIZE_TO_DRAW = 6;
 	//private static final Color ALPHACOLOR = new Color(255, 255,255, 128 );
 	double charWidth = 10; //10
@@ -299,7 +299,7 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener,
 	public void incCharSize(){
 		if(charWidth >= 1){
 			// a little bit faster above char 16
-			if(charWidth >= 16){
+			if(charWidth >= 14){
 				charWidth = (int) (charWidth + CHAR_ZOOM_CHANGE_RATIO*charWidth); // +1
 			}
 			else{
