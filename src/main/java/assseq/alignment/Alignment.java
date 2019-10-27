@@ -2102,6 +2102,7 @@ public class Alignment implements FileSequenceLoadListener {
 	public AliCursor getAliCursor(){
 		return aliCursor;
 	}
+	
 	/*
 	public AliCursor createNewAliCursor(Point center){
 		//alignment.clearSelection();
@@ -2109,5 +2110,14 @@ public class Alignment implements FileSequenceLoadListener {
 		return newAliCursor;
 	}
 	*/
+	
+	public void setCutoffToRightOfSelection() {
+		sequences.setCutoffToRightOfSelection();
+	}
+
+	public void setCutoffToLeftOfSelection() {
+		sequences.setCutoffToLeftOfSelection();
+	}
+	
 	
 }

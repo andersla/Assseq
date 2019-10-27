@@ -2005,6 +2005,7 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener,
 						
 						if(alignment.getFixedNucleotideConsensus().isBaseSelected(matrixX)){
 							g2d.setColor(colorSchemeNucleotide.getBaseSelectionBackgroundColor(NucleotideUtilities.GAP));
+							logger.info("QualValCons=" + qualVal);
 						}
 						
 						g2d.fillRect(posX, 0, (int)charWidth, paneClip.height);

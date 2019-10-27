@@ -53,18 +53,6 @@ public class SequencePainterNucleotide extends SequencePainter {
 			}
 		}
 
-		// adjustment if non-cons is to be highlighted
-		if(aliPane.isHighlightNonCons()){
-			byte cons = alignment.getFixedNucleotideConsensusBaseValAt(seqXPos);
-			// no color on gap even if they are in maj.cons
-			if(baseVal == NucleotideUtilities.UNKNOWN ||
-					cons == NucleotideUtilities.UNKNOWN ||
-					baseVal == NucleotideUtilities.GAP){
-
-			}else if(residue != cons){
-				pixContainerToUse = aliPane.charPixNonConsensusNuc;
-			}
-		}
 
 		if(aliPane.isHighlightCons()){
 			NucleotideHistogram nucHistogram = (NucleotideHistogram) alignment.getHistogram();
@@ -76,6 +64,19 @@ public class SequencePainterNucleotide extends SequencePainter {
 			}
 		}
 
+		// adjustment if non-cons is to be highlighted
+		if(aliPane.isHighlightNonCons()){
+			byte cons = alignment.getFixedNucleotideConsensusBaseValAt(seqXPos);
+			// no color on gap even if they are in maj.cons
+			if(baseVal == NucleotideUtilities.UNKNOWN ||
+					cons == NucleotideUtilities.UNKNOWN ||
+					baseVal == NucleotideUtilities.GAP){
+
+			}else if(NucleotideUtilities.baseValFromBase(residue) != NucleotideUtilities.baseValFromBase(cons)){
+				pixContainerToUse = aliPane.charPixNonConsensusNuc;
+			}
+		}
+
 		if(seq instanceof QualCalledSequence){
 			QualCalledSequence qualCalledSeq = (QualCalledSequence) seq;
 			if(qualCalledSeq.isQualClippedAtPos(seqXPos)){
@@ -83,7 +84,7 @@ public class SequencePainterNucleotide extends SequencePainter {
 			}
 		}
 
-		// adjust colors if selected and temp selection
+		// Adjust colors if selected and temp selection
 		// We have to calculate within this way - because rect.contains(Point) is always returning false on a 0-width or 0 height Rectangle
 		boolean isPointWithinSelectionRect = false;
 		if(alignment.getTempSelection() != null){
@@ -93,8 +94,10 @@ public class SequencePainterNucleotide extends SequencePainter {
 		}
 		if(seq.isBaseSelected(seqXPos) || (alignment.getTempSelection() != null && isPointWithinSelectionRect)){
 			pixContainerToUse = aliPane.charPixSelectedNuc;
-		}
-
+			if(seq instanceof QualCalledSequence){
+				logger.info("qalVal=" + qualVal);
+			}
+		}	
 
 
 		RGBArray newPiece = pixContainerToUse.getRGBArray(byteToDraw, qualVal);

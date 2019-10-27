@@ -18,7 +18,7 @@ public class DefaultQualCalledBases implements Bases {
 	private static final String TEXT_FILE_BYTE_ENCODING = "ASCII";
 	byte[] backend;
 	short[] qualCalls;
-	boolean[] qualClipped;
+    QualClip qualClip = new QualClip();
 	short NONE_QUALCALL = 93;
 
 	public DefaultQualCalledBases(byte[] bytes) {
@@ -26,23 +26,21 @@ public class DefaultQualCalledBases implements Bases {
 		short[] qualCalls = new short[bytes.length];
 		Arrays.fill(qualCalls, NONE_QUALCALL);
 		this.qualCalls = qualCalls;
-		this.qualClipped = new boolean[bytes.length];
 	}
 	
 	public DefaultQualCalledBases(byte[] bytes, short[] qualCalls) {
 		this.backend = bytes;
 		this.qualCalls = qualCalls;
-		this.qualClipped = new boolean[bytes.length];
 	}
 	
-	public DefaultQualCalledBases(byte[] bytes, short[] qualCalls, boolean[] qualClipped) {
+	public DefaultQualCalledBases(byte[] bytes, short[] qualCalls, QualClip qualClip) {
 		this.backend = bytes;
 		this.qualCalls = qualCalls;
-		this.qualClipped = qualClipped;
+		this.qualClip = qualClip;
 	}
 
 	public DefaultQualCalledBases getCopy(){
-		return new DefaultQualCalledBases(ArrayUtils.clone(backend), ArrayUtils.clone(qualCalls),  ArrayUtils.clone(qualClipped));
+		return new DefaultQualCalledBases(ArrayUtils.clone(backend), ArrayUtils.clone(qualCalls),  qualClip.getCopy());
 	}
 
 	public int getLength(){
@@ -63,7 +61,7 @@ public class DefaultQualCalledBases implements Bases {
 	}
 	
 	public boolean isQualClipped(int n){
-		return qualClipped[n];
+		return qualClip.isPosClipped(n);
 	}
 
 	public byte[] toByteArray() {
@@ -151,11 +149,7 @@ public class DefaultQualCalledBases implements Bases {
 		qualCalls = newQual;
 		
 		// QualClip
-		//First create emptyCalls to insert
-		boolean[] additionalCip = new boolean[newBytes.length];
-		Arrays.fill(additionalCip, false);
-		boolean[] newClip = ArrayUtilities.insertAt(qualClipped, n, additionalCip);
-		qualClipped = newClip;
+		qualClip.insertAt(n, newBytes.length);
 		
 	}
 
@@ -222,13 +216,13 @@ public class DefaultQualCalledBases implements Bases {
 				if(next != target){
 					newBackend[index] = next;
 					newQualCalls[index] = qualCalls[n];
-					newQualClipped[index] = qualClipped[n];
+					// TODO Something about qualClip
+					qualClip.deletePos(n);
 					index ++;
 				}
 			}
 			backend = newBackend;
 			qualCalls = newQualCalls;
-			qualClipped = newQualClipped;
 		}
 		
 
@@ -274,14 +268,13 @@ public class DefaultQualCalledBases implements Bases {
 			else{
 				newBases[newIndex] = backend[n];
 				newQualCalls[newIndex] = qualCalls[n];
-				newQualClipped[newIndex] = qualClipped[n];
+				qualClip.deletePos(n);
 				newIndex ++;
 			}
 		}
 
 		backend = newBases;
 		qualCalls = newQualCalls;
-		qualClipped = newQualClipped;
 		
 	}
 
@@ -293,7 +286,7 @@ public class DefaultQualCalledBases implements Bases {
 	public void reverse() {
 		ArrayUtils.reverse(backend);
 		ArrayUtils.reverse(qualCalls);
-		ArrayUtils.reverse(qualClipped);
+		qualClip.reverse(ArrayUtils.getLength(backend));
 	}
 
 	// convenience method
@@ -312,19 +305,11 @@ public class DefaultQualCalledBases implements Bases {
 	}
 
 	public void setQualClipStart(int pos) {
-		setQualClipRange(0,pos,true);
+		qualClip.setStartPos(pos);
 	}
 	
 	public void setQualClipEnd(int pos) {
-		if(backend.length == 0) {
-			return;
-		}
-		setQualClipRange(pos, backend.length, true);
-	}
-	
-	public void setQualClipRange(int startPos, int endPosExclusive, boolean val) {
-		// End pos is exclusi
-		Arrays.fill(qualClipped, startPos, endPosExclusive, val);
+		qualClip.setEndPos(pos);
 	}
 
 	public short[] getQualCalls() {

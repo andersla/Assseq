@@ -2332,4 +2332,41 @@ public class AlignmentListModel implements ListModel, Iterable<Sequence>{
 		
 	}
 
+	public void setCutoffToRightOfSelection() {
+		boolean cutoffChanged = false;
+		for(Sequence sequence : delegateSequences){
+			if(sequence.hasSelection()){
+				if(sequence instanceof QualCalledSequence) {
+					QualCalledSequence seq = (QualCalledSequence) sequence;
+					int pos = sequence.getFirstSelectedPosition();
+					seq.setQualClipEnd(pos);
+					//seq.setQualClipEnd(seq.getLength() - 1);
+					cutoffChanged = true;
+				}
+			}
+		}
+		if(cutoffChanged) {
+			fireSequencesChangedAll();
+		}
+	}
+	
+	public void setCutoffToLeftOfSelection() {
+		logger.info("setCutoffToLeftOfSelection");
+		boolean cutoffChanged = false;
+		for(Sequence sequence : delegateSequences){
+			if(sequence.hasSelection()){
+				if(sequence instanceof QualCalledSequence) {
+					QualCalledSequence seq = (QualCalledSequence) sequence;
+					int pos = sequence.getLastSelectedPosition();
+					seq.setQualClipStart(pos);
+					//seq.setQualClipEnd(pos);
+					cutoffChanged = true;
+				}
+			}
+		}
+		if(cutoffChanged) {
+			fireSequencesChangedAll();
+		}
+	}
+
 }

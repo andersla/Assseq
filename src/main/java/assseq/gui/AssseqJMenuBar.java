@@ -1035,6 +1035,55 @@ public class AssseqJMenuBar extends JMenuBar implements AlignmentListener, Align
 		mnAlign.add(mntmDeleteGapMoveRight);
 		editFunctions.add(mntmDeleteGapMoveRight);
 		hasSelectionFunctions.add(mntmDeleteGapMoveRight);
+		
+		
+		//
+		//	    Set cutoff methods
+		//
+
+		mnAlign.add(new JSeparator());
+
+
+
+		
+		//
+		//	    Manual alignment functions
+		//
+
+		mnAlign.add(new JSeparator());
+
+
+		JMenuItem mntmSetCutoffRight = new JMenuItem("Set sequence cutoff Right of selection");
+		mntmSetCutoffRight.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				aliViewWindow.setCutoffRight();
+			}
+		});
+		mntmSetCutoffRight.setAccelerator(OSNativeUtils.getSetCutoffRightKeyAccelerator());
+		mnAlign.add(mntmSetCutoffRight);
+		hasSelectionFunctions.add(mntmSetCutoffRight);
+		editFunctions.add(mntmSetCutoffRight);
+
+		
+		JMenuItem mntmSetCutoffLeft = new JMenuItem("Set sequence cutoff Left of selection");
+		mntmSetCutoffLeft.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				aliViewWindow.setCutoffLeft();
+			}
+		});
+		mntmSetCutoffLeft.setAccelerator(OSNativeUtils.getSetCutoffLeftKeyAccelerator());
+		mnAlign.add(mntmSetCutoffLeft);
+		hasSelectionFunctions.add(mntmSetCutoffLeft);
+		editFunctions.add(mntmSetCutoffLeft);
+		
+
+
+
+
+
+		editFunctions.add(mntmMoveSelectionLeft);
+		hasSelectionFunctions.add(mntmMoveSelectionLeft);
+		
 
 		//
 		// Menu with External Commands

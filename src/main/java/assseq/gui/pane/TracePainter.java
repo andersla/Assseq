@@ -151,7 +151,7 @@ public class TracePainter implements Runnable{
 					baseVal == NucleotideUtilities.GAP){
 				// no color on gap even if they are in maj.cons
 			}
-			else if(residue != cons){
+			else if(NucleotideUtilities.baseValFromBase(residue) != NucleotideUtilities.baseValFromBase(cons)){
 				bgColor = colorScheme.getBaseNonConsensusBackgroundColor();
 			}
 		}

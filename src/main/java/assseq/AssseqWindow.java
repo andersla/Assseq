@@ -4234,6 +4234,18 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 	}
 
 
+	public void setCutoffRight() {
+		aliViewWindow.getUndoControler().pushUndoState();
+		alignment.setCutoffToRightOfSelection();
+	}
+
+
+	public void setCutoffLeft() {
+		aliViewWindow.getUndoControler().pushUndoState();
+		alignment.setCutoffToLeftOfSelection();
+	}
+
+
 }
 
 
