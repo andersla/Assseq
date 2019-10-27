@@ -85,12 +85,6 @@ public class BasicTraceSequence extends BasicQualCalledSequence implements Trace
 			getTraces().append(addCount);
 		}
 		
-//		for(int n = 0; n < addCount; n++) {
-//			Traces traces = getTraces();
-//			if(traces != null) {
-//				traces.append();
-//			}
-//		}
 	}
 
 

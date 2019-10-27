@@ -230,7 +230,7 @@ public class TracePainter implements Runnable{
 
 //			// Only draw if some vals are there
 			//if(! ArrayUtils.contains(traceA, Traces.NO_DATA_TRACEVAL)){
-			if(seq.getTraces().hasDataAtPos(seqXPos)) {
+			if(seq.getTraces().hasTraceDataAtPos(seqXPos)) {
 
 				g2d.setColor(colorTraceG);
 				g2d.drawPolyline(traceXpos, traceG, traceXpos.length);

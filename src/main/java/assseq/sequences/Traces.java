@@ -10,7 +10,7 @@ import assseq.utils.ArrayUtilities;
 public class Traces {
 	private static final Logger logger = Logger.getLogger(Traces.class);
 
-	public static int INSERTED_BASECALL = 0;
+	public static int INSERTED_BASECALL = -1;
 	public static int NO_DATA_TRACEVAL = -1;
 
 	private Trace traceA;
@@ -18,10 +18,10 @@ public class Traces {
 	private Trace traceC;
 	private Trace traceT;
 	private int[] baseCalls;
-
-	//private int lengthInBases;
-	//private int oneBaseLength;
-	//private int baseCalledTraceLength;
+	private int[] baseCallTracePosStart;
+	private int[] baseCallTracePosEnd;
+	private int oneBaseLength;
+	
 
 	public Traces(Trace traceA, Trace traceG, Trace traceC, Trace traceT, int[] baseCalls) {
 		super();
@@ -30,10 +30,24 @@ public class Traces {
 		this.traceC = traceC;
 		this.traceT = traceT;
 		this.baseCalls = baseCalls;
-		//this.baseCalledTraceLength = baseCalls[baseCalls.length - 1];
-		//this.oneBaseLength = baseCalledTraceLength/baseCalls.length;
-		// Add 1/2 baseLength at end to get real baseCalledTrace
-		//this.oneBaseLength = (int)(baseCalledTraceLength + (oneBaseLength*0.5)) / baseCalls.length;
+		this.oneBaseLength = baseCalls[baseCalls.length - 1]/baseCalls.length;
+		
+		// Fill arrays
+		baseCallTracePosStart = new int[baseCalls.length];
+		baseCallTracePosEnd = new int[baseCalls.length];
+		for(int n = 0; n < baseCalls.length; n++ ) {
+			baseCallTracePosStart[n] = getTraceStartPos(n);
+			baseCallTracePosEnd[n] = getTraceEndPos(n);
+		}
+		
+		// Trim non called trace at end
+		int maxBaseCallPos = baseCalls[baseCalls.length - 1];	
+		traceA.trim(maxBaseCallPos + oneBaseLength/2);
+		traceC.trim(maxBaseCallPos + oneBaseLength/2);
+		traceG.trim(maxBaseCallPos + oneBaseLength/2);
+		traceT.trim(maxBaseCallPos + oneBaseLength/2);
+			
+		
 		logger.debug(Arrays.toString(baseCalls));
 		logger.debug(Arrays.toString(traceA.backend));
 
@@ -58,11 +72,16 @@ public class Traces {
 	// TODO fix this so it can take more than one pos at a time?
 	public int[] getTraceVals(Trace trace, int basePos){
 		
-		int startPos = getTraceStartPos(basePos);
-		int endPos = getTraceEndPos(basePos);
-
-		int [] traceVals = ArrayUtils.subarray(trace.backend, startPos, endPos);
-		return traceVals;
+		if(baseCalls[basePos] == INSERTED_BASECALL) {
+			return new int[oneBaseLength];
+		}
+		else {
+		
+			int startPos = baseCallTracePosStart[basePos];
+			int endPos =  baseCallTracePosEnd[basePos];
+			int [] traceVals = ArrayUtils.subarray(trace.backend, startPos, endPos);
+			return traceVals;
+		}
 	}
 
 	private int getTraceStartPos(int basePos) {
@@ -76,7 +95,7 @@ public class Traces {
 		
 		int baseCallVal = baseCalls[basePos];
 
-		// If basePos is first let last = 0
+		// If basePos is first let start = 0
 		int startPos;
 		if(basePos == 0) {
 			startPos = 0;
@@ -87,7 +106,6 @@ public class Traces {
 			startPos = prevCallVal + (baseCallVal - prevCallVal)/2;
 		}
 		return startPos;
-
 	}
 
 	// returns end of trace for this pos (Inclusive)
@@ -105,7 +123,7 @@ public class Traces {
 		// If basePos is last pos, let next be last
 		int endPos;
 		if(basePos == baseCalls.length -1) {
-			endPos = basePos;
+			endPos =  baseCalls[basePos];
 		}
 		else {
 			// Set end pos to be in the middle between this and next call
@@ -157,13 +175,9 @@ public class Traces {
 	}
 	
 	private int getOneBaseLength() {
-		int oneBaseLength = getBaseCalledTraceLength()/baseCalls.length;
 		return oneBaseLength;
 	}
 
-	private int getBaseCalledTraceLength() {
-		return baseCalls[baseCalls.length - 1];
-	}
 	
 	public void append() {
 		append(1);
@@ -174,28 +188,11 @@ public class Traces {
 	}
 	
 	public void insertAt(int basePos, int addCount) {
-		
-		logger.debug("Insert at " + basePos);
-
-		int startPos = getTraceStartPos(basePos);
-		
-		logger.debug("startpos " + startPos);
-		
-		int[] newTracePiece = new int[getOneBaseLength() * addCount];
-		
-		logger.debug("newTracePiece.length" + newTracePiece.length);
-		
-		Arrays.fill(newTracePiece, NO_DATA_TRACEVAL);
-		traceA.insertAt(startPos, newTracePiece);
-		traceC.insertAt(startPos, newTracePiece);
-		traceG.insertAt(startPos, newTracePiece);
-		traceT.insertAt(startPos, newTracePiece);
-		
+			
 		// Create newCalls for the new trace piece
 		int[] newCalls = new int[addCount];
 		for(int n = 0; n < addCount; n++) {
-			int newCallStartPos = (int) (startPos + n * getOneBaseLength() + 0.5 * getOneBaseLength());
-			newCalls[n] = newCallStartPos;
+			newCalls[n] = INSERTED_BASECALL;
 		}
 		
 		logger.debug("newCalls.length" + newCalls.length);
@@ -204,9 +201,9 @@ public class Traces {
 		// assureSize(basePos - 1);
 		int[] newArray = ArrayUtilities.insertAt(baseCalls, basePos, newCalls);
 		
-		// offset basecalls after inserted position with the inserted baseLength
-		int offsetOldValues = getOneBaseLength() * addCount;
-		ArrayUtilities.addToArrayValues(newArray, offsetOldValues, basePos + addCount);
+//		// offset basecalls after inserted position with the inserted baseLength
+//		int offsetOldValues = getOneBaseLength() * addCount;
+//		ArrayUtilities.addToArrayValues(newArray, offsetOldValues, basePos + addCount);
 		
 		
 		baseCalls = newArray;
@@ -227,26 +224,26 @@ public class Traces {
 		
 		logger.debug("Delete in trace (posToDelete):" + posToDelete);
 		
-		// Find out positions this baseCall has in traces
-		int startPos = getTraceStartPos(posToDelete);
-		int endPos = getTraceEndPos(posToDelete);
+//		// Find out positions this baseCall has in traces
+//		int startPos = getTraceStartPos(posToDelete);
+//		int endPos = getTraceEndPos(posToDelete);
+//		
+//		// Delete pos from traces
+//		traceA.deletePos(startPos, endPos);
+//		traceC.deletePos(startPos, endPos);
+//		traceG.deletePos(startPos, endPos);
+//		traceT.deletePos(startPos, endPos);
 		
-		// Delete pos from traces
-		traceA.deletePos(startPos, endPos);
-		traceC.deletePos(startPos, endPos);
-		traceG.deletePos(startPos, endPos);
-		traceT.deletePos(startPos, endPos);
 		
-		
-		// delete from basecalls
-		int[] newBaseCalls = ArrayUtilities.deletePos(baseCalls, posToDelete);
-		
-		// adjust basecalls after the position removed
-		
-		// Add one because endPos is inclusive (not exclusive)
-		int valToSubtract = endPos - startPos + 1;
-	    ArrayUtilities.subtractFromArrayValues(newBaseCalls, valToSubtract, posToDelete);
-		baseCalls = newBaseCalls;
+//		// delete from basecalls
+//		int[] newBaseCalls = ArrayUtilities.deletePos(baseCalls, posToDelete);
+//		
+//		// adjust basecalls after the position removed
+//		
+//		// Add one because endPos is inclusive (not exclusive)
+//		int valToSubtract = endPos - startPos + 1;
+//	    ArrayUtilities.subtractFromArrayValues(newBaseCalls, valToSubtract, posToDelete);
+//		baseCalls = newBaseCalls;
 		
 	}
 
@@ -278,23 +275,17 @@ public class Traces {
 	}
 	
 	public void trim() {
-		int oneBaseLength = getOneBaseLength();
-		int maxBaseCallPos = baseCalls[baseCalls.length - 1];	
-		traceA.trim(maxBaseCallPos + oneBaseLength/2);
-		traceC.trim(maxBaseCallPos + oneBaseLength/2);
-		traceG.trim(maxBaseCallPos + oneBaseLength/2);
-		traceT.trim(maxBaseCallPos + oneBaseLength/2);
+
 	}
 
-	public boolean hasDataAtPos(int basePos) {
-		int startPos = getTraceStartPos(basePos);
-		int endPos = getTraceEndPos(basePos) - 1;
-		for(int n = startPos; n < endPos; n++) {
-			if(traceA.backend[n] != NO_DATA_TRACEVAL) {
-				return true;
-			}
+
+	public boolean hasTraceDataAtPos(int basePos) {
+		if(baseCalls[basePos] != INSERTED_BASECALL) {
+			return true;
 		}
-		return false;
+		else {
+			return false;
+		}
 	}
 
 }
