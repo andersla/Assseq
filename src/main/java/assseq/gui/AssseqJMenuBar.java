@@ -923,118 +923,118 @@ public class AssseqJMenuBar extends JMenuBar implements AlignmentListener, Align
 		//
 		//	    Manual alignment functions
 		//
-
-		mnAlign.add(new JSeparator());
-
-
-		// This way of binding key action to menu buttom makes repeat work much faster
-		// http://stackoverflow.com/questions/9622260/java-swing-actionlistener-much-slower-than-keylistener
-		AbstractAction moveselrightAction = new AbstractAction("Move selected positions right"){
-			{
-				putValue(ACCELERATOR_KEY, OSNativeUtils.getMoveSelectedRightKeyAccelerator());
-			}
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.moveSelectionRight();
-			}
-		};
-		aliViewWin.getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(OSNativeUtils.getMoveSelectedRightKeyAccelerator(), "moveselright");
-		aliViewWin.getRootPane().getActionMap().put("moveselright", moveselrightAction);  
-		JMenuItem mntmMoveSelectionRight = new JMenuItem(moveselrightAction);
-		mnAlign.add(mntmMoveSelectionRight);
-		mntmMoveSelectionRight.setIcon(AppIcons.getMoveRightIcon());
-		hasSelectionFunctions.add(mntmMoveSelectionRight);
-		editFunctions.add(mntmMoveSelectionRight);
-
-
-		// This way of binding key action to menu buttom makes repeat work much faster
-		// http://stackoverflow.com/questions/9622260/java-swing-actionlistener-much-slower-than-keylistener
-		AbstractAction moveselleftAction = new AbstractAction("Move selected positions left"){
-			{
-				putValue(ACCELERATOR_KEY, OSNativeUtils.getMoveSelectedLeftKeyAccelerator());
-			}
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.moveSelectionLeft();
-			}
-		};
-		aliViewWin.getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(OSNativeUtils.getMoveSelectedLeftKeyAccelerator(), "moveselleft");
-		aliViewWin.getRootPane().getActionMap().put("moveselleft", moveselleftAction);   
-		JMenuItem mntmMoveSelectionLeft = new JMenuItem(moveselleftAction);
-		mntmMoveSelectionLeft.setAction(moveselleftAction); 
-		mnAlign.add(mntmMoveSelectionLeft);
-		mntmMoveSelectionLeft.setIcon(AppIcons.getMoveLeftIcon());
-		editFunctions.add(mntmMoveSelectionLeft);
-		hasSelectionFunctions.add(mntmMoveSelectionLeft);
-
-
-
-		// This way of binding key action to menu buttom makes repeat work much faster
-		// http://stackoverflow.com/questions/9622260/java-swing-actionlistener-much-slower-than-keylistener
-		AbstractAction insertGapMRAction = new AbstractAction("Insert Gap move right"){
-			{
-				putValue(ACCELERATOR_KEY, OSNativeUtils.getInsertGapMoveRightKeyAccelerator());
-			}
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.insertGapMoveRight();
-			}
-		};
-		aliViewWin.getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(OSNativeUtils.getInsertGapMoveRightKeyAccelerator(), "insertGapMRAction");
-		aliViewWin.getRootPane().getActionMap().put("insertGapMRAction", insertGapMRAction);   
-		JMenuItem mntmInsertGapMoveRight = new JMenuItem(insertGapMRAction);
-		mnAlign.add(mntmInsertGapMoveRight);
-		editFunctions.add(mntmInsertGapMoveRight);
-		hasSelectionFunctions.add(mntmInsertGapMoveRight);
-
-		// This way of binding key action to menu buttom makes repeat work much faster
-		// http://stackoverflow.com/questions/9622260/java-swing-actionlistener-much-slower-than-keylistener
-		AbstractAction insertGapMoveLeftAction = new AbstractAction("Insert Gap move left"){
-			{
-				putValue(ACCELERATOR_KEY, OSNativeUtils.getInsertGapMoveLeftKeyAccelerator());
-			}
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.insertGapMoveLeft();
-			}
-		};
-		aliViewWin.getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(OSNativeUtils.getInsertGapMoveLeftKeyAccelerator(), "insertGapMoveLeftAction");
-		aliViewWin.getRootPane().getActionMap().put("insertGapMoveLeftAction", insertGapMoveLeftAction); 
-		JMenuItem mntmInsertGapMoveLeft = new JMenuItem(insertGapMoveLeftAction);
-		mnAlign.add(mntmInsertGapMoveLeft);
-		editFunctions.add(mntmInsertGapMoveLeft);
-		hasSelectionFunctions.add(mntmInsertGapMoveLeft);
-
-		// This way of binding key action to menu buttom makes repeat work much faster
-		// http://stackoverflow.com/questions/9622260/java-swing-actionlistener-much-slower-than-keylistener
-		AbstractAction deleteGapMoveLeftAction = new AbstractAction("Delete Gap at left"){
-			{
-				putValue(ACCELERATOR_KEY, OSNativeUtils.getDeleteGapMoveLeftKeyAccelerator());
-			}
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.deleteGapMoveLeft();
-			}
-		};
-		aliViewWin.getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(OSNativeUtils.getDeleteGapMoveLeftKeyAccelerator(), "deleteGapMoveLeftAction");
-		aliViewWin.getRootPane().getActionMap().put("deleteGapMoveLeftAction", deleteGapMoveLeftAction); 
-		JMenuItem mntmDeleteGapMoveLeft = new JMenuItem(deleteGapMoveLeftAction);
-		mnAlign.add(mntmDeleteGapMoveLeft);
-		editFunctions.add(mntmDeleteGapMoveLeft);
-		hasSelectionFunctions.add(mntmDeleteGapMoveLeft);
-
-
-		// This way of binding key action to menu buttom makes repeat work much faster
-		// http://stackoverflow.com/questions/9622260/java-swing-actionlistener-much-slower-than-keylistener
-		AbstractAction deleteGapMoveRightAction = new AbstractAction("Delete Gap at right"){
-			{
-				putValue(ACCELERATOR_KEY, OSNativeUtils.getDeleteGapMoveRightKeyAccelerator());
-			}
-			public void actionPerformed(ActionEvent e) {
-				aliViewWindow.deleteGapMoveRight();
-			}
-		};
-		aliViewWin.getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(OSNativeUtils.getDeleteGapMoveRightKeyAccelerator(), "deleteGapMoveRightAction");
-		aliViewWin.getRootPane().getActionMap().put("deleteGapMoveRightAction", deleteGapMoveRightAction); 
-		JMenuItem mntmDeleteGapMoveRight = new JMenuItem(deleteGapMoveRightAction);
-		mnAlign.add(mntmDeleteGapMoveRight);
-		editFunctions.add(mntmDeleteGapMoveRight);
-		hasSelectionFunctions.add(mntmDeleteGapMoveRight);
+//
+//		mnAlign.add(new JSeparator());
+//
+//
+//		// This way of binding key action to menu buttom makes repeat work much faster
+//		// http://stackoverflow.com/questions/9622260/java-swing-actionlistener-much-slower-than-keylistener
+//		AbstractAction moveselrightAction = new AbstractAction("Move selected positions right"){
+//			{
+//				putValue(ACCELERATOR_KEY, OSNativeUtils.getMoveSelectedRightKeyAccelerator());
+//			}
+//			public void actionPerformed(ActionEvent e) {
+//				aliViewWindow.moveSelectionRight();
+//			}
+//		};
+//		aliViewWin.getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(OSNativeUtils.getMoveSelectedRightKeyAccelerator(), "moveselright");
+//		aliViewWin.getRootPane().getActionMap().put("moveselright", moveselrightAction);  
+//		JMenuItem mntmMoveSelectionRight = new JMenuItem(moveselrightAction);
+//		mnAlign.add(mntmMoveSelectionRight);
+//		mntmMoveSelectionRight.setIcon(AppIcons.getMoveRightIcon());
+//		hasSelectionFunctions.add(mntmMoveSelectionRight);
+//		editFunctions.add(mntmMoveSelectionRight);
+//
+//
+//		// This way of binding key action to menu buttom makes repeat work much faster
+//		// http://stackoverflow.com/questions/9622260/java-swing-actionlistener-much-slower-than-keylistener
+//		AbstractAction moveselleftAction = new AbstractAction("Move selected positions left"){
+//			{
+//				putValue(ACCELERATOR_KEY, OSNativeUtils.getMoveSelectedLeftKeyAccelerator());
+//			}
+//			public void actionPerformed(ActionEvent e) {
+//				aliViewWindow.moveSelectionLeft();
+//			}
+//		};
+//		aliViewWin.getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(OSNativeUtils.getMoveSelectedLeftKeyAccelerator(), "moveselleft");
+//		aliViewWin.getRootPane().getActionMap().put("moveselleft", moveselleftAction);   
+//		JMenuItem mntmMoveSelectionLeft = new JMenuItem(moveselleftAction);
+//		mntmMoveSelectionLeft.setAction(moveselleftAction); 
+//		mnAlign.add(mntmMoveSelectionLeft);
+//		mntmMoveSelectionLeft.setIcon(AppIcons.getMoveLeftIcon());
+//		editFunctions.add(mntmMoveSelectionLeft);
+//		hasSelectionFunctions.add(mntmMoveSelectionLeft);
+//
+//
+//
+//		// This way of binding key action to menu buttom makes repeat work much faster
+//		// http://stackoverflow.com/questions/9622260/java-swing-actionlistener-much-slower-than-keylistener
+//		AbstractAction insertGapMRAction = new AbstractAction("Insert Gap move right"){
+//			{
+//				putValue(ACCELERATOR_KEY, OSNativeUtils.getInsertGapMoveRightKeyAccelerator());
+//			}
+//			public void actionPerformed(ActionEvent e) {
+//				aliViewWindow.insertGapMoveRight();
+//			}
+//		};
+//		aliViewWin.getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(OSNativeUtils.getInsertGapMoveRightKeyAccelerator(), "insertGapMRAction");
+//		aliViewWin.getRootPane().getActionMap().put("insertGapMRAction", insertGapMRAction);   
+//		JMenuItem mntmInsertGapMoveRight = new JMenuItem(insertGapMRAction);
+//		mnAlign.add(mntmInsertGapMoveRight);
+//		editFunctions.add(mntmInsertGapMoveRight);
+//		hasSelectionFunctions.add(mntmInsertGapMoveRight);
+//
+//		// This way of binding key action to menu buttom makes repeat work much faster
+//		// http://stackoverflow.com/questions/9622260/java-swing-actionlistener-much-slower-than-keylistener
+//		AbstractAction insertGapMoveLeftAction = new AbstractAction("Insert Gap move left"){
+//			{
+//				putValue(ACCELERATOR_KEY, OSNativeUtils.getInsertGapMoveLeftKeyAccelerator());
+//			}
+//			public void actionPerformed(ActionEvent e) {
+//				aliViewWindow.insertGapMoveLeft();
+//			}
+//		};
+//		aliViewWin.getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(OSNativeUtils.getInsertGapMoveLeftKeyAccelerator(), "insertGapMoveLeftAction");
+//		aliViewWin.getRootPane().getActionMap().put("insertGapMoveLeftAction", insertGapMoveLeftAction); 
+//		JMenuItem mntmInsertGapMoveLeft = new JMenuItem(insertGapMoveLeftAction);
+//		mnAlign.add(mntmInsertGapMoveLeft);
+//		editFunctions.add(mntmInsertGapMoveLeft);
+//		hasSelectionFunctions.add(mntmInsertGapMoveLeft);
+//
+//		// This way of binding key action to menu buttom makes repeat work much faster
+//		// http://stackoverflow.com/questions/9622260/java-swing-actionlistener-much-slower-than-keylistener
+//		AbstractAction deleteGapMoveLeftAction = new AbstractAction("Delete Gap at left"){
+//			{
+//				putValue(ACCELERATOR_KEY, OSNativeUtils.getDeleteGapMoveLeftKeyAccelerator());
+//			}
+//			public void actionPerformed(ActionEvent e) {
+//				aliViewWindow.deleteGapMoveLeft();
+//			}
+//		};
+//		aliViewWin.getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(OSNativeUtils.getDeleteGapMoveLeftKeyAccelerator(), "deleteGapMoveLeftAction");
+//		aliViewWin.getRootPane().getActionMap().put("deleteGapMoveLeftAction", deleteGapMoveLeftAction); 
+//		JMenuItem mntmDeleteGapMoveLeft = new JMenuItem(deleteGapMoveLeftAction);
+//		mnAlign.add(mntmDeleteGapMoveLeft);
+//		editFunctions.add(mntmDeleteGapMoveLeft);
+//		hasSelectionFunctions.add(mntmDeleteGapMoveLeft);
+//
+//
+//		// This way of binding key action to menu buttom makes repeat work much faster
+//		// http://stackoverflow.com/questions/9622260/java-swing-actionlistener-much-slower-than-keylistener
+//		AbstractAction deleteGapMoveRightAction = new AbstractAction("Delete Gap at right"){
+//			{
+//				putValue(ACCELERATOR_KEY, OSNativeUtils.getDeleteGapMoveRightKeyAccelerator());
+//			}
+//			public void actionPerformed(ActionEvent e) {
+//				aliViewWindow.deleteGapMoveRight();
+//			}
+//		};
+//		aliViewWin.getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(OSNativeUtils.getDeleteGapMoveRightKeyAccelerator(), "deleteGapMoveRightAction");
+//		aliViewWin.getRootPane().getActionMap().put("deleteGapMoveRightAction", deleteGapMoveRightAction); 
+//		JMenuItem mntmDeleteGapMoveRight = new JMenuItem(deleteGapMoveRightAction);
+//		mnAlign.add(mntmDeleteGapMoveRight);
+//		editFunctions.add(mntmDeleteGapMoveRight);
+//		hasSelectionFunctions.add(mntmDeleteGapMoveRight);
 		
 		
 		//
@@ -1043,14 +1043,6 @@ public class AssseqJMenuBar extends JMenuBar implements AlignmentListener, Align
 
 		mnAlign.add(new JSeparator());
 
-
-
-		
-		//
-		//	    Manual alignment functions
-		//
-
-		mnAlign.add(new JSeparator());
 
 
 		JMenuItem mntmSetCutoffRight = new JMenuItem("Set sequence cutoff Right of selection");
@@ -1075,14 +1067,6 @@ public class AssseqJMenuBar extends JMenuBar implements AlignmentListener, Align
 		mnAlign.add(mntmSetCutoffLeft);
 		hasSelectionFunctions.add(mntmSetCutoffLeft);
 		editFunctions.add(mntmSetCutoffLeft);
-		
-
-
-
-
-
-		editFunctions.add(mntmMoveSelectionLeft);
-		hasSelectionFunctions.add(mntmMoveSelectionLeft);
 		
 
 		//
