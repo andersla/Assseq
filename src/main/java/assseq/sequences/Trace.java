@@ -16,6 +16,10 @@ public class Trace {
 	public Trace(int[] vals) {
 		this.backend = vals;
 	}
+	
+	public Trace getCopy() {
+		return new Trace(ArrayUtils.clone(backend));
+	}
 
 	public void insertAt(int n, int[] newVals) {
 		

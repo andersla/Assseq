@@ -34,9 +34,16 @@ public class Traces {
 		//this.oneBaseLength = baseCalledTraceLength/baseCalls.length;
 		// Add 1/2 baseLength at end to get real baseCalledTrace
 		//this.oneBaseLength = (int)(baseCalledTraceLength + (oneBaseLength*0.5)) / baseCalls.length;
-		logger.debug(Arrays.toString(baseCalls));
-		logger.debug(Arrays.toString(traceA.backend));
-
+		//logger.debug(Arrays.toString(baseCalls));
+		//logger.debug(Arrays.toString(traceA.backend));
+	}
+	
+	public Traces getCopy() {
+		return new Traces(traceA.getCopy(),
+				          traceG.getCopy(),
+				          traceC.getCopy(),
+				          traceT.getCopy(),
+				          ArrayUtils.clone(baseCalls));			
 	}
 
 	public int[] getTraceAVals(int basePos){

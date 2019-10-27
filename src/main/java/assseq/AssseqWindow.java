@@ -3250,7 +3250,8 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 
 
 	private void undoEverything(UndoSavedStateEverything state) throws AlignmentImportException {
-		logger.info("undoEverything");
+		logger.info("undoEverything.sequences" + state.sequences);
+		
 		//		alignment.setNewSequences(seqFactory.createSequences(new StringReader(state.fastaAlignment)));
 		alignment.setNewSequencesFromUndo(state.sequences);
 		//		sequenceJList.setModel(alignment.getSequences());
@@ -3302,6 +3303,8 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		if(undoList.hasAvailableRedos()){
 
 			UndoSavedState redoObj = undoList.getRedoState();
+			
+			logger.info("redoObj" + redoObj);
 
 			if(redoObj instanceof UndoSavedStateEverything){
 				try {

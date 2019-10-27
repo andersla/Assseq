@@ -42,11 +42,13 @@ public class BasicTraceSequence extends BasicQualCalledSequence implements Trace
 		this.name = template.name;
 		this.id = template.id;
 		this.bases = template.getNonTranslatedBases().getCopy();
+		this.traces = template.getTraces().getCopy();
 		this.alignmentModel = template.alignmentModel;
 		this.selectionModel = createNewSelectionModel();
 	}
 
 	public Sequence getCopy() {
+		logger.info("getCopyHere()");
 		return new BasicTraceSequence(this);
 	}
 
