@@ -1414,6 +1414,26 @@ public class AlignmentListModel implements ListModel, Iterable<Sequence>{
 		return NucleotideUtilities.charFromBaseVal(consVal);
 	}
 	
+	public boolean isNucleotideConsensusQualClippedAt(int pos){
+		boolean qualClipped = true;
+		for(Sequence sequence : delegateSequences){
+			if(sequence instanceof QualCalledSequence) {
+				QualCalledSequence seq = (QualCalledSequence) sequence;
+				if(! seq.isQualClippedAtPos(pos)) {
+					qualClipped = false;
+				}
+				else {
+					logger.info("QualQlipped=true pos=" + pos);
+				}
+			}
+			else {
+				qualClipped = false;
+			}
+			
+		}
+		return qualClipped;
+	}
+	
 	public char getFixedNucleotideConsensusCharAt(int pos){
 		if(fixedConsensus != null) {
 			return fixedConsensus.getCharAtPos(pos);

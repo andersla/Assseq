@@ -1999,19 +1999,25 @@ public class AlignmentPane extends JPanel implements AlignmentSelectionListener,
 						
 						double textXOffset = (double)charWidth * 0.2;
 						
-						// Draq quality background color // new Color((int)(Math.random() * 0x1000000));
-						Color qualValColor = colorSchemeNucleotide.getBaseQualityBackgroundColor(consensusResidue, CharPixelsContainerNucQuality.getQualClassFromQualVal(qualVal));
-						g2d.setColor(qualValColor);
+						Color bgColor = colorSchemeNucleotide.getBaseQualityBackgroundColor(consensusResidue, CharPixelsContainerNucQuality.getQualClassFromQualVal(qualVal));
+						Color fgColor = Color.black;
+						
+						if(alignment.isNucleotideConsensusQualClippedAt(matrixX)){
+							fgColor = colorSchemeNucleotide.getQualClipForegroundColor();
+							bgColor = colorSchemeNucleotide.getQualClipBackgroundColor();	
+						}
+								
 						
 						if(alignment.getFixedNucleotideConsensus().isBaseSelected(matrixX)){
 							g2d.setColor(colorSchemeNucleotide.getBaseSelectionBackgroundColor(NucleotideUtilities.GAP));
 							logger.info("QualValCons=" + qualVal);
 						}
 						
+						g2d.setColor(bgColor);
 						g2d.fillRect(posX, 0, (int)charWidth, paneClip.height);
 						
 						// Draw base
-						g2d.setColor(Color.black);
+						g2d.setColor(fgColor);
 						g2d.drawString(stringToDraw, posX + (int)textXOffset, textPosY);
 	
 						pos ++;
