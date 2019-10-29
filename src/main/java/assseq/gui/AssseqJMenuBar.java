@@ -222,10 +222,7 @@ public class AssseqJMenuBar extends JMenuBar implements AlignmentListener, Align
 		JMenuItem mntmSaveConsAsFasta = new JMenuItem("Save consensus as Fasta");
 		mntmSaveConsAsFasta.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Messenger.showOKOnlyMessage(Messenger.NOT_IMPLEMENTED);
-				if(true) {
-					return;
-				}
+				aliViewWindow.saveConsensusAsFileViaChooser(FileFormat.CONSENSUS_FASTA);
 			}
 		});
 		mnFile.add(mntmSaveConsAsFasta);

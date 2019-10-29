@@ -1272,6 +1272,82 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 
 		return true;
 	}
+	
+	public boolean saveConsensusAsFileViaChooser(FileFormat fileFormat){
+
+		// Get dir for saving
+		String suggestedDir = null;
+		String suggestedFileName = null;
+
+		if(alignment.getAlignmentFile() == null) {
+			try {
+				alignment.setAlignmentFile(AlignmentFile.createAliViewTempFile("files", ""));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		if(alignment.getAlignmentFile().isAliViewTempFile()){		
+			File lastRecent = Settings.getLastRecentFile();
+			File lastRecentDir = null;
+			if(lastRecent == null){
+				lastRecentDir = AlignmentFile.createUserHomeFile();
+			}else{
+				lastRecentDir = lastRecent.getParentFile();
+			}			
+			suggestedDir = lastRecentDir.getAbsolutePath();
+			suggestedFileName = alignment.getAlignmentFile().getNameWithoutTempPrefix();
+		}else{
+			suggestedDir = alignment.getAlignmentFile().getParent();
+			suggestedFileName = alignment.getFileName();	
+		}
+
+
+		// if file format not is same as alignment strip surrent suffix and add new one
+		if(fileFormat != alignment.getFileFormat()){		
+			suggestedFileName = FileFormat.stripFileSuffixFromName(suggestedFileName);
+			suggestedFileName += "." + fileFormat.getSuffix();	
+		}
+
+		// make sure there is a file name
+		if(suggestedFileName == null || suggestedFileName.length() < 1){
+			suggestedFileName = "alignment" + "." + fileFormat.getSuffix();
+		}
+
+		File suggestedFile = new File(suggestedDir, suggestedFileName);
+		Component parent = this.getParent();
+
+		File selectedFile = FileUtilities.selectSaveFileViaChooser(suggestedFile,parent);
+
+		// här borde det vara alignment getAlignmentAsFastaStream
+
+		if(selectedFile != null){
+
+			// Ask user if file exists
+			if(selectedFile.exists()){
+				String message = "File already exists - do you want to overwrite?";
+				int retVal = JOptionPane.showConfirmDialog(this, message, "Overwrite?", JOptionPane.OK_CANCEL_OPTION);
+				if(retVal != JOptionPane.OK_OPTION){									
+					return false;
+				}
+			}
+			try {
+					alignment.saveConsensusAsFile(selectedFile, fileFormat);
+
+			} catch (IOException e) {
+				e.printStackTrace();
+				// Meddela användaren om fel				
+				Messenger.showOKOnlyMessage(Messenger.FILE_SAVE_ERROR, LF + e.getLocalizedMessage(), this);
+			}
+
+		}
+		else{
+			return false;
+		}
+
+		return true;
+	}
 
 
 	public void exportRaxMLFile() {

@@ -46,6 +46,8 @@ public class FileFormat {
 
 	public static final FileFormat ACE = new FileFormat("ACE", "ace", "ace");
 
+	public static final FileFormat CONSENSUS_FASTA = new FileFormat("ConsensusFasta", "cons.fas", "cons.fas");
+
 
 	public static void main(String[] args) {
 		//FileFormat ffFileTest = new FileFormat();

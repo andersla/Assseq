@@ -223,7 +223,26 @@ public class Alignment implements FileSequenceLoadListener {
 		out.flush();
 		out.close();
 	}
-	
+
+	public void storeConsensusAsFasta(Writer out) throws IOException{
+
+		out.write('>');
+		out.write("consensus");
+		out.write(LF);
+		
+		Sequence fixedConsensus = sequences.getFixedNucleotideConsensus();
+		
+		for(int n = 0; n < fixedConsensus.getLength(); n++) {
+			if(!sequences.isNucleotideConsensusQualClippedAt(n)) {
+				out.write(fixedConsensus.getCharAtPos(n));
+			}
+		}
+		
+		out.write(LF);
+		out.flush();
+		out.close();
+	}
+
 	public void storeAlignmetAsFastaQuals(Writer out) throws IOException{
 		int longest = sequences.getLongestSequenceLength();
 		for(Sequence seq: sequences){
@@ -235,14 +254,14 @@ public class Alignment implements FileSequenceLoadListener {
 			if(seq instanceof QualCalledSequence) {
 				QualCalledSequence qualSeq = (QualCalledSequence) seq;
 				qualSeq.writeQuality(out);
-			    out.write(LF);
+				out.write(LF);
 			}
 
 		}		
 		out.flush();
 		out.close();
 	}
-	
+
 	public void storeAlignmetAsFastQ(Writer out) throws IOException{
 		int longest = sequences.getLongestSequenceLength();
 		for(Sequence seq: sequences){
@@ -252,33 +271,33 @@ public class Alignment implements FileSequenceLoadListener {
 			out.write(LF);
 			seq.writeBases(out);
 			out.write(LF);
-			
+
 			if(seq instanceof QualCalledSequence) {
 				QualCalledSequence qualSeq = (QualCalledSequence) seq;
 				out.write('+');
 				out.write(LF);
 				qualSeq.writeQualityFastQ(out);
-			    out.write(LF);
+				out.write(LF);
 			}
-			
+
 			out.write(LF);
 
-		    }		
-			
+		}		
+
 		out.flush();
 		out.close();
 	}
-	
+
 	public void storeAlignmetAsACE(Writer out) throws IOException{
 		int longest = sequences.getLongestSequenceLength();
 		BasicTraceSequence consensus = (BasicTraceSequence) sequences.getFixedNucleotideConsensus();
 
-        // AS <number of contigs> <total number of reads in ace file>
+		// AS <number of contigs> <total number of reads in ace file>
 		int nContigs = 1;
 		int nReads = sequences.size();
 		out.write("AS " + nContigs + " " + nReads + LF);
 		out.write(LF);
-		
+
 		// CO <contig name> <# of bases> <# of reads in contig> <# of base segments in contig> <U or C>
 		String contigName = getFileName();
 		int length = consensus.getLength();
@@ -287,15 +306,15 @@ public class Alignment implements FileSequenceLoadListener {
 		out.write("CO " + contigName + " " + length + " " + nReadsInContig + " " + nBaseSeg + " U" + LF);
 		out.write(consensus.getBasesAsString());
 		out.write(LF);
-		
+
 		// BQ
 		out.write("BQ" + LF);
 		out.write(consensus.qualCallsAsString() + LF);
 		out.write(LF);
-		
-		
-		
-		
+
+
+
+
 		for(Sequence seq: sequences){
 
 			out.write('@');
@@ -303,19 +322,19 @@ public class Alignment implements FileSequenceLoadListener {
 			out.write(LF);
 			seq.writeBases(out);
 			out.write(LF);
-			
+
 			if(seq instanceof QualCalledSequence) {
 				QualCalledSequence qualSeq = (QualCalledSequence) seq;
 				out.write('+');
 				out.write(LF);
 				qualSeq.writeQualityFastQ(out);
-			    out.write(LF);
+				out.write(LF);
 			}
-			
+
 			out.write(LF);
 
-		    }		
-			
+		}		
+
 		out.flush();
 		out.close();
 	}
@@ -721,7 +740,7 @@ public class Alignment implements FileSequenceLoadListener {
 				BufferedWriter outMeta = new BufferedWriter(new FileWriter(new File(outFile.getAbsoluteFile() + ".meta")));
 				storeMetaData(outMeta);
 			}
-			
+
 		}else if(fileFormat == FileFormat.FASTQ){
 			setTranslationOnePos(false);
 			storeAlignmetAsFastQ(out);
@@ -740,7 +759,9 @@ public class Alignment implements FileSequenceLoadListener {
 				storeMetaData(outMeta);
 			}
 
-		}else if(fileFormat == FileFormat.PHYLIP_TRANSLATED_AMINO_ACID){
+		}
+
+		else if(fileFormat == FileFormat.PHYLIP_TRANSLATED_AMINO_ACID){
 			setTranslationOnePos(true);
 			storeAlignmetAsPhyFile(out, FileFormat.PHYLIP_RELAXED_PADDED_AKA_LONG_NAME_SEQUENTIAL);
 			// save meta if exset it is set
@@ -780,6 +801,17 @@ public class Alignment implements FileSequenceLoadListener {
 		}
 		// revert translation
 		setTranslationOnePos(wasTranslated);
+	}
+
+	public void saveConsensusAsFile(File outFile, FileFormat fileFormat) throws IOException{
+
+		logger.info("fileFormat" + fileFormat);
+
+		BufferedWriter out = new BufferedWriter(new FileWriter(outFile));
+
+		if(fileFormat == FileFormat.CONSENSUS_FASTA){
+			storeConsensusAsFasta(out);
+		}
 	}
 
 	/*
@@ -1126,31 +1158,31 @@ public class Alignment implements FileSequenceLoadListener {
 	public String getConsensus(){
 		return sequences.getConsensus();
 	}
-	
+
 	public char getNucleotideConsensusAt(int pos) {
 		return sequences.getNucleotideConsensusAt(pos);
 	}
-	
+
 	public boolean isNucleotideConsensusQualClippedAt(int pos) {
 		return sequences.isNucleotideConsensusQualClippedAt(pos);
 	}
-	
+
 	public char getFixedNucleotideConsensusCharAt(int pos) {
 		return sequences.getFixedNucleotideConsensusCharAt(pos);
 	}
-	
+
 	public byte getFixedNucleotideConsensusBaseValAt(int pos) {
 		return sequences.getFixedNucleotideConsensusBaseValAt(pos);
 	}
-	
+
 	public Sequence getFixedNucleotideConsensus() {
 		return sequences.getFixedNucleotideConsensus();
 	}
-	
+
 	public int getFixedNucleotideConsensusQualityAt(int x) {
 		return sequences.getFixedNucleotideConsensusQualityAt(x);
 	}
-	
+
 	public void setFixedConsensus(QualCalledSequence seq) {
 		sequences.setFixedConsensus(seq);
 	}
@@ -1225,7 +1257,7 @@ public class Alignment implements FileSequenceLoadListener {
 	public void addSequences(File additionalFile) {
 		addSequences(additionalFile, 0);
 	}
-	
+
 	public void addSequences(File[] additionalFiles, int index) {
 		try {
 			for(File addFile: additionalFiles) {
@@ -1716,11 +1748,11 @@ public class Alignment implements FileSequenceLoadListener {
 	public void selectionExtendLeft() {
 		sequences.selectionExtendLeft();
 	}
-	
+
 	public void selectionExtendDown() {
 		sequences.selectionExtendDown();
 	}
-	
+
 	public void selectionExtendTop() {
 		sequences.selectionExtendTop();
 	}
@@ -2106,15 +2138,15 @@ public class Alignment implements FileSequenceLoadListener {
 	public AliCursor getAliCursor(){
 		return aliCursor;
 	}
-	
+
 	/*
 	public AliCursor createNewAliCursor(Point center){
 		//alignment.clearSelection();
 		AliCursor newAliCursor = new AliCursor(center.x, center.y, this);
 		return newAliCursor;
 	}
-	*/
-	
+	 */
+
 	public void setCutoffToRightOfSelection() {
 		sequences.setCutoffToRightOfSelection();
 	}
@@ -2122,6 +2154,6 @@ public class Alignment implements FileSequenceLoadListener {
 	public void setCutoffToLeftOfSelection() {
 		sequences.setCutoffToLeftOfSelection();
 	}
-	
-	
+
+
 }

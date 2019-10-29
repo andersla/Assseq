@@ -1423,7 +1423,7 @@ public class AlignmentListModel implements ListModel, Iterable<Sequence>{
 					qualClipped = false;
 				}
 				else {
-					logger.info("QualQlipped=true pos=" + pos);
+
 				}
 			}
 			else {
