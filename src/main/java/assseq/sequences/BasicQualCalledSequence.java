@@ -63,6 +63,15 @@ public class BasicQualCalledSequence extends BasicSequence implements QualCalled
 	public void setQualClipEnd(int pos) {
 		getBases().setQualClipEnd(pos);
 	}
+	
+	public int getQualClipStart() {
+		return getBases().getQualClipStart();
+	}
+	
+	public int getQualClipEnd() {
+		return getBases().getQualClipEnd();
+	}
+
 
 	public boolean isQualClippedAtPos(int pos) {
 		return getBases().isQualClipped(pos);
@@ -80,9 +89,13 @@ public class BasicQualCalledSequence extends BasicSequence implements QualCalled
 	}
 	
 	public String qualCallsAsString() {
+		return qualCallsAsString(0, getLength() - 1);
+	}
+	
+	public String qualCallsAsString(int startPos, int endPos) {
 		short[] qualCalls = getBases().getQualCalls();
 		StringBuilder builder = new StringBuilder();
-		for(int n = 0; n < qualCalls.length;  n++) {	
+		for(int n = startPos; n < endPos;  n++) {	
 			builder.append( qualCalls[n] + " ");
 		}
 		

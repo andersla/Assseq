@@ -311,9 +311,17 @@ public class DefaultQualCalledBases implements Bases {
 	public void setQualClipEnd(int pos) {
 		qualClip.setEndPos(pos);
 	}
-
+	
 	public short[] getQualCalls() {
 		return qualCalls;	
+	}
+
+	public int getQualClipStart() {
+		return qualClip.clipStart;
+	}
+	
+	public int getQualClipEnd() {
+		return qualClip.clipEnd;
 	}
 
 }

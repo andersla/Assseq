@@ -50,6 +50,7 @@ import assseq.sequencelist.FileSequenceAlignmentListModel;
 import assseq.sequencelist.FileSequenceLoadListener;
 import assseq.sequencelist.FindObject;
 import assseq.sequencelist.MemorySequenceAlignmentListModel;
+import assseq.sequences.BasicQualCalledSequence;
 import assseq.sequences.BasicTraceSequence;
 import assseq.sequences.FastaFileSequence;
 import assseq.sequences.InMemorySequence;
@@ -289,8 +290,9 @@ public class Alignment implements FileSequenceLoadListener {
 	}
 
 	public void storeAlignmetAsACE(Writer out) throws IOException{
-		int longest = sequences.getLongestSequenceLength();
-		BasicTraceSequence consensus = (BasicTraceSequence) sequences.getFixedNucleotideConsensus();
+		
+		//int longest = sequences.getLongestSequenceLength();
+		
 
 		// AS <number of contigs> <total number of reads in ace file>
 		int nContigs = 1;
@@ -299,42 +301,60 @@ public class Alignment implements FileSequenceLoadListener {
 		out.write(LF);
 
 		// CO <contig name> <# of bases> <# of reads in contig> <# of base segments in contig> <U or C>
+		BasicQualCalledSequence consensus = (BasicQualCalledSequence) sequences.getFixedNucleotideConsensus();
 		String contigName = getFileName();
-		int length = consensus.getLength();
 		int nReadsInContig = sequences.size();
-		int nBaseSeg = 0;
-		out.write("CO " + contigName + " " + length + " " + nReadsInContig + " " + nBaseSeg + " U" + LF);
-		out.write(consensus.getBasesAsString());
-		out.write(LF);
+		int unpaddedLenght = consensus.getLength() - consensus.getLeftPadSize() - consensus.getRightPadSize();
+		int nBaseSegments = 0; // I dont know about this one
+		out.write("CO " + contigName + " " + unpaddedLenght + " " + nReadsInContig + " " + nBaseSegments + " U" + LF);
 
+		int startPos = consensus.getLeftPadSize();
+		int endPos = consensus.getLength() - 1 - consensus.getRightPadSize();
+		consensus.writeBasesBetween(startPos, endPos, out);
+		out.write(LF);
+		out.write(LF);
+		
 		// BQ
 		out.write("BQ" + LF);
-		out.write(consensus.qualCallsAsString() + LF);
+		out.write(consensus.qualCallsAsString(startPos, endPos) + LF);
 		out.write(LF);
 
-
-
-
 		for(Sequence seq: sequences){
-
-			out.write('@');
+			BasicQualCalledSequence sequence = (BasicQualCalledSequence) seq;
+			out.write("AF ");
 			out.write(seq.getName());
+			int consLeftPad = consensus.getLeftPadSize();
+			int seqLeftPad = sequence.getLeftPadSize();
+			
+			out.write(" U " + String.valueOf(1 - consLeftPad + seqLeftPad)); // Add 1 to get 1-index
+			out.write(LF);	
+
+		}	
+
+		out.write(LF);
+		
+		for(Sequence seq: sequences){
+			
+			BasicQualCalledSequence sequence = (BasicQualCalledSequence) seq;
+			int clipStartPos = sequence.getQualClipStart() - sequence.getLeftPadSize();
+			int clipEndPos = sequence.getQualClipEnd() - sequence.getLeftPadSize();
+			
+			int seqLeftStart = sequence.getLeftPadSize();
+			int seqRightEnd = sequence.getLength() - sequence.getRightPadSize() - 1;
+			int seqNonPadLength = sequence.getLength() - sequence.getLeftPadSize() - sequence.getRightPadSize();
+			
+			out.write("RD ");
+			out.write(sequence.getName());
+			out.write(" " + seqNonPadLength + " 0 0");
 			out.write(LF);
-			seq.writeBases(out);
+			sequence.writeBasesBetween(seqLeftStart, seqRightEnd, out);;
 			out.write(LF);
-
-			if(seq instanceof QualCalledSequence) {
-				QualCalledSequence qualSeq = (QualCalledSequence) seq;
-				out.write('+');
-				out.write(LF);
-				qualSeq.writeQualityFastQ(out);
-				out.write(LF);
-			}
-
 			out.write(LF);
-
-		}		
-
+			out.write("QA " + (clipStartPos + 1) + " " + (clipEndPos + 1) + " 1 " + seqNonPadLength);
+			out.write(LF);
+			out.write(LF);
+		}
+		
 		out.flush();
 		out.close();
 	}

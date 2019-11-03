@@ -68,11 +68,7 @@ public class SequencePainterNucleotide extends SequencePainter {
 		if(aliPane.isHighlightNonCons()){
 			byte cons = alignment.getFixedNucleotideConsensusBaseValAt(seqXPos);
 			// no color on gap even if they are in maj.cons
-			if(baseVal == NucleotideUtilities.UNKNOWN ||
-					cons == NucleotideUtilities.UNKNOWN ||
-					baseVal == NucleotideUtilities.GAP){
-
-			}else if(NucleotideUtilities.baseValFromBase(residue) != NucleotideUtilities.baseValFromBase(cons)){
+			if(NucleotideUtilities.baseValFromBase(residue) != NucleotideUtilities.baseValFromBase(cons)){
 				pixContainerToUse = aliPane.charPixNonConsensusNuc;
 			}
 		}

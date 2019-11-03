@@ -133,13 +133,16 @@ public class ACEImporter {
 
 						// Check if revcomp (this is done by string comparison instead of 
 						String readSeq = parser.getReadSeqForContig(contigIndex, readIndex);
-						String compare = StringUtils.substring(readSeq,0, 20);
-						boolean isUncomplemented = seq.getBasesAsString().toLowerCase().startsWith(compare.toLowerCase());
+						
+						String compare = StringUtils.substring(seq.getBasesAsString().toLowerCase(), 0, 20);
+						boolean isUncomplemented = readSeq.toLowerCase().contains((compare));
 						logger.info("" + seq + " is uncomplemented" + isUncomplemented);
 						if(! isUncomplemented) {
 							seq.reverseComplement();
 						}
 
+						logger.info("readSeq=" + readSeq);
+						
 						// Add qualClip to sequences
 						if(seq instanceof BasicQualCalledSequence) {
 							BasicQualCalledSequence basicQualCalledSeq = (BasicQualCalledSequence) seq;
@@ -157,7 +160,7 @@ public class ACEImporter {
 						// insert gaps
 						logger.debug("readSeq:" + readSeq);
 						for(int n = 0; n < readSeq.length(); n++) {
-							if(readSeq.charAt(n) == '*') {
+							if(readSeq.charAt(n) == '*' || readSeq.charAt(n) == '-') {
 								logger.debug("insert gap at:" + n);
 								seq.insertGapAt(n);
 							}

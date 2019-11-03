@@ -285,6 +285,24 @@ public class BasicSequence implements Sequence, Comparable<Sequence> {
 		}	
 		return baseVals;	
 	}
+	
+	public int getLeftPadSize() {
+		for(int n = 0;n < getBases().getLength() ;n++){
+			if(! NucleotideUtilities.isGap(getBases().get(n))) {
+				return n;
+			}
+		}
+		return getLength();
+	}
+	
+	public int getRightPadSize() {
+		for(int n = getBases().getLength() - 1;n >= 0  ;n--){
+			if(! NucleotideUtilities.isGap(getBases().get(n))) {
+				return getBases().getLength() - n -1;
+			}
+		}
+		return getLength();
+	}
 
 
 	public void insertGapLeftOfSelectedBase(){	

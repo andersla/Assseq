@@ -205,10 +205,10 @@ public class AssseqJMenuBar extends JMenuBar implements AlignmentListener, Align
 		mntmSaveAlignmentAsACE.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				
-				Messenger.showOKOnlyMessage(Messenger.NOT_IMPLEMENTED);
-				if(true) {
-					return;
-				}
+//				Messenger.showOKOnlyMessage(Messenger.NOT_IMPLEMENTED);
+//				if(true) {
+//					return;
+//				}
 				
 				aliViewWindow.saveAlignmentAsFileViaChooser(FileFormat.ACE, false);
 			}
