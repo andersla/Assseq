@@ -205,7 +205,14 @@ public class BasicSequence implements Sequence, Comparable<Sequence> {
 		for(int n = start; n <= end; n++){
 			out.write( getBases().charAt(n));
 		}
-
+	}
+	
+	public void writeNonGapBasesBetween(int start, int end, Writer out) throws IOException {
+		for(int n = start; n <= end; n++){
+			if(! NucleotideUtilities.isGap(getBases().get(n))){
+				out.write( getBases().charAt(n));
+			}
+		}
 	}
 
 	public void toggleSimpleName(){

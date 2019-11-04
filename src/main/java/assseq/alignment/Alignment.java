@@ -336,12 +336,17 @@ public class Alignment implements FileSequenceLoadListener {
 		for(Sequence seq: sequences){
 			
 			BasicQualCalledSequence sequence = (BasicQualCalledSequence) seq;
-			int clipStartPos = sequence.getQualClipStart() - sequence.getLeftPadSize();
-			int clipEndPos = sequence.getQualClipEnd() - sequence.getLeftPadSize();
 			
 			int seqLeftStart = sequence.getLeftPadSize();
 			int seqRightEnd = sequence.getLength() - sequence.getRightPadSize() - 1;
 			int seqNonPadLength = sequence.getLength() - sequence.getLeftPadSize() - sequence.getRightPadSize();
+			
+			int clipStartPosWithGap = sequence.getQualClipStart();
+			int clipEndPosWithGap = sequence.getQualClipEnd();
+			
+			int clipStartPos = sequence.getUngapedPos(clipStartPosWithGap);
+			int clipEndPos = sequence.getUngapedPos(clipEndPosWithGap);
+			
 			
 			out.write("RD ");
 			out.write(sequence.getName());
@@ -350,7 +355,7 @@ public class Alignment implements FileSequenceLoadListener {
 			sequence.writeBasesBetween(seqLeftStart, seqRightEnd, out);;
 			out.write(LF);
 			out.write(LF);
-			out.write("QA " + (clipStartPos + 1) + " " + (clipEndPos + 1) + " 1 " + seqNonPadLength);
+			out.write("QA " + (clipStartPos) + " " + (clipEndPos - 1) + " 1 " + seqNonPadLength);
 			out.write(LF);
 			out.write(LF);
 		}
