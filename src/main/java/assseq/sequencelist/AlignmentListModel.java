@@ -45,6 +45,7 @@ import assseq.alignment.NucleotideHistogram;
 import assseq.gui.TextEditDialog;
 import assseq.importer.AlignmentImportException;
 import assseq.importer.FileFormat;
+import assseq.messenges.Messenger;
 import assseq.sequences.BasicSequence;
 import assseq.sequences.FileSequence;
 import assseq.sequences.InMemorySequence;
@@ -1915,22 +1916,33 @@ public class AlignmentListModel implements ListModel, Iterable<Sequence>{
 	public List<Sequence> replaceSelectedWithChar(char newChar, boolean undoable) {	
 		List<Sequence> editedSequences = new ArrayList<Sequence>();
 		List<Sequence> selectedSeqs = selectionModel.getSelectedSequences();
-		boolean wasReplaced = false;
-		for(Sequence seq: selectedSeqs){
-			if(undoable){
-				editedSequences.add(seq.getCopy());
+		
+		if(selectedSeqs != null && selectedSeqs.size() > 0) {
+			
+			Messenger.showOKOnlyMessage(Messenger.NOT_IMPLEMENTED);
+			if(true) {
+				// do nothing
 			}
-			seq.replaceSelectedBasesWithChar(newChar);
-			wasReplaced = true;
+			
+//			boolean wasReplaced = false;
+//			for(Sequence seq: selectedSeqs){
+//				if(undoable){
+//					editedSequences.add(seq.getCopy());
+//				}
+//				seq.replaceSelectedBasesWithChar(newChar);
+//				wasReplaced = true;
+//			}		
+//			if(wasReplaced){
+//				fireSequencesChanged(selectionModel.getSelectionBounds());
+//			}	
 		}
 		
-		if(wasReplaced){
-			fireSequencesChanged(selectionModel.getSelectionBounds());
-		}
-		
+		// Consensus special
 		if(fixedConsensus != null) {
-			fixedConsensus.replaceSelectedBasesWithChar(newChar);
-			fireSequencesChangedAll();
+			if(fixedConsensus.hasSelection()) {
+				fixedConsensus.replaceSelectedBasesWithChar(newChar);
+				fireSequencesChangedAll();
+			}
 		}
 		
 

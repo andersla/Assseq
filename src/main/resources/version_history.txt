@@ -1,5 +1,9 @@
 Version history
 
+0.4
+- First working version (very limited)
+
+
 0.3
 - Still only demo version
 - Added some function stubs

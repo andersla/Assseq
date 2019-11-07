@@ -4,7 +4,7 @@
   <groupId>Assseq</groupId>
   <artifactId>Assseq</artifactId>
   <packaging>jar</packaging>
-  <version>0.3</version>
+  <version>0.4</version>
   <name>Assseq</name>
   <url>http://maven.apache.org</url>
   <properties>
