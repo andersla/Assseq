@@ -830,6 +830,8 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		AlignmentConsensusRulerMouseListener crl = new AlignmentConsensusRulerMouseListener();
 		alignmentPane.getConsensusRulerComponent().addMouseListener(crl);
 		alignmentPane.getConsensusRulerComponent().addMouseMotionListener(crl);
+		alignmentPane.getConsensusRulerComponent().addKeyListener(new AlignmentKeyListener());
+		
 
 		AlignmentKeyListener tracePanelKL = new AlignmentKeyListener();
 		tracePanel.addKeyListener(tracePanelKL);
@@ -3682,7 +3684,7 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 			logger.info("x=" + matrixPoint.x);
 			alignment.getAliCursor().setPosition(matrixPoint.x,0);
 			// request focus after aliCursor change otherwise not really working
-	//		alignmentPane.requestFocus();
+			alignmentPane.requestFocus();
 
 			// Clear startpoint
 			startPoint = null;
@@ -3764,7 +3766,7 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		}
 
 		public void keyPressed(KeyEvent e) {
-
+			logger.info("is pressed");
 			//logger.info("keyPressed Time from last endTim " + (System.currentTimeMillis() - alignmentPane.getEndTime()) + " milliseconds");
 
 			// Skip if any modifier but shift is down
@@ -3798,7 +3800,7 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 		}
 
 		public void keyReleased(KeyEvent e) {
-
+			logger.info("is released");
 		}
 	}
 

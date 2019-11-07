@@ -104,7 +104,9 @@ public class Alignment implements FileSequenceLoadListener {
 
 	public void setNewSequencesFromUndo(AlignmentListModel seqs){
 		this.sequences.setSequences(seqs.getDelegateSequences());
-		this.sequences.setFixedConsensus((QualCalledSequence)seqs.getFixedNucleotideConsensus());
+		if(seqs.getFixedNucleotideConsensus() != null) {
+			this.sequences.setFixedConsensus((QualCalledSequence)seqs.getFixedNucleotideConsensus());
+		}
 		// TODO this should also be read from file
 		this.alignmentMeta = new AlignmentMeta();	
 		//setEditedAfterLastSave(false);
