@@ -3751,9 +3751,12 @@ public class AssseqWindow extends JFrame implements UndoControler, AlignmentList
 				// Skip
 			}else{
 				char typed = e.getKeyChar();
-				String allowedChars = "QWERTYUIOPASDFGHJKLZXCVBNM?qwertyuiopasdfghjklzxcvbnm";
+				String allowedChars = "QWERTYUIOPASDFGHJKLZXCVBNM?qwertyuiopasdfghjklzxcvbnm -";
 				if(allowedChars.indexOf(typed) > -1){
-					if(aliViewWindow.requestEditMode()){		
+					if(aliViewWindow.requestEditMode()){
+						if(typed == ' ' || typed == '-') {
+							typed = (char)SequenceUtils.GAP_SYMBOL;
+						}
 						replaceSelectedWithChar(typed);
 					}
 				}

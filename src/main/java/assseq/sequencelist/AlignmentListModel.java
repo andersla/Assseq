@@ -106,7 +106,10 @@ public class AlignmentListModel implements ListModel, Iterable<Sequence>{
 		for (Sequence seq: template.delegateSequences) {
 			seqClone.add(seq.getCopy());
 		}
-
+		
+		if(template.fixedConsensus != null) {
+			this.fixedConsensus = (QualCalledSequence)template.fixedConsensus.getCopy();
+		}
 		this.fileFormat = template.fileFormat;
 		this.delegateSequences = seqClone;
 		this.sequenceType = template.sequenceType;
